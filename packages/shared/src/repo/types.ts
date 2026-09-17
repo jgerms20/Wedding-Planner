@@ -1,11 +1,14 @@
 import type {
+  AiUsage,
   BudgetCategory,
   BudgetItem,
+  ChatMessage,
   Decision,
   Destination,
   Event,
   Guest,
   Household,
+  Note,
   Scenario,
   Settings,
   SubEvent,
@@ -41,6 +44,9 @@ export interface WeddingRepo {
   subEvents: EntityRepo<SubEvent>;
   partyMembers: EntityRepo<WeddingPartyMember>;
   decisions: EntityRepo<Decision>;
+  notes: EntityRepo<Note>;
+  chatMessages: EntityRepo<ChatMessage>;
+  aiUsage: EntityRepo<AiUsage>;
 
   getWedding(slug: string): Promise<Wedding | undefined>;
   upsertWedding(wedding: Wedding): Promise<Wedding>;

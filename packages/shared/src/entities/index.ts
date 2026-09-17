@@ -5,3 +5,4 @@ export * from "./destination";
 export * from "./guest";
 export * from "./budget";
 export * from "./social";
+export * from "./local-only";

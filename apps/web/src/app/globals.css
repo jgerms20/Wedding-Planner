@@ -2,75 +2,103 @@
 
 @custom-variant dark (&:where(.dark, .dark *));
 
+/*
+ * Bower design system: "The Atlas".
+ * A destination-first wedding typeset like a travel atlas crossed with a
+ * letterpress invitation suite. Ink-green chrome, ivory pages, one coral
+ * accent, antique-gold hairlines. Tokens only live here.
+ */
 :root {
-  --radius: 0.4rem;
+  --radius: 0.5rem;
+  --rail-w: 15rem;
 
-  /* Warm, editorial palette — stationery, not software. */
-  --paper: oklch(0.975 0.014 85);
-  --paper-raised: oklch(0.99 0.01 85);
-  --ink: oklch(0.24 0.03 55);
-  --ink-soft: oklch(0.46 0.03 55);
-  --line: oklch(0.87 0.02 75);
+  /* Ink (green) scale */
+  --ink-900: oklch(0.2 0.035 160);
+  --ink: oklch(0.28 0.05 160);
+  --ink-700: oklch(0.36 0.05 160);
+  --ink-soft: oklch(0.46 0.04 160);
+  --ink-mute: oklch(0.58 0.03 160);
 
-  --rose: oklch(0.53 0.14 35);
-  --rose-soft: oklch(0.93 0.04 40);
-  --sage: oklch(0.5 0.06 145);
-  --sage-soft: oklch(0.92 0.03 145);
-  --gold: oklch(0.72 0.12 80);
-  --gold-soft: oklch(0.94 0.05 85);
+  /* Paper (ivory) scale */
+  --paper: oklch(0.97 0.012 80);
+  --paper-raised: oklch(0.985 0.01 80);
+  --paper-deep: oklch(0.94 0.016 80);
+  --paper-ink: oklch(0.24 0.04 160);
+
+  /* Accents */
+  --coral: oklch(0.66 0.16 40);
+  --coral-deep: oklch(0.58 0.16 38);
+  --coral-soft: oklch(0.93 0.05 40);
+  --gold: oklch(0.75 0.09 85);
+  --gold-soft: oklch(0.95 0.04 85);
+  --line: oklch(0.88 0.02 80);
+  --line-strong: oklch(0.8 0.03 80);
 
   --background: var(--paper);
-  --foreground: var(--ink);
+  --foreground: var(--paper-ink);
   --card: var(--paper-raised);
-  --card-foreground: var(--ink);
+  --card-foreground: var(--paper-ink);
   --popover: var(--paper-raised);
-  --popover-foreground: var(--ink);
-  --primary: var(--rose);
-  --primary-foreground: oklch(0.99 0.01 40);
-  --secondary: var(--sage-soft);
-  --secondary-foreground: var(--ink);
-  --muted: oklch(0.94 0.015 80);
+  --popover-foreground: var(--paper-ink);
+  --primary: var(--coral);
+  --primary-foreground: oklch(0.99 0.01 80);
+  --secondary: var(--paper-deep);
+  --secondary-foreground: var(--paper-ink);
+  --muted: var(--paper-deep);
   --muted-foreground: var(--ink-soft);
   --accent: var(--gold-soft);
-  --accent-foreground: var(--ink);
+  --accent-foreground: var(--paper-ink);
   --destructive: oklch(0.55 0.19 25);
   --border: var(--line);
-  --input: var(--line);
-  --ring: var(--rose);
+  --input: var(--line-strong);
+  --ring: var(--coral);
+
+  /* Chrome (the rail) is always ink, in both themes. */
+  --rail: var(--ink);
+  --rail-foreground: oklch(0.95 0.012 80);
+  --rail-muted: oklch(0.78 0.03 140);
+  --rail-line: oklch(0.36 0.04 160);
+  --rail-active: oklch(0.34 0.05 160);
 }
 
 .dark {
-  --paper: oklch(0.2 0.02 55);
-  --paper-raised: oklch(0.25 0.02 55);
-  --ink: oklch(0.94 0.015 75);
-  --ink-soft: oklch(0.74 0.02 75);
-  --line: oklch(0.36 0.02 60);
+  --paper: var(--ink-900);
+  --paper-raised: oklch(0.25 0.04 160);
+  --paper-deep: oklch(0.23 0.035 160);
+  --paper-ink: oklch(0.95 0.012 80);
 
-  --rose: oklch(0.72 0.13 35);
-  --rose-soft: oklch(0.32 0.06 35);
-  --sage: oklch(0.72 0.07 145);
-  --sage-soft: oklch(0.3 0.04 145);
-  --gold: oklch(0.78 0.11 85);
+  --coral: oklch(0.74 0.15 42);
+  --coral-deep: oklch(0.68 0.16 40);
+  --coral-soft: oklch(0.34 0.07 40);
+  --gold: oklch(0.8 0.1 85);
   --gold-soft: oklch(0.32 0.05 85);
+  --line: oklch(0.34 0.03 160);
+  --line-strong: oklch(0.42 0.03 160);
+  --ink-soft: oklch(0.78 0.03 140);
+  --ink-mute: oklch(0.66 0.03 150);
 
   --background: var(--paper);
-  --foreground: var(--ink);
+  --foreground: var(--paper-ink);
   --card: var(--paper-raised);
-  --card-foreground: var(--ink);
+  --card-foreground: var(--paper-ink);
   --popover: var(--paper-raised);
-  --popover-foreground: var(--ink);
-  --primary: var(--rose);
-  --primary-foreground: oklch(0.16 0.02 40);
-  --secondary: var(--sage-soft);
-  --secondary-foreground: var(--ink);
-  --muted: oklch(0.27 0.02 55);
+  --popover-foreground: var(--paper-ink);
+  --primary: var(--coral);
+  --primary-foreground: oklch(0.16 0.03 40);
+  --secondary: var(--paper-deep);
+  --secondary-foreground: var(--paper-ink);
+  --muted: var(--paper-deep);
   --muted-foreground: var(--ink-soft);
   --accent: var(--gold-soft);
-  --accent-foreground: var(--ink);
-  --destructive: oklch(0.6 0.18 25);
+  --accent-foreground: var(--paper-ink);
+  --destructive: oklch(0.62 0.18 25);
   --border: var(--line);
-  --input: var(--line);
-  --ring: var(--rose);
+  --input: var(--line-strong);
+  --ring: var(--coral);
+
+  --rail: oklch(0.17 0.03 160);
+  --rail-line: oklch(0.28 0.035 160);
+  --rail-active: oklch(0.26 0.04 160);
 }
 
 @theme inline {
@@ -92,21 +120,78 @@
   --color-border: var(--border);
   --color-input: var(--input);
   --color-ring: var(--ring);
-  --color-rose: var(--rose);
-  --color-rose-soft: var(--rose-soft);
-  --color-sage: var(--sage);
-  --color-sage-soft: var(--sage-soft);
+
+  --color-ink: var(--ink);
+  --color-ink-900: var(--ink-900);
+  --color-ink-700: var(--ink-700);
+  --color-ink-soft: var(--ink-soft);
+  --color-ink-mute: var(--ink-mute);
+  --color-paper: var(--paper);
+  --color-paper-raised: var(--paper-raised);
+  --color-paper-deep: var(--paper-deep);
+  --color-coral: var(--coral);
+  --color-coral-deep: var(--coral-deep);
+  --color-coral-soft: var(--coral-soft);
   --color-gold: var(--gold);
   --color-gold-soft: var(--gold-soft);
+  --color-line: var(--line);
+  --color-line-strong: var(--line-strong);
+  --color-rail: var(--rail);
+  --color-rail-foreground: var(--rail-foreground);
+  --color-rail-muted: var(--rail-muted);
+  --color-rail-line: var(--rail-line);
+  --color-rail-active: var(--rail-active);
+
+  /* Kept for compatibility with components written against the first theme. */
+  --color-rose: var(--coral);
+  --color-rose-soft: var(--coral-soft);
+  --color-sage: var(--ink-soft);
+  --color-sage-soft: var(--paper-deep);
 
   --radius-sm: calc(var(--radius) - 2px);
   --radius-md: var(--radius);
   --radius-lg: calc(var(--radius) + 6px);
-  --radius-xl: calc(var(--radius) + 12px);
+  --radius-xl: calc(var(--radius) + 14px);
 
-  --font-display: Iowan Old Style, Palatino Linotype, Palatino, Book Antiqua, ui-serif, Georgia, serif;
-  --font-sans: Charter, "Segoe UI", ui-sans-serif, system-ui, sans-serif;
+  --font-display: "Fraunces Variable", "Iowan Old Style", "Palatino Linotype", Georgia, serif;
+  --font-sans: "Instrument Sans Variable", "Instrument Sans", "Helvetica Neue", Arial, sans-serif;
   --font-mono: ui-monospace, "SF Mono", Menlo, Consolas, monospace;
+
+  --animate-rise: rise 0.7s cubic-bezier(0.2, 0.7, 0.2, 1) both;
+  --animate-pulse-ring: pulse-ring 1.6s ease-out infinite;
+}
+
+@keyframes rise {
+  from {
+    opacity: 0;
+    transform: translateY(14px);
+  }
+  to {
+    opacity: 1;
+    transform: none;
+  }
+}
+
+@keyframes pulse-ring {
+  0% {
+    box-shadow: 0 0 0 0 color-mix(in oklch, var(--coral) 45%, transparent);
+  }
+  100% {
+    box-shadow: 0 0 0 18px color-mix(in oklch, var(--coral) 0%, transparent);
+  }
+}
+
+@keyframes settle {
+  from {
+    opacity: 0;
+    transform: translateY(0.35em) scale(0.98);
+    filter: blur(2px);
+  }
+  to {
+    opacity: 1;
+    transform: none;
+    filter: none;
+  }
 }
 
 @layer base {
@@ -122,18 +207,158 @@
   body {
     @apply bg-background text-foreground;
     font-family: var(--font-sans);
-    background-image:
-      radial-gradient(circle at 1px 1px, color-mix(in oklch, var(--ink) 6%, transparent) 1px, transparent 0);
-    background-size: 22px 22px;
+    font-feature-settings: "ss01", "cv01";
+    position: relative;
   }
-  h1, h2, h3, h4, .font-display {
+  /* Topographic contour lines on the paper, faint. */
+  body::before {
+    content: "";
+    position: fixed;
+    inset: 0;
+    z-index: 0;
+    pointer-events: none;
+    opacity: 0.35;
+    background-image: url("data:image/svg+xml;utf8,%3Csvg xmlns='http://www.w3.org/2000/svg' width='520' height='520' viewBox='0 0 520 520'%3E%3Cg fill='none' stroke='%23264d3f' stroke-opacity='0.11' stroke-width='1'%3E%3Cpath d='M20 260c40-90 120-120 210-110s150 70 200 40 70-90 80-140'/%3E%3Cpath d='M0 300c60-80 140-100 230-90s150 60 210 30 60-80 80-130'/%3E%3Cpath d='M-10 340c70-70 160-80 250-70s140 50 200 20 60-70 90-120'/%3E%3Cpath d='M0 380c80-60 170-60 260-50s130 40 190 10 60-60 80-110'/%3E%3Cpath d='M10 420c90-50 180-40 270-30s120 30 180 0 60-50 70-100'/%3E%3Cpath d='M30 460c100-40 190-20 280-10s110 20 170-10 50-40 60-90'/%3E%3Cpath d='M60 500c110-30 200-10 290 0s100 10 150-20'/%3E%3Cpath d='M40 220c30-100 110-150 200-140s160 80 220 50 60-100 60-130'/%3E%3Cpath d='M70 180c20-100 100-170 190-160s170 90 230 60 50-80 40-80'/%3E%3C/g%3E%3C/svg%3E");
+    background-size: 520px 520px;
+  }
+  .dark body::before {
+    opacity: 0.22;
+    filter: invert(1);
+  }
+  /* Fine paper grain. */
+  body::after {
+    content: "";
+    position: fixed;
+    inset: 0;
+    z-index: 0;
+    pointer-events: none;
+    opacity: 0.045;
+    mix-blend-mode: multiply;
+    background-image: url("data:image/svg+xml;utf8,%3Csvg xmlns='http://www.w3.org/2000/svg' width='200' height='200'%3E%3Cfilter id='n'%3E%3CfeTurbulence type='fractalNoise' baseFrequency='0.9' numOctaves='2' stitchTiles='stitch'/%3E%3C/filter%3E%3Crect width='200' height='200' filter='url(%23n)'/%3E%3C/svg%3E");
+  }
+  .dark body::after {
+    mix-blend-mode: screen;
+    opacity: 0.06;
+  }
+  h1,
+  h2,
+  h3,
+  .font-display {
     font-family: var(--font-display);
-    letter-spacing: -0.01em;
+    font-variation-settings:
+      "SOFT" 60,
+      "WONK" 1,
+      "opsz" 72;
+    letter-spacing: -0.015em;
+  }
+  h1 {
+    font-weight: 500;
+  }
+  h2,
+  h3 {
+    font-weight: 500;
+  }
+  ::selection {
+    background: color-mix(in oklch, var(--coral) 30%, transparent);
+  }
+}
+
+@layer components {
+  /* Everything rendered inside the shell sits above the paper textures. */
+  .paper-content {
+    position: relative;
+    z-index: 1;
+  }
+  /* Editorial small caps label. */
+  .eyebrow {
+    @apply text-[0.68rem] font-semibold tracking-[0.18em] uppercase text-ink-soft;
+  }
+  /* Tabular figures for money and countdowns. */
+  .tabular {
+    font-variant-numeric: tabular-nums lining-nums;
+  }
+  /* Big display numerals. */
+  .numeral {
+    font-family: var(--font-display);
+    font-variation-settings:
+      "SOFT" 100,
+      "WONK" 0,
+      "opsz" 144;
+    font-variant-numeric: tabular-nums lining-nums;
+    letter-spacing: -0.03em;
+    line-height: 0.9;
+  }
+  /* Antique gold hairline. */
+  .hairline {
+    height: 1px;
+    background: linear-gradient(90deg, transparent, var(--gold) 20%, var(--gold) 80%, transparent);
+  }
+  /* Postcard: a card with a deckled, slightly warmer surface and a lift on hover. */
+  .postcard {
+    @apply relative rounded-lg border border-line bg-card;
+    box-shadow:
+      0 1px 0 color-mix(in oklch, var(--gold) 45%, transparent),
+      0 10px 30px -18px color-mix(in oklch, var(--ink) 55%, transparent);
+    transition:
+      transform 0.35s cubic-bezier(0.2, 0.7, 0.2, 1),
+      box-shadow 0.35s;
+  }
+  .postcard:hover {
+    transform: translateY(-3px) rotate(-0.4deg);
+    box-shadow:
+      0 1px 0 color-mix(in oklch, var(--gold) 60%, transparent),
+      0 22px 44px -20px color-mix(in oklch, var(--ink) 65%, transparent);
+  }
+  /* Passport stamp ring: a double coral ring with mono lettering. */
+  .stamp {
+    @apply inline-flex items-center justify-center rounded-full font-mono text-[0.62rem] font-semibold tracking-[0.2em] uppercase text-coral;
+    width: 3rem;
+    height: 3rem;
+    border: 1.5px solid var(--coral);
+    box-shadow: inset 0 0 0 3px var(--card), inset 0 0 0 4px var(--coral);
+    transform: rotate(-8deg);
+    opacity: 0.9;
+  }
+  .stamp-sm {
+    width: 2.25rem;
+    height: 2.25rem;
+    font-size: 0.55rem;
+    box-shadow: inset 0 0 0 2px var(--card), inset 0 0 0 3px var(--coral);
+  }
+  /* Staggered reveal. Add .rise to children and .rise-1..8 for delay. */
+  .rise {
+    animation: var(--animate-rise);
+  }
+  .rise-1 { animation-delay: 60ms; }
+  .rise-2 { animation-delay: 140ms; }
+  .rise-3 { animation-delay: 220ms; }
+  .rise-4 { animation-delay: 300ms; }
+  .rise-5 { animation-delay: 380ms; }
+  .rise-6 { animation-delay: 460ms; }
+  .rise-7 { animation-delay: 540ms; }
+  .rise-8 { animation-delay: 620ms; }
+  .settle {
+    animation: settle 0.9s cubic-bezier(0.2, 0.7, 0.2, 1) both;
+  }
+  .listening {
+    animation: var(--animate-pulse-ring);
+  }
+  @media (prefers-reduced-motion: reduce) {
+    .rise,
+    .settle,
+    .listening,
+    .postcard {
+      animation: none;
+      transition: none;
+    }
   }
 }
 
 @layer utilities {
   .text-balance {
     text-wrap: balance;
+  }
+  .text-pretty {
+    text-wrap: pretty;
   }
 }

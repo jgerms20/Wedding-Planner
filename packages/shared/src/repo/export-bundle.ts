@@ -7,6 +7,7 @@ import {
   eventSchema,
   guestSchema,
   householdSchema,
+  noteSchema,
   scenarioSchema,
   settingsSchema,
   subEventSchema,
@@ -35,5 +36,7 @@ export const exportBundleSchema = z.object({
   subEvents: z.array(subEventSchema),
   partyMembers: z.array(weddingPartyMemberSchema),
   decisions: z.array(decisionSchema),
+  /** Added after version 1 shipped; older exports simply have none. */
+  notes: z.array(noteSchema).default([]),
 });
 export type ExportBundle = z.infer<typeof exportBundleSchema>;

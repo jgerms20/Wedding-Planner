@@ -108,7 +108,7 @@ export default function PlanPage() {
     <div>
       <PageHeader
         title="Plan"
-        description={`Viewing as ${viewerName}. Every task ties back to design doc §2 — edit anything, it sticks.`}
+        description="Every task moves with your date, anchors, and travel windows. Edit anything; it sticks."
         action={
           <div className="flex gap-2">
             <Button variant="outline" size="sm" onClick={() => setSettingsOpen(true)}>

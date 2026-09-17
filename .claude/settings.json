@@ -1,0 +1,14 @@
+{
+  "hooks": {
+    "SessionStart": [
+      {
+        "hooks": [
+          {
+            "type": "command",
+            "command": "cd \"$CLAUDE_PROJECT_DIR\" && if [ -f pnpm-lock.yaml ] && [ ! -d node_modules ]; then pnpm install --frozen-lockfile >/dev/null 2>&1 && echo 'pnpm install: done'; fi; echo 'Bower: read CLAUDE.md, then docs/specs/. Skills: bower-design, wedding-research, bower-ai-actions.'"
+          }
+        ]
+      }
+    ]
+  }
+}

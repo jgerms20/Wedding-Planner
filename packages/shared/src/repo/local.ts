@@ -1,13 +1,16 @@
 import Dexie, { type Table } from "dexie";
 import type { ZodType } from "zod";
 import {
+  aiUsageSchema,
   budgetCategorySchema,
   budgetItemSchema,
+  chatMessageSchema,
   decisionSchema,
   destinationSchema,
   eventSchema,
   guestSchema,
   householdSchema,
+  noteSchema,
   scenarioSchema,
   settingsSchema,
   subEventSchema,
@@ -15,13 +18,16 @@ import {
   venueSchema,
   weddingPartyMemberSchema,
   weddingSchema,
+  type AiUsage,
   type BudgetCategory,
   type BudgetItem,
+  type ChatMessage,
   type Decision,
   type Destination,
   type Event,
   type Guest,
   type Household,
+  type Note,
   type Scenario,
   type Settings,
   type SubEvent,
@@ -49,6 +55,9 @@ class BowerDatabase extends Dexie {
   subEvents!: Table<SubEvent, string>;
   partyMembers!: Table<WeddingPartyMember, string>;
   decisions!: Table<Decision, string>;
+  notes!: Table<Note, string>;
+  chatMessages!: Table<ChatMessage, string>;
+  aiUsage!: Table<AiUsage, string>;
 
   constructor(name = "bower") {
     super(name);
@@ -67,6 +76,12 @@ class BowerDatabase extends Dexie {
       subEvents: "id, weddingId, kind",
       partyMembers: "id, weddingId, side",
       decisions: "id, weddingId, decidedAt",
+    });
+    // v2: notes, concierge chat, and AI usage (browser-only until Phase 0b).
+    this.version(2).stores({
+      notes: "id, weddingId, createdAt, linkedId",
+      chatMessages: "id, weddingId, createdAt",
+      aiUsage: "id, weddingId, createdAt, feature",
     });
   }
 }
@@ -109,6 +124,27 @@ export function createLocalRepo(databaseName = "bower"): WeddingRepo {
   const subEvents = entityRepo(db.subEvents, subEventSchema);
   const partyMembers = entityRepo(db.partyMembers, weddingPartyMemberSchema);
   const decisions = entityRepo(db.decisions, decisionSchema);
+  const notes = entityRepo(db.notes, noteSchema);
+  const chatMessages = entityRepo(db.chatMessages, chatMessageSchema);
+  const aiUsage = entityRepo(db.aiUsage, aiUsageSchema);
+
+  const bundleTables = [
+    db.weddings,
+    db.settings,
+    db.tasks,
+    db.events,
+    db.destinations,
+    db.venues,
+    db.scenarios,
+    db.households,
+    db.guests,
+    db.budgetCategories,
+    db.budgetItems,
+    db.subEvents,
+    db.partyMembers,
+    db.decisions,
+    db.notes,
+  ];
 
   return {
     tasks,
@@ -123,6 +159,9 @@ export function createLocalRepo(databaseName = "bower"): WeddingRepo {
     subEvents,
     partyMembers,
     decisions,
+    notes,
+    chatMessages,
+    aiUsage,
 
     async getWedding(slug) {
       return db.weddings.where("slug").equals(slug).first();
@@ -163,6 +202,7 @@ export function createLocalRepo(databaseName = "bower"): WeddingRepo {
         subEvents: await subEvents.list(weddingId),
         partyMembers: await partyMembers.list(weddingId),
         decisions: await decisions.list(weddingId),
+        notes: await notes.list(weddingId),
       };
       const parsed = exportBundleSchema.parse(bundle);
       return JSON.stringify(parsed, null, 2);
@@ -172,61 +212,28 @@ export function createLocalRepo(databaseName = "bower"): WeddingRepo {
       const raw: unknown = JSON.parse(json);
       const bundle = exportBundleSchema.parse(raw);
 
-      await db.transaction(
-        "rw",
-        [
-          db.weddings,
-          db.settings,
-          db.tasks,
-          db.events,
-          db.destinations,
-          db.venues,
-          db.scenarios,
-          db.households,
-          db.guests,
-          db.budgetCategories,
-          db.budgetItems,
-          db.subEvents,
-          db.partyMembers,
-          db.decisions,
-        ],
-        async () => {
-          // Local mode holds a single wedding: importing replaces everything.
-          await Promise.all([
-            db.weddings.clear(),
-            db.settings.clear(),
-            db.tasks.clear(),
-            db.events.clear(),
-            db.destinations.clear(),
-            db.venues.clear(),
-            db.scenarios.clear(),
-            db.households.clear(),
-            db.guests.clear(),
-            db.budgetCategories.clear(),
-            db.budgetItems.clear(),
-            db.subEvents.clear(),
-            db.partyMembers.clear(),
-            db.decisions.clear(),
-          ]);
+      await db.transaction("rw", bundleTables, async () => {
+        // Local mode holds a single wedding: importing replaces everything.
+        await Promise.all(bundleTables.map((table) => table.clear()));
 
-          await db.weddings.put(bundle.wedding);
-          if (bundle.settings) {
-            await db.settings.put(bundle.settings);
-          }
-          await db.tasks.bulkPut(bundle.tasks);
-          await db.events.bulkPut(bundle.events);
-          await db.destinations.bulkPut(bundle.destinations);
-          await db.venues.bulkPut(bundle.venues);
-          await db.scenarios.bulkPut(bundle.scenarios);
-          await db.households.bulkPut(bundle.households);
-          await db.guests.bulkPut(bundle.guests);
-          await db.budgetCategories.bulkPut(bundle.budgetCategories);
-          await db.budgetItems.bulkPut(bundle.budgetItems);
-          await db.subEvents.bulkPut(bundle.subEvents);
-          await db.partyMembers.bulkPut(bundle.partyMembers);
-          await db.decisions.bulkPut(bundle.decisions);
-        },
-      );
+        await db.weddings.put(bundle.wedding);
+        if (bundle.settings) {
+          await db.settings.put(bundle.settings);
+        }
+        await db.tasks.bulkPut(bundle.tasks);
+        await db.events.bulkPut(bundle.events);
+        await db.destinations.bulkPut(bundle.destinations);
+        await db.venues.bulkPut(bundle.venues);
+        await db.scenarios.bulkPut(bundle.scenarios);
+        await db.households.bulkPut(bundle.households);
+        await db.guests.bulkPut(bundle.guests);
+        await db.budgetCategories.bulkPut(bundle.budgetCategories);
+        await db.budgetItems.bulkPut(bundle.budgetItems);
+        await db.subEvents.bulkPut(bundle.subEvents);
+        await db.partyMembers.bulkPut(bundle.partyMembers);
+        await db.decisions.bulkPut(bundle.decisions);
+        await db.notes.bulkPut(bundle.notes);
+      });
     },
   };
 }

@@ -49,7 +49,7 @@ const STEPS = ["You two", "When", "Where", "Size & budget", "Vibe & policies", "
 
 export default function IntakePage() {
   const router = useRouter();
-  const { repo, wedding, reloadWedding, viewingAs } = useRepoContext();
+  const { repo, wedding, reloadWedding, viewerName } = useRepoContext();
   const [step, setStep] = useState(0);
   const [saving, setSaving] = useState(false);
 
@@ -200,7 +200,7 @@ export default function IntakePage() {
       title: "Completed intake",
       detail: `Built the initial plan for ${updatedWedding.name}.`,
       decidedAt: nowIso(),
-      decidedBy: viewingAs === "a" ? updatedWedding.partnerA.name : updatedWedding.partnerB.name,
+      decidedBy: viewerName,
       source: "manual",
     });
 
