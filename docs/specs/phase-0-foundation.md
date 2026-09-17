@@ -1,7 +1,7 @@
 # Phase 0: Foundation spec
 
-Status: ready
-Design doc sections: §4 (architecture), §4.2 (data model), §4.3 (agent runtime), §6 Phase 0
+Status: in progress (0a)
+Design doc sections: §2.1, §2.6, §4, §4.2, §4.3, §6 Phase 0a/0b
 
 ## Goal
 
@@ -53,6 +53,15 @@ Routes (App Router):
 - First agent `hello`: system prompt "You are the wedding concierge"; tools `get_wedding_summary` (reads weddings + counts) and `propose_task` (gated, actionType `create_task`); effort `low`
 - API: `POST /api/agents/run` (auth required, verifies membership) enqueues; `POST /api/approvals/[id]` approve/reject; approval handler for `create_task` inserts the task
 - Fake-client mode: `ANTHROPIC_FAKE=1` swaps in a scripted client so tests and CI never hit the API
+
+## Phase 0a tasks (no accounts needed)
+
+A. **Monorepo scaffold** (= task 1 below).
+B. **Data access layer.** `packages/shared/src/repo/` defines `WeddingRepo` (weddings, tasks, events, destinations, scenarios, guests, budget items, decisions, settings) and `packages/shared/src/repo/local.ts` implements it on IndexedDB (Dexie) with `exportJson()` / `importJson()`. The Supabase adapter is Phase 0b. Data mode is chosen by `NEXT_PUBLIC_DATA_MODE=local|supabase`.
+C. **Web app in local mode.** All routes from the UI section, plus: `/w/[slug]/intake` (the §8 questions as a form that seeds the profile), Plan page with the template timeline generated from date + anchors + travel windows and editable inline, Destinations page with destinations → venues and a scenario comparison table (manual entry, computed cost per guest and total from simple inputs), Settings with export/import JSON. Static export (`output: "export"`) must build.
+D. **GitHub Pages deploy.** Workflow on push to the default branch builds the static export with `NEXT_PUBLIC_DATA_MODE=local` and a `basePath` of `/Wedding-Planner`, uploads it with `actions/upload-pages-artifact`, deploys with `actions/deploy-pages`, and tries `actions/configure-pages` with `enablement: true`.
+E. **DB package** (= tasks 2-3) tested against a local Postgres 16 started from `/usr/lib/postgresql/16/bin` when Docker is unavailable.
+F. **Agent runtime with fake client** (= task 6, minus the API route which needs Supabase auth).
 
 ## Tasks
 

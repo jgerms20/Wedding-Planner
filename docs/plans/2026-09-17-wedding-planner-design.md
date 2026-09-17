@@ -1,4 +1,6 @@
-# Wedding Planner: agent-powered planning product
+# Bower: agent-powered wedding planning
+
+Working product name: **Bower** (a bower is the leafy arch a couple stands under; a bowerbird builds elaborate structures for its mate). Domain and trademark check pending; the name lives in one config constant so renaming is trivial.
 
 ## Context
 
@@ -15,7 +17,7 @@ Decisions made at kickoff (2026-09-17):
 | Vendor outreach in v1 | Email, every outbound message approved by you; voice calling later |
 | Users per wedding | The couple (two owner accounts); roles for parents/planner deferred but modeled |
 
-Two corrections from research, applied below: the agent runtime is the **Anthropic SDK tool runner** (not the "Claude Agent SDK", which is a filesystem/coding harness), and vendor email runs through a **dedicated per-wedding inbox** rather than your Gmail, because reading Gmail replies requires Google's restricted-scope CASA audit for a sellable product.
+Feedback folded in on 2026-09-17 (second pass): destination-first selection with a comparison tool that recomputes plan and cost; the lifecycle is an editable template built around **anchor events** and **travel windows**; a layer of small persistent micro-agents; a **local data mode** so the app is hosted and usable before any accounts exist; and a model-tiered build process. Two corrections from research, applied below: the agent runtime is the **Anthropic SDK tool runner** (not the "Claude Agent SDK", which is a filesystem/coding harness), and vendor email runs through a **dedicated per-wedding inbox** rather than your Gmail, because reading Gmail replies requires Google's restricted-scope CASA audit for a sellable product.
 
 ---
 
@@ -42,7 +44,13 @@ Ship v1 with Level 1 for anything that leaves the app. Level 2 is where "we coul
 
 This section is the map the agents plan against. It becomes seed data (`packages/agents/knowledge/timeline.ts`) that the Timeline agent adapts to each couple.
 
-### 2.1 Lifecycle phases (18-month plan)
+### 2.1 Lifecycle phases (default template, fully editable)
+
+The table below is the **default template**, not a rule. Every couple edits it, and the Timeline agent re-derives it from three inputs:
+
+- **Anchor events.** Moments the couple chooses to organize around. For us: a **spring 2027 engagement party** roughly a year out that doubles as the reveal of the date, the destination, and the wedding party; save-the-dates go out immediately after it; invitations go out far earlier than the conventional 6-8 weeks (our default: ~9-12 months, with an early RSVP deadline so guests can book travel). The conventional dates are shown as a reference, never enforced.
+- **Travel windows.** Periods when we are physically somewhere useful (e.g. East Coast trips). The Timeline agent schedules in-person tasks (venue tours, tastings, family conversations, attire fittings) into those windows and warns when a window is the last chance for something.
+- **Destination template.** A destination wedding shifts communications earlier, adds legal and travel tasks, and changes lead times; choosing a destination scenario (see §2.6) re-plans automatically.
 
 | Phase | When | What happens |
 |---|---|---|
@@ -84,6 +92,15 @@ Roles: maid/matron of honor, best man/best woman, bridesmaids, groomsmen, mixed-
 
 Vendor meals; tips and who hands them out; overtime; service charges and tax on catering (often 20-25% on top); postage weight of invitations; alterations; marriage license fee; wedding party transport; welcome bags; sunset time on the day (photo schedule); rain plan; accessibility; dietary needs; kids policy; plus-one policy; hotel block release dates; day-of emergency kit; who holds the rings; vendor load-in and parking; sound curfews and permits; open-flame/sparkler rules; dress code communication; timeline buffers; returning the signed license; thank-you notes.
 
+### 2.6 Destination-first selection and the comparison tool
+
+Selection is hierarchical: **destination → venue → date**, and each level is a **scenario** that can be compared side by side before one is pinned as active.
+
+- A **destination** (city/region/country) carries: travel cost per guest from the guest list's home cities, lodging cost bands, weather by month, legal requirements (residency days, apostilles, symbolic vs legal ceremony), peak-season pricing, and an estimated attendance rate (which guests are likely to travel).
+- **Venues** live under destinations with capacity, rental fee, F&B minimums, in-house services, lodging on site, and date availability from outreach.
+- A **scenario** = destination + venue + date range + guest count assumption. Pinning a scenario recomputes the budget (per-guest and fixed costs), the guest count estimate, the timeline (lead times, legal tasks, communications dates), and the wedding-party costs. Scenarios are versioned so we can revisit "what if Brazil" months later.
+- The **comparison tool** shows scenarios in columns with the deltas that matter: total cost, cost per guest, expected attendance, travel burden, weather, lead time risk, and the top three unknowns the Scout still needs to resolve.
+
 ---
 
 ## 3. The agent roster
@@ -97,7 +114,7 @@ Every agent is a declarative config in `packages/agents/registry/` (name, purpos
 | 3 | **Timeline / Chief of Staff** | Generates the month-by-month plan from date, style, destination, guest count; re-plans when anything changes (date moves, destination chosen); surfaces this week; dependency-aware ("can't send invites before the venue is booked"); owns the don't-forget list | read/write tasks, events, deadlines | Profile change; weekly cron; user ask |
 | 4 | **Budget** | Builds the budget from guest count + region + priorities using category benchmarks; tracks estimate → quoted → contracted → paid; payment reminders; reads uploaded quotes/contracts (PDF) and extracts line items; what-if ("cut 20 guests", "skip videographer"); flags service charges and tax | read/write budget, payments; read files; structured extraction | Quote/contract upload; user ask; payment due cron |
 | 5 | **Guest List** | Imports CSV/Google contacts, dedupes into households, tiers (must/should/nice), sides, plus-one and kids policy; scenario filters ("who makes the cut at 120?"); tracks save-the-date/invite/RSVP/gift/thank-you per event; emails guests for addresses and dietary needs (approval-gated) | read/write guests, households, RSVPs; send_email (gated) | Import; user ask; RSVP deadline cron |
-| 6 | **Venue & Destination Scout** | Given criteria (capacity, budget, month, vibe, region), researches destinations and venues on the web, builds a sourced comparison table (capacity, rental fee, F&B minimum, in-house catering, lodging, weather by month, guest travel cost), finds contact channels, proposes a shortlist | web_search, web_fetch, upsert vendors/venues/destinations | User ask |
+| 6 | **Destination & Venue Scout** | Works top-down: proposes destinations against criteria (season, budget, guest travel burden, legal simplicity, vibe), then venues under each with sourced facts (capacity, rental fee, F&B minimum, in-house services, lodging, weather by month), estimates per-guest travel cost from the guest list's home cities, builds **scenarios** for the comparison tool, and finds contact channels for outreach | web_search, web_fetch, upsert destinations/venues/scenarios, read guests | User ask; scenario pinned |
 | 7 | **Vendor Outreach & Negotiation** | Per vendor thread: drafts the inquiry (availability, pricing, packages), sends after approval, reads replies, extracts quotes into structured data, asks follow-ups, schedules tours into the calendar, chases silence after N days, negotiates toward your target within your rules, escalates decisions | read vendor/thread; send_email (gated); update quote; create calendar event; create approval | Inbound email; approval granted; follow-up cron; user ask |
 | 8 | **Contract Reviewer** | Summarizes a contract, flags risky terms (cancellation, force majeure, overtime, deposit non-refundability, exclusivity), builds the payment schedule into the budget | read files (PDF as document blocks); write payments, tasks | Contract upload |
 | 9 | **Legal & Admin Guide** | Jurisdiction-specific marriage license steps with citations, officiant rules, destination legal validity, name change checklist, insurance to consider, prenup timing; creates dated tasks | web_search (citations required), create tasks | Venue/date set; user ask |
@@ -108,6 +125,21 @@ Every agent is a declarative config in `packages/agents/registry/` (name, purpos
 | 14 | **Gifts & Thank-you** | Registry suggestions, gift log, per-gift thank-you note drafts | read/write gifts | After showers/wedding |
 | 15 | **Voice** (Phase 5) | Calls vendors for availability/pricing when email stalls, with AI disclosure and recording consent, transcript into the thread | Retell AI (telephony-native, compliance tooling) | Level 2+ only, user-initiated |
 | 16 | **Post-Wedding** | Name change sequence, certificate copies, vendor reviews, preservation, reconciliation | tasks, budget | Day after |
+
+**Micro-agents (persistent, cheap, run on schedules or events; Haiku 4.5 or Sonnet 5):**
+
+| Micro-agent | Job |
+|---|---|
+| Inbox triage | Classifies every inbound email (vendor reply, quote, guest RSVP, spam) and routes it to the right agent or thread |
+| Follow-up chaser | Finds threads silent past their SLA and drafts the nudge (auto-sends at Level 2) |
+| Deadline sentinel | Watches tasks, payments, RSVP deadlines, and hotel block release dates; escalates into the daily brief |
+| Payment reminder | Upcoming deposits and balances with the contract terms attached |
+| Price watcher | Tracks flight and lodging prices for pinned destination scenarios and guest home cities |
+| Attendance estimator | Re-estimates likely headcount per scenario from guest tiers, distance, and RSVP history |
+| Guest hygiene | Duplicate detection, missing addresses/emails, household merges |
+| Decision logger | Turns approved actions and chat conclusions into `decisions` entries so nothing is re-argued |
+| Brief composer | Assembles the daily/weekly brief from the above |
+| Vendor responsiveness | Tracks response times per vendor as a signal in comparisons |
 
 Cross-cutting rules for every agent:
 - **Inbound content is untrusted.** Vendor emails and fetched web pages are wrapped as data; agents never follow instructions found in them, and every outbound action is gated regardless.
@@ -131,6 +163,7 @@ Cross-cutting rules for every agent:
 | Email | Postmark: outbound from `{wedding-slug}@mail.<yourdomain>`, inbound webhook (full body in one POST) → thread → agent job | Avoids Gmail restricted scopes entirely; every wedding gets its own inbox; you can enable "copy me on everything" |
 | Calendar | Internal events + per-wedding **ICS feed** (subscribe from Google/Apple) in v1; Google Calendar two-way sync later (calendar scope is only "sensitive", not restricted) | Zero OAuth verification work to be useful now |
 | Files | Supabase Storage under `weddings/{id}/…` + `files` table; PDFs passed to Claude as document blocks | Contracts, quotes, inspiration, licenses, vows |
+| Data access | A repository interface in `packages/shared` with two adapters: **`local`** (browser IndexedDB, per-device, JSON export/import) and **`supabase`**. Local mode lets the app build as a static site and deploy to **GitHub Pages** with zero accounts, so it is usable immediately; Supabase mode adds shared, multi-device, multi-user data | Usable now, and the same UI code runs against both |
 | Hosting | Vercel (web) + Railway (worker) + Supabase | Standard, cheap, scales to first customers |
 | Observability | `agent_runs` transcripts + per-wedding cost ledger; Sentry | Needed to sell it and to control spend |
 | Billing (Phase 4) | Stripe | |
@@ -142,7 +175,8 @@ Cross-cutting rules for every agent:
 - **Money:** `budget_categories`, `budget_items` (estimate, quoted, contracted, paid), `payments` (due date, status), `contributions` (who funds what)
 - **People:** `households`, `guests` (side, tier, relationship, plus_one, kids, contact, dietary, address), `guest_event_status` (per sub-event: invited/sent/rsvp/gift/thank_you), `wedding_party_members`
 - **Events:** `sub_events` (type, date, host, venue, budget link, guest subset rule)
-- **Vendors:** `destinations`, `vendors` (category, contact channels, price range, source URLs), `venues` (extends vendor: capacity, fees, minimums, lodging, in-house services), `quotes` + `quote_line_items`, `contracts`, `vendor_status` pipeline (not contacted → contacted → awaiting → replied → quoted → touring → negotiating → booked/declined)
+- **Selection:** `destinations` (travel/lodging/legal/weather facts), `scenarios` (destination, venue, date range, guest assumption, computed deltas, pinned flag, version)
+- **Vendors:** `vendors` (category, contact channels, price range, source URLs), `venues` (extends vendor: capacity, fees, minimums, lodging, in-house services), `quotes` + `quote_line_items`, `contracts`, `vendor_status` pipeline (not contacted → contacted → awaiting → replied → quoted → touring → negotiating → booked/declined)
 - **Comms:** `threads` (vendor or guest), `messages` (direction, body, parsed fields, postmark ids), `pending_approvals` (action type, payload, agent_run_id, status)
 - **Agents:** `agent_runs`, `agent_events` (streamed steps for the live activity feed), `chat_messages` (Concierge), `cost_ledger`
 - **Files:** `files` (storage path, kind, linked entity, extracted_text)
@@ -188,8 +222,12 @@ Cross-cutting rules for every agent:
 
 Each phase ends with something you actually use for your wedding. Phase 2 is the moat; Phase 1 is what makes you open the app daily.
 
-### Phase 0: Foundation (first)
-Monorepo scaffold; Supabase project; auth; create wedding + invite partner; base schema for tenancy/tasks/events with RLS; app shell and navigation; worker with pg-boss and the agent runtime skeleton running one trivial agent end-to-end with `agent_runs` logging; deploy pipeline (Vercel + Railway); seed script with a fake wedding; CI (typecheck, lint, tests).
+### Phase 0a: Usable now, no accounts (first)
+Monorepo scaffold; app shell with every screen; **local data mode** (IndexedDB) with JSON export/import; intake form that seeds the wedding profile; editable timeline with anchors and travel windows generated from the template; destinations/scenarios comparison (manual entry); countdown; static export deployed to GitHub Pages. Also the `packages/db` migration + RLS and the agent runtime with a fake client, so Phase 0b is wiring, not building.
+**Done when:** both of you can open the Pages URL and start entering real things this weekend (per-device until 0b).
+
+### Phase 0b: Foundation with accounts
+Supabase project; auth; create wedding + invite partner; base schema for tenancy/tasks/events with RLS; app shell and navigation; worker with pg-boss and the agent runtime skeleton running one trivial agent end-to-end with `agent_runs` logging; deploy pipeline (Vercel + Railway); seed script with a fake wedding; CI (typecheck, lint, tests).
 **Done when:** both of you can log in, see an empty dashboard, and an agent run shows up in the activity feed.
 
 ### Phase 1: Personal MVP ("we use this every day")
@@ -215,10 +253,11 @@ Voice agent via Retell (AI disclosure in the first seconds, recording consent by
 
 1. **This document** is the source of truth at `docs/plans/2026-09-17-wedding-planner-design.md`; module specs live in `docs/specs/` (start with `phase-0-foundation.md`).
 2. **One spec per module** in `docs/specs/` (e.g. `budget.md`, `outreach.md`), each with: data model deltas, UI screens, agent prompt + tool list, acceptance criteria, and test fixtures. Specs are written with the strongest model available; they are the expensive, high-leverage artifact.
-3. **Tasks, not vibes.** Each spec is split into tasks small enough that a sub-agent needs no exploration: "add `quotes` and `quote_line_items` tables with RLS, migration, Drizzle types, and a unit test". Well-specified implementation tasks go to Sonnet 5 sub-agents in worktrees (`anthropic-skills:subagent-driven-development`); schema, agent prompts, security, and code review stay on the strongest model.
-4. **Batch independent tasks** in parallel (`dispatching-parallel-agents`), and never dispatch a task whose spec is still fuzzy: that is where credits vanish.
-5. **Verification before merge, every time:** typecheck, lint, unit tests for tools and extraction, a Playwright smoke test per screen, and for agents a fixture eval (a handful of real-shaped vendor emails and the expected parsed output). `verification-before-completion` skill applies.
-6. **Runtime cost control for the product:** Opus 5 at `medium` effort for most agents, `high` for negotiation and planning, Sonnet 5 for classification/extraction; prompt caching on the system prompt and wedding snapshot; a per-wedding monthly cap in the worker; cost visible per run in the activity feed.
+3. **Model tiering for the build.** Fable orchestrates: writes specs, reviews diffs, resolves design questions, and merges. Opus 5 handles agent prompts, security-sensitive code (RLS, approvals, email ingestion), and tricky debugging. Sonnet 5 does the bulk of implementation from specs. Haiku 4.5 does mechanical legwork: fixtures, seed data, docs sweeps, repetitive refactors. Sub-agents run in worktrees with a tight brief and acceptance criteria, and are not handed the whole repo to explore.
+4. **Tasks, not vibes.** Each spec is split into tasks small enough that a sub-agent needs no exploration: "add `quotes` and `quote_line_items` tables with RLS, migration, Drizzle types, and a unit test". Well-specified implementation tasks go to Sonnet 5 sub-agents in worktrees (`anthropic-skills:subagent-driven-development`); schema, agent prompts, security, and code review stay on the strongest model.
+5. **Batch independent tasks** in parallel (`dispatching-parallel-agents`), and never dispatch a task whose spec is still fuzzy: that is where credits vanish.
+6. **Verification before merge, every time:** typecheck, lint, unit tests for tools and extraction, a Playwright smoke test per screen, and for agents a fixture eval (a handful of real-shaped vendor emails and the expected parsed output). `verification-before-completion` skill applies.
+7. **Runtime cost control for the product:** Opus 5 at `medium` effort for most agents, `high` for negotiation and planning, Sonnet 5 for classification/extraction; prompt caching on the system prompt and wedding snapshot; a per-wedding monthly cap in the worker; cost visible per run in the activity feed.
 
 ---
 
