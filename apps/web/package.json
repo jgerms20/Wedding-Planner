@@ -9,7 +9,8 @@
     "start": "next start",
     "lint": "eslint . -c ../../eslint.config.js",
     "typecheck": "tsc --noEmit",
-    "test": "vitest run"
+    "test": "vitest run",
+    "e2e": "playwright test"
   },
   "dependencies": {
     "@bower/shared": "workspace:*",
@@ -20,9 +21,11 @@
     "clsx": "^2.1.1",
     "tailwind-merge": "^2.6.0",
     "lucide-react": "^0.469.0",
-    "@radix-ui/react-slot": "^1.1.1"
+    "@radix-ui/react-slot": "^1.1.1",
+    "date-fns": "^4.4.0"
   },
   "devDependencies": {
+    "@playwright/test": "1.56.1",
     "@tailwindcss/postcss": "^4",
     "@types/node": "^22",
     "@types/react": "^19",
