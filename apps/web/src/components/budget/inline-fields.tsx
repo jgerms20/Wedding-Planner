@@ -1,0 +1,67 @@
+"use client";
+
+import { useState } from "react";
+import { formatDate, formatMoney } from "@/lib/format";
+import { cn } from "@/lib/utils";
+
+/** A money figure that becomes a number input on click, and saves on blur/Enter. */
+export function InlineMoney({ label, value, onCommit }: { label: string; value: number | undefined; onCommit: (value: number | undefined) => void }) {
+  const [editing, setEditing] = useState(false);
+
+  if (editing) {
+    return (
+      <label className="flex flex-col items-end gap-0.5">
+        <span className="text-[0.6rem] tracking-wide text-ink-mute uppercase">{label}</span>
+        <input
+          type="number"
+          autoFocus
+          defaultValue={value ?? ""}
+          onBlur={(e) => {
+            setEditing(false);
+            const raw = e.target.value.trim();
+            onCommit(raw === "" ? undefined : Number(raw));
+          }}
+          onKeyDown={(e) => {
+            if (e.key === "Enter") e.currentTarget.blur();
+            if (e.key === "Escape") setEditing(false);
+          }}
+          className="tabular h-7 w-24 rounded-md border border-line-strong bg-transparent px-2 text-right text-sm outline-none focus:border-coral"
+        />
+      </label>
+    );
+  }
+
+  return (
+    <button type="button" onClick={() => setEditing(true)} className="flex flex-col items-end gap-0.5 text-right">
+      <span className="text-[0.6rem] tracking-wide text-ink-mute uppercase">{label}</span>
+      <span className={cn("tabular text-sm", value === undefined ? "text-ink-mute" : "text-foreground")}>{formatMoney(value)}</span>
+    </button>
+  );
+}
+
+/** A due date that becomes a date input on click. */
+export function InlineDate({ value, onCommit }: { value: string | undefined; onCommit: (value: string | undefined) => void }) {
+  const [editing, setEditing] = useState(false);
+
+  if (editing) {
+    return (
+      <input
+        type="date"
+        autoFocus
+        defaultValue={value ?? ""}
+        onBlur={(e) => {
+          setEditing(false);
+          onCommit(e.target.value || undefined);
+        }}
+        className="h-7 rounded-md border border-line-strong bg-transparent px-2 text-xs outline-none focus:border-coral"
+      />
+    );
+  }
+
+  return (
+    <button type="button" onClick={() => setEditing(true)} className="flex flex-col items-end gap-0.5 text-right">
+      <span className="text-[0.6rem] tracking-wide text-ink-mute uppercase">Due</span>
+      <span className="tabular text-sm text-ink-soft">{value ? formatDate(value) : "Set date"}</span>
+    </button>
+  );
+}

@@ -64,7 +64,7 @@ export function PlanSettingsDialog({
       </DialogHeader>
       <DialogBody className="flex flex-col gap-6">
         <section className="flex flex-col gap-3">
-          <h3 className="text-sm font-medium">Communications offsets</h3>
+          <p className="eyebrow">Communications offsets</p>
           <div className="grid grid-cols-3 gap-3">
             <Field label="Save-the-dates (months before)">
               <Input type="number" step="0.5" value={saveTheDatesMonthsBefore} onChange={(e) => setSaveTheDatesMonthsBefore(Number(e.target.value))} />
@@ -80,7 +80,7 @@ export function PlanSettingsDialog({
 
         <section className="flex flex-col gap-3">
           <div className="flex items-center justify-between">
-            <h3 className="text-sm font-medium">Anchors</h3>
+            <p className="eyebrow">Anchors</p>
             <Button
               type="button"
               size="sm"
@@ -91,7 +91,7 @@ export function PlanSettingsDialog({
             </Button>
           </div>
           {anchors.map((anchor, i) => (
-            <div key={anchor.id} className="flex flex-col gap-2 rounded-md border border-border p-3">
+            <div key={anchor.id} className="flex flex-col gap-2 rounded-md border border-line p-3">
               <div className="flex gap-2">
                 <Select
                   value={anchor.kind}
@@ -119,7 +119,7 @@ export function PlanSettingsDialog({
                 </Button>
               </div>
               {anchor.kind === "engagement_party" && (
-                <div className="flex flex-wrap gap-4 pl-1 text-xs text-muted-foreground">
+                <div className="flex flex-wrap gap-4 pl-1 text-xs text-ink-soft">
                   Reveals:
                   {REVEAL_OPTIONS.map((r) => (
                     <label key={r} className="flex items-center gap-1.5">
@@ -144,7 +144,7 @@ export function PlanSettingsDialog({
 
         <section className="flex flex-col gap-3">
           <div className="flex items-center justify-between">
-            <h3 className="text-sm font-medium">Travel windows</h3>
+            <p className="eyebrow">Travel windows</p>
             <Button
               type="button"
               size="sm"
@@ -155,7 +155,7 @@ export function PlanSettingsDialog({
             </Button>
           </div>
           {windows.map((w, i) => (
-            <div key={w.id} className="flex flex-wrap gap-2 rounded-md border border-border p-3">
+            <div key={w.id} className="flex flex-wrap gap-2 rounded-md border border-line p-3">
               <Input
                 value={w.label}
                 onChange={(e) => setWindows((prev) => prev.map((x, xi) => (xi === i ? { ...x, label: e.target.value } : x)))}
