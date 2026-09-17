@@ -1,3 +1,6 @@
-// Placeholder export. Types, Zod schemas, and the WeddingRepo data-access
-// layer (see docs/specs/phase-0-foundation.md) land here.
 export const PACKAGE_NAME = "@bower/shared";
+
+export * from "./entities/index.js";
+export * from "./util.js";
+export * from "./repo/index.js";
+export * from "./timeline/index.js";
