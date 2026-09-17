@@ -29,9 +29,9 @@ import {
   type Venue,
   type Wedding,
   type WeddingPartyMember,
-} from "../entities/index.js";
-import { EXPORT_BUNDLE_VERSION, exportBundleSchema } from "./export-bundle.js";
-import type { EntityRepo, WeddingRepo } from "./types.js";
+} from "../entities/index";
+import { EXPORT_BUNDLE_VERSION, exportBundleSchema } from "./export-bundle";
+import type { EntityRepo, WeddingRepo } from "./types";
 
 /** The local Dexie (IndexedDB) database. One table per entity, database name "bower". */
 class BowerDatabase extends Dexie {

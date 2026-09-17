@@ -1,5 +1,5 @@
 import { z } from "zod";
-import { phaseKeySchema, taskStatusSchema } from "./common.js";
+import { phaseKeySchema, taskStatusSchema } from "./common";
 
 export const taskSchema = z.object({
   id: z.string(),

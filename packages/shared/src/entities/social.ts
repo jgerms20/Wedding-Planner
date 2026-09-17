@@ -1,5 +1,5 @@
 import { z } from "zod";
-import { sideSchema, subEventKindSchema } from "./common.js";
+import { sideSchema, subEventKindSchema } from "./common";
 
 export const subEventSchema = z.object({
   id: z.string(),

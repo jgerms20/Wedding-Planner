@@ -1,4 +1,4 @@
-import type { AnchorKind, PhaseKey } from "../entities/index.js";
+import type { AnchorKind, PhaseKey } from "../entities/index";
 
 /**
  * A single row of the default plan template, authored from design doc

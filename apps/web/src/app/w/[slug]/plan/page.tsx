@@ -1,6 +1,7 @@
 "use client";
 
 import {
+  generateAnchorEvents,
   generatePlan,
   newId,
   nowIso,
@@ -152,6 +153,9 @@ export default function PlanPage() {
         planConfig={settings.planConfig}
         onSave={async (planConfig) => {
           await repo.saveSettings({ ...settings, planConfig });
+          for (const event of generateAnchorEvents(wedding, planConfig)) {
+            await repo.events.upsert(event);
+          }
           await reloadSettings();
         }}
       />

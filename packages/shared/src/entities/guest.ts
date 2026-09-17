@@ -1,5 +1,5 @@
 import { z } from "zod";
-import { sideSchema, tierSchema } from "./common.js";
+import { sideSchema, tierSchema } from "./common";
 
 export const householdSchema = z.object({
   id: z.string(),

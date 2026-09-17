@@ -1,6 +1,6 @@
-import type { Event, PlanConfig, Task, TravelWindow, Wedding } from "../entities/index.js";
-import { newId, nowIso } from "../util.js";
-import { COMMS_TEMPLATE_IDS, TEMPLATE_TASKS, type TemplateTask } from "./template.js";
+import type { Event, PlanConfig, Task, TravelWindow, Wedding } from "../entities/index";
+import { newId, nowIso } from "../util";
+import { COMMS_TEMPLATE_IDS, TEMPLATE_TASKS, type TemplateTask } from "./template";
 
 const AVERAGE_DAYS_PER_MONTH = 30.4368;
 

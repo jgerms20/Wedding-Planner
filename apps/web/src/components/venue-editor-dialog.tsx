@@ -1,6 +1,7 @@
 "use client";
 
-import { newId, nowIso, venueStatusSchema, type Venue, type VenueStatus } from "@bower/shared";
+import { newId, nowIso, venueStatusSchema } from "@bower/shared";
+import type { Venue, VenueStatus } from "@bower/shared";
 import { useEffect, useState, type ReactNode } from "react";
 import { Button } from "@/components/ui/button";
 import { Checkbox } from "@/components/ui/checkbox";

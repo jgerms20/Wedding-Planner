@@ -13,7 +13,7 @@ import type {
   Venue,
   Wedding,
   WeddingPartyMember,
-} from "../entities/index.js";
+} from "../entities/index";
 
 /** Per-entity CRUD, scoped to a wedding for list(). */
 export interface EntityRepo<T> {

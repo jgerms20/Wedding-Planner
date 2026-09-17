@@ -1,9 +1,9 @@
-import { createLocalRepo } from "./local.js";
-import type { DataMode, WeddingRepo } from "./types.js";
+import { createLocalRepo } from "./local";
+import type { DataMode, WeddingRepo } from "./types";
 
-export * from "./types.js";
-export * from "./local.js";
-export * from "./export-bundle.js";
+export * from "./types";
+export * from "./local";
+export * from "./export-bundle";
 
 /**
  * Creates a WeddingRepo for the given data mode. "local" (Phase 0a) is backed

@@ -1,5 +1,5 @@
 import { describe, expect, it } from "vitest";
-import { scenarioMath, type Scenario } from "../src/entities/index.js";
+import { scenarioMath, type Scenario } from "../src/entities/index";
 
 function makeScenario(overrides: Partial<Scenario> = {}): Scenario {
   return {

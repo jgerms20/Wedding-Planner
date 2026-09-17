@@ -1,5 +1,5 @@
 import { z } from "zod";
-import { anchorKindSchema, dateFlexibilitySchema } from "./common.js";
+import { anchorKindSchema, dateFlexibilitySchema } from "./common";
 
 export const partnerSchema = z.object({
   name: z.string(),

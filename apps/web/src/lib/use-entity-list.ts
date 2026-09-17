@@ -15,7 +15,6 @@ export function useEntityList<T>(loader: () => Promise<T[] | undefined>) {
     const next = await loader();
     if (next) setItems(next);
     setLoading(false);
-    // eslint-disable-next-line react-hooks/exhaustive-deps
   }, [loader]);
 
   useEffect(() => {

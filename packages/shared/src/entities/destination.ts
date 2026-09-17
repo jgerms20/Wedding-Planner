@@ -1,5 +1,5 @@
 import { z } from "zod";
-import { venueStatusSchema } from "./common.js";
+import { venueStatusSchema } from "./common";
 
 export const destinationSchema = z.object({
   id: z.string(),

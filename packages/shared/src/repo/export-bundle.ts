@@ -14,7 +14,7 @@ import {
   venueSchema,
   weddingPartyMemberSchema,
   weddingSchema,
-} from "../entities/index.js";
+} from "../entities/index";
 
 export const EXPORT_BUNDLE_VERSION = 1;
 

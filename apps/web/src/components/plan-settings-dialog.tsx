@@ -39,7 +39,7 @@ export function PlanSettingsDialog({
     setSaveTheDatesMonthsBefore(planConfig.saveTheDatesMonthsBefore);
     setInvitationsMonthsBefore(planConfig.invitationsMonthsBefore);
     setRsvpDeadlineMonthsBefore(planConfig.rsvpDeadlineMonthsBefore);
-    // eslint-disable-next-line react-hooks/exhaustive-deps
+    // Intentionally re-syncs only when the dialog opens, not on every planConfig change.
   }, [open]);
 
   async function handleSave() {

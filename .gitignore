@@ -2,8 +2,12 @@ node_modules/
 .next/
 dist/
 build/
+out/
 .turbo/
 coverage/
+playwright-report/
+test-results/
+blob-report/
 *.log
 .env
 .env.*

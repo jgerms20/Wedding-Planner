@@ -1,9 +1,9 @@
 import "fake-indexeddb/auto";
 import { beforeEach, describe, expect, it } from "vitest";
-import { defaultSettings, type Task, type Wedding } from "../src/entities/index.js";
-import { createLocalRepo } from "../src/repo/local.js";
-import type { WeddingRepo } from "../src/repo/types.js";
-import { newId, nowIso } from "../src/util.js";
+import { defaultSettings, type Task, type Wedding } from "../src/entities/index";
+import { createLocalRepo } from "../src/repo/local";
+import type { WeddingRepo } from "../src/repo/types";
+import { newId, nowIso } from "../src/util";
 
 function makeWedding(): Wedding {
   const now = nowIso();

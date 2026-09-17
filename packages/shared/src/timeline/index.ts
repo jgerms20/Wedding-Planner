@@ -1,2 +1,2 @@
-export * from "./template.js";
-export * from "./generate.js";
+export * from "./template";
+export * from "./generate";

@@ -1,6 +1,6 @@
 import { describe, expect, it } from "vitest";
-import { defaultPlanConfig, type Task, type Wedding } from "../src/entities/index.js";
-import { generateAnchorEvents, generatePlan, parseSeasonStart } from "../src/timeline/generate.js";
+import { defaultPlanConfig, type Task, type Wedding } from "../src/entities/index";
+import { generateAnchorEvents, generatePlan, parseSeasonStart } from "../src/timeline/generate";
 
 function makeWedding(overrides: Partial<Wedding> = {}): Wedding {
   return {
