@@ -3,7 +3,7 @@
 import { scenarioMath, type Destination, type Scenario } from "@bower/shared";
 import { format, isValid, parseISO } from "date-fns";
 import { Copy, Plus } from "lucide-react";
-import type { ReactNode } from "react";
+import { useState, type ReactNode } from "react";
 import { AccentChip } from "@/components/atlas/chips";
 import { Button } from "@/components/ui/button";
 import { formatMoney } from "@/lib/format";
@@ -25,7 +25,13 @@ export function ScenarioMatrix({
   onNewScenario: () => void;
 }) {
   const destinationById = new Map(destinations.map((d) => [d.id, d]));
-  const pinned = scenarios.find((s) => s.pinned);
+  const pinnedSource = scenarios.find((s) => s.pinned);
+  // Our plan reads first; the rest follow by total so the comparison is a ladder.
+  const ordered = [...scenarios].sort((a, b) => {
+    if (a.pinned !== b.pinned) return a.pinned ? -1 : 1;
+    return scenarioMath(a).totalCost - scenarioMath(b).totalCost;
+  });
+  const pinned = pinnedSource;
   const pinnedMath = pinned ? scenarioMath(pinned) : undefined;
 
   return (
@@ -43,7 +49,7 @@ export function ScenarioMatrix({
         </Button>
       </div>
 
-      {scenarios.length === 0 ? (
+      {ordered.length === 0 ? (
         <p className="mt-5 text-sm text-ink-soft">No scenarios yet. Tell Bower a place, or add one.</p>
       ) : (
         <div className="rise rise-2 mt-5 overflow-x-auto rounded-lg border border-line">
@@ -53,7 +59,7 @@ export function ScenarioMatrix({
                 <th className="w-40 shrink-0 p-3 align-bottom text-xs font-semibold tracking-wide text-ink-mute uppercase">
                   &nbsp;
                 </th>
-                {scenarios.map((s) => (
+                {ordered.map((s) => (
                   <th key={s.id} className={cn("min-w-[190px] p-3 align-top", s.pinned && "border-t-2 border-t-coral")}>
                     <div className="flex items-start justify-between gap-2">
                       <p className="font-display text-lg leading-tight">{s.name}</p>
@@ -74,20 +80,20 @@ export function ScenarioMatrix({
               </tr>
             </thead>
             <tbody>
-              <Row label="Destination" values={scenarios.map((s) => destinationById.get(s.destinationId ?? "")?.name ?? "—")} />
-              <Row label="Dates" values={scenarios.map((s) => formatDateRange(s.dateStart, s.dateEnd))} />
-              <Row label="Guests invited" values={scenarios.map((s) => String(s.guestAssumption))} tabular />
-              <Row label="Likely to come" values={scenarios.map((s) => String(scenarioMath(s).expectedGuests))} tabular />
-              <Row label="Fixed costs" values={scenarios.map((s) => formatMoney(s.fixedCosts))} tabular />
-              <Row label="Per-guest cost" values={scenarios.map((s) => formatMoney(s.perGuestCost))} tabular />
-              <DeltaRow label="Total" pinnedId={pinned?.id} values={scenarios.map((s) => ({ id: s.id, value: scenarioMath(s).totalCost }))} />
+              <Row label="Destination" values={ordered.map((s) => destinationById.get(s.destinationId ?? "")?.name ?? "—")} />
+              <Row label="Dates" values={ordered.map((s) => formatDateRange(s.dateStart, s.dateEnd))} />
+              <Row label="Guests invited" values={ordered.map((s) => String(s.guestAssumption))} tabular />
+              <Row label="Likely to come" values={ordered.map((s) => String(scenarioMath(s).expectedGuests))} tabular />
+              <Row label="Fixed costs" values={ordered.map((s) => formatMoney(s.fixedCosts))} tabular />
+              <Row label="Per-guest cost" values={ordered.map((s) => formatMoney(s.perGuestCost))} tabular />
+              <DeltaRow label="Total" pinnedId={pinned?.id} values={ordered.map((s) => ({ id: s.id, value: scenarioMath(s).totalCost }))} />
               <DeltaRow
                 label="Cost per guest"
                 pinnedId={pinned?.id}
-                values={scenarios.map((s) => ({ id: s.id, value: scenarioMath(s).costPerGuest }))}
+                values={ordered.map((s) => ({ id: s.id, value: scenarioMath(s).costPerGuest }))}
               />
-              <Row label="Guest travel burden" values={scenarios.map((s) => formatMoney(scenarioMath(s).guestTravelBurden))} tabular />
-              <Row label="Notes" values={scenarios.map((s) => s.notes ?? "—")} wrap />
+              <Row label="Guest travel burden" values={ordered.map((s) => formatMoney(scenarioMath(s).guestTravelBurden))} tabular />
+              <NotesRow values={ordered.map((s) => s.notes ?? "—")} />
             </tbody>
           </table>
         </div>
@@ -163,4 +169,24 @@ function formatOne(iso: string): string | undefined {
   if (!isValid(date)) return undefined;
   const pattern = date.getFullYear() === new Date().getFullYear() ? "EEE, MMM d" : "EEE, MMM d, yyyy";
   return format(date, pattern);
+}
+
+
+/** How each number was derived. Long by design, so it starts collapsed. */
+function NotesRow({ values }: { values: string[] }) {
+  const [open, setOpen] = useState(false);
+  return (
+    <tr className="border-b border-line last:border-0">
+      <td className="p-3 align-top text-xs font-semibold tracking-wide text-ink-mute uppercase">
+        <button type="button" onClick={() => setOpen((v) => !v)} className="text-left underline decoration-dotted underline-offset-4">
+          {open ? "Hide how" : "How we got these"}
+        </button>
+      </td>
+      {values.map((v, i) => (
+        <td key={i} className={cn("p-3 align-top text-xs leading-relaxed text-ink-soft", !open && "line-clamp-3")}>
+          {v}
+        </td>
+      ))}
+    </tr>
+  );
 }

@@ -1,5 +1,7 @@
 "use client";
 
+import { AiUsageCard } from "@/components/ai/ai-usage-card";
+import { ConnectClaudeCard } from "@/components/ai/connect-claude-card";
 import { nowIso } from "@bower/shared";
 import { AlertTriangle, Download, Upload } from "lucide-react";
 import Link from "next/link";
@@ -122,7 +124,8 @@ export default function SettingsPage() {
         </Link>
       </section>
 
-      {/* ai-settings slot: ConnectClaudeCard + AiUsageCard */}
+      <ConnectClaudeCard />
+      <AiUsageCard />
 
       <section className="postcard rise rise-2 flex flex-col gap-4 p-6">
         <p className="eyebrow">Your data</p>

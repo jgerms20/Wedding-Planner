@@ -1,6 +1,6 @@
 "use client";
 
-import { newId, nowIso, pinScenario, reestimateBudgetFromScenario, type Destination, type Scenario, type Venue, type VenueStatus } from "@bower/shared";
+import { newId, nowIso, pinScenario, reestimateBudgetFromScenario, type Destination, type Scenario, type Venue, type VenueStatus, scenarioMath } from "@bower/shared";
 import { Plus } from "lucide-react";
 import { useCallback, useMemo, useState } from "react";
 import { DestinationPostcard } from "@/components/atlas/destination-postcard";
@@ -45,6 +45,21 @@ export default function DestinationsPage() {
     () => scenarios.find((s) => s.id === wedding?.activeScenarioId) ?? scenarios.find((s) => s.pinned),
     [scenarios, wedding?.activeScenarioId],
   );
+
+  // The front-runner leads the atlas; everything else follows by total cost, so
+  // the cheapest alternative is the next thing they see.
+  const orderedDestinations = useMemo(() => {
+    const totalFor = (id: string) => {
+      const scenario = scenarioByDestination.get(id);
+      return scenario ? scenarioMath(scenario).totalCost : Number.MAX_SAFE_INTEGER;
+    };
+    return [...destinations].sort((a, b) => {
+      const aPinned = pinned?.destinationId === a.id;
+      const bPinned = pinned?.destinationId === b.id;
+      if (aPinned !== bPinned) return aPinned ? -1 : 1;
+      return totalFor(a.id) - totalFor(b.id);
+    });
+  }, [destinations, scenarioByDestination, pinned?.destinationId]);
 
   if (!repo || !wedding) return <p className="font-display text-xl text-ink-soft">Opening the atlas…</p>;
 
@@ -102,7 +117,7 @@ export default function DestinationsPage() {
         <p className="mt-6 text-sm text-ink-soft">No destinations yet. Tell Bower a place, or add one.</p>
       ) : (
         <div className="mt-6 grid gap-4 sm:grid-cols-2 xl:grid-cols-3">
-          {destinations.map((destination, i) => (
+          {orderedDestinations.map((destination, i) => (
             <DestinationPostcard
               key={destination.id}
               className={`rise rise-${Math.min(i + 1, 8)}`}

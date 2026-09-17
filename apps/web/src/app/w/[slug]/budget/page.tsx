@@ -39,16 +39,34 @@ export default function BudgetPage() {
   const { items: scenarios, reload: reloadScenarios } = useEntityList(loadScenarios);
   const pinned = scenarios.find((s) => s.pinned);
 
-  // Seed the typical category split the first time this wedding visits Budget.
+  // Seed the typical category split only for a wedding that genuinely has none,
+  // and tidy the empty duplicates an earlier build could create. Both read the
+  // repo directly rather than trusting in-memory state, which can still be
+  // loading on first paint.
   useEffect(() => {
-    if (!repo || !weddingId || categoriesLoading || categories.length > 0) return;
+    if (!repo || !weddingId || categoriesLoading) return;
     (async () => {
-      for (const [i, cat] of DEFAULT_BUDGET_CATEGORIES.entries()) {
-        await repo.budgetCategories.upsert({ id: newId(), weddingId, name: cat.name, targetPercent: cat.targetPercent, sortOrder: i });
+      const existing = await repo.budgetCategories.list(weddingId);
+      if (existing.length === 0) {
+        for (const [i, cat] of DEFAULT_BUDGET_CATEGORIES.entries()) {
+          await repo.budgetCategories.upsert({ id: newId(), weddingId, name: cat.name, targetPercent: cat.targetPercent, sortOrder: i });
+        }
+        await reloadCategories();
+        return;
       }
-      await reloadCategories();
+      // One-time cleanup: a category with no lines at all is a leftover from
+      // the duplicate-seeding bug. Only runs when the list is clearly doubled.
+      if (existing.length > DEFAULT_BUDGET_CATEGORIES.length) {
+        const lines = await repo.budgetItems.list(weddingId);
+        const used = new Set(lines.map((line) => line.categoryId));
+        const empties = existing.filter((c) => !used.has(c.id));
+        if (empties.length > 0 && empties.length < existing.length) {
+          for (const c of empties) await repo.budgetCategories.remove(c.id);
+          await reloadCategories();
+        }
+      }
     })();
-  }, [repo, weddingId, categoriesLoading, categories.length, reloadCategories]);
+  }, [repo, weddingId, categoriesLoading, reloadCategories]);
 
   const [itemDialog, setItemDialog] = useState<{ open: boolean; categoryId?: string; item?: BudgetItem }>({ open: false });
   const [sourcesItem, setSourcesItem] = useState<BudgetItem | undefined>(undefined);

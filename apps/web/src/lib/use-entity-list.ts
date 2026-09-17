@@ -16,7 +16,11 @@ export function useEntityList<T>(loader: () => Promise<T[] | undefined>) {
   const reload = useCallback(async () => {
     setLoading(true);
     const next = await loader();
-    if (next) setItems(next);
+    // A loader that returns undefined means its dependencies (repo, weddingId)
+    // are not ready. Staying "loading" keeps seed-when-empty effects from
+    // firing against a list that simply has not been read yet.
+    if (!next) return;
+    setItems(next);
     setLoading(false);
   }, [loader]);
 

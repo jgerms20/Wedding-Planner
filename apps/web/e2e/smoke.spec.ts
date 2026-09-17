@@ -22,6 +22,9 @@ test("first load lands on the pre-seeded Home, and the redesigned pages hold up"
   await expect(estimateChip).toBeVisible();
   await page.getByRole("button", { name: "Sources" }).first().click();
   await expect(page.getByRole("heading", { name: "How we estimated this" })).toBeVisible();
+  // It is a modal: close it before navigating, the way a person would.
+  await page.keyboard.press("Escape");
+  await expect(page.getByRole("heading", { name: "How we estimated this" })).toBeHidden();
 
   // Guests: the cut-at-N slider renders even with an empty list (no guests in the seed).
   await page.getByRole("link", { name: "Guests", exact: true }).click();

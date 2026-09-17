@@ -1,5 +1,6 @@
 "use client";
 
+import { ResearchVenuesButton } from "@/components/ai/research-venues-button";
 import { scenarioMath, venueStatusSchema, type Destination, type Scenario, type Venue, type VenueStatus } from "@bower/shared";
 import { ChevronDown, ExternalLink, Pencil, Plus } from "lucide-react";
 import { AccentChip, EstimateChip, NeutralChip, SourceChips } from "@/components/atlas/chips";
@@ -124,9 +125,12 @@ export function DestinationPostcard({
           <div>
             <div className="flex items-center justify-between gap-2">
               <p className="eyebrow">Venues</p>
-              <Button variant="ghost" size="sm" onClick={onAddVenue}>
-                <Plus className="size-3.5 stroke-[1.5]" /> Add venue
-              </Button>
+              <div className="flex items-center gap-1">
+                <ResearchVenuesButton destination={destination} />
+                <Button variant="ghost" size="sm" onClick={onAddVenue}>
+                  <Plus className="size-3.5 stroke-[1.5]" /> Add venue
+                </Button>
+              </div>
             </div>
             {venues.length === 0 ? (
               <p className="mt-2 text-sm text-ink-mute">No venues yet. Tell Bower to find some, or add one.</p>
