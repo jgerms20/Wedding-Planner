@@ -2,9 +2,10 @@
 
 import { parseSeasonStart, scenarioMath, type Decision, type Destination, type Scenario, type Task } from "@bower/shared";
 import { differenceInCalendarDays, format, parseISO } from "date-fns";
-import { ArrowRight, Check, Mic } from "lucide-react";
+import { ArrowRight, Check, Mic, RefreshCw } from "lucide-react";
 import Link from "next/link";
-import { useCallback, useMemo } from "react";
+import { useCallback, useMemo, useState } from "react";
+import { restoreSeed } from "@/lib/bootstrap";
 import { WEDDING_SLUG } from "@/lib/constants";
 import { countryCode } from "@/lib/country-code";
 import { daysUntil, formatMoney, seasonLabel } from "@/lib/format";
@@ -15,8 +16,9 @@ import { cn } from "@/lib/utils";
 const base = `/w/${WEDDING_SLUG}`;
 
 export default function HomePage() {
-  const { repo, wedding, settings, ready } = useRepoContext();
+  const { repo, wedding, settings, ready, touch } = useRepoContext();
   const weddingId = wedding?.id;
+  const [restoring, setRestoring] = useState(false);
 
   const loadTasks = useCallback(async () => (repo && weddingId ? repo.tasks.list(weddingId) : undefined), [repo, weddingId]);
   const loadScenarios = useCallback(async () => (repo && weddingId ? repo.scenarios.list(weddingId) : undefined), [repo, weddingId]);
@@ -54,6 +56,17 @@ export default function HomePage() {
     if (!repo) return;
     await repo.tasks.upsert({ ...task, status: "done", updatedAt: new Date().toISOString() });
     await reloadTasks();
+  }
+
+  async function restoreTheSeed() {
+    if (!repo || restoring) return;
+    setRestoring(true);
+    try {
+      await restoreSeed(repo);
+      touch();
+    } finally {
+      setRestoring(false);
+    }
   }
 
   return (
@@ -113,7 +126,21 @@ export default function HomePage() {
           </Link>
         </div>
         {destinations.length === 0 ? (
-          <p className="mt-4 text-sm text-ink-soft">No destinations yet. Tell Bower a place and it lands here with costs.</p>
+          <div className="mt-4 flex flex-wrap items-center gap-3 rounded-lg border border-dashed border-line-strong p-4 text-sm">
+            <p className="flex-1 text-ink-soft">
+              This looks like it&apos;s from before we added the destination research. One click brings in Brazil, Jamaica, and the
+              rest with real costs and sources.
+            </p>
+            <button
+              type="button"
+              onClick={() => void restoreTheSeed()}
+              disabled={restoring}
+              className="inline-flex shrink-0 items-center gap-1.5 rounded-full bg-coral px-3 py-1.5 text-sm font-medium text-primary-foreground transition-opacity disabled:opacity-60"
+            >
+              <RefreshCw className={cn("size-3.5", restoring && "animate-spin")} />
+              {restoring ? "Bringing it in…" : "Bring in the atlas"}
+            </button>
+          </div>
         ) : (
           <div className="-mx-4 mt-5 flex snap-x gap-4 overflow-x-auto px-4 pb-3 sm:-mx-8 sm:px-8">
             {[...destinations]

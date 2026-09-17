@@ -11,6 +11,14 @@ Everything the owners need to do themselves, in one sitting. Each item unlocks a
 
 In this mode all data lives in each browser (IndexedDB). Use **Settings → Export JSON / Import JSON** to move data between your two devices until Phase 0b. First load seeds the app with Joshua & Janel's atlas (six destinations with sourced costs, a plan, an estimated budget, satellite events).
 
+### Troubleshooting: page looks stale, or a nav link 404s
+
+GitHub Pages can take a couple of minutes to catch up after a deploy, and browsers cache the app's files. If something looks broken:
+
+1. Hard-refresh (Ctrl/Cmd+Shift+R), or open the site in a private/incognito window — this rules out a stale cached copy, which is the most common cause.
+2. If the Atlas shows no destinations (no Brazil, Jamaica, etc.), that's an old, empty seed stuck in this browser's local storage from before the research was added — it's not overwritten automatically so nothing you've since typed in gets lost. Home shows a "Bring in the atlas" button in that case, or use **Settings → Restore the Joshua & Janel seed**.
+3. Still broken in a fresh private window after a minute or two? That points to the GitHub Pages configuration itself rather than the app — check Settings → Pages on GitHub still shows Source: GitHub Actions.
+
 ## Turn on the smart features (five minutes)
 
 The Tell Bower bar parses what you say or type into guests, tasks, dates, and notes; the Concierge answers from your whole plan; the Atlas can research venues with sources. These run Claude directly in your browser with your own API key.
