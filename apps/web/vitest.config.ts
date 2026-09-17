@@ -9,5 +9,7 @@ export default defineConfig({
   },
   test: {
     environment: "node",
+    // Playwright owns e2e/*.spec.ts — keep it out of the vitest run.
+    exclude: ["**/node_modules/**", "**/e2e/**"],
   },
 });
