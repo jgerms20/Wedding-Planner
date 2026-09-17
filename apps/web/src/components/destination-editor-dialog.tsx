@@ -60,10 +60,18 @@ export function DestinationEditorDialog({
       <DialogBody className="flex flex-col gap-3">
         <Row>
           <Field label="Name">
-            <Input value={form.name} onChange={(e) => setForm((f) => ({ ...f, name: e.target.value }))} />
+            <Input
+              value={form.name}
+              onChange={(e) => setForm((f) => ({ ...f, name: e.target.value }))}
+              data-testid="destination-name"
+            />
           </Field>
           <Field label="Country">
-            <Input value={form.country} onChange={(e) => setForm((f) => ({ ...f, country: e.target.value }))} />
+            <Input
+              value={form.country}
+              onChange={(e) => setForm((f) => ({ ...f, country: e.target.value }))}
+              data-testid="destination-country"
+            />
           </Field>
         </Row>
         <Field label="Region (optional)">

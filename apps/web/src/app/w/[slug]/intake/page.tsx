@@ -49,7 +49,7 @@ const STEPS = ["You two", "When", "Where", "Size & budget", "Vibe & policies", "
 
 export default function IntakePage() {
   const router = useRouter();
-  const { repo, wedding } = useRepoContext();
+  const { repo, wedding, reloadWedding } = useRepoContext();
   const [step, setStep] = useState(0);
   const [saving, setSaving] = useState(false);
 
@@ -194,6 +194,9 @@ export default function IntakePage() {
       await repo.events.upsert(event);
     }
 
+    // Refreshes the shared context (the WeddingShell layout persists across this
+    // navigation, so Home would otherwise keep showing the pre-intake wedding).
+    await reloadWedding();
     router.replace(`/w/${WEDDING_SLUG}`);
   }
 
@@ -224,13 +227,23 @@ export default function IntakePage() {
           {step === 0 && (
             <>
               <Field label="Your name">
-                <Input value={partnerAName} onChange={(e) => setPartnerAName(e.target.value)} placeholder="Partner A" />
+                <Input
+                  value={partnerAName}
+                  onChange={(e) => setPartnerAName(e.target.value)}
+                  placeholder="Partner A"
+                  data-testid="intake-partner-a-name"
+                />
               </Field>
               <Field label="Your pronouns (optional)">
                 <Input value={partnerAPronouns} onChange={(e) => setPartnerAPronouns(e.target.value)} placeholder="she/her" />
               </Field>
               <Field label="Their name">
-                <Input value={partnerBName} onChange={(e) => setPartnerBName(e.target.value)} placeholder="Partner B" />
+                <Input
+                  value={partnerBName}
+                  onChange={(e) => setPartnerBName(e.target.value)}
+                  placeholder="Partner B"
+                  data-testid="intake-partner-b-name"
+                />
               </Field>
               <Field label="Their pronouns (optional)">
                 <Input value={partnerBPronouns} onChange={(e) => setPartnerBPronouns(e.target.value)} placeholder="they/them" />
@@ -241,7 +254,11 @@ export default function IntakePage() {
           {step === 1 && (
             <>
               <Field label="Do you know the date?">
-                <Select value={dateMode} onChange={(e) => setDateMode(e.target.value as typeof dateMode)}>
+                <Select
+                  value={dateMode}
+                  onChange={(e) => setDateMode(e.target.value as typeof dateMode)}
+                  data-testid="intake-date-mode"
+                >
                   <option value="fixed">Yes, an exact date</option>
                   <option value="season">Just a season</option>
                   <option value="open">Not yet</option>
@@ -249,7 +266,12 @@ export default function IntakePage() {
               </Field>
               {dateMode === "fixed" && (
                 <Field label="Wedding date">
-                  <Input type="date" value={targetDate} onChange={(e) => setTargetDate(e.target.value)} />
+                  <Input
+                    type="date"
+                    value={targetDate}
+                    onChange={(e) => setTargetDate(e.target.value)}
+                    data-testid="intake-target-date"
+                  />
                 </Field>
               )}
               {dateMode === "season" && (

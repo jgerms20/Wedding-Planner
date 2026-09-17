@@ -63,7 +63,9 @@ export default function HomePage() {
             <h1 className="mt-2 font-display text-3xl leading-tight font-semibold text-balance sm:text-4xl">
               {dateHeadline}
             </h1>
-            <p className="mt-3 font-display text-xl text-rose">{formatCountdown(wedding.targetDate)}</p>
+            <p className="mt-3 font-display text-xl text-rose" data-testid="home-countdown">
+              {formatCountdown(wedding.targetDate)}
+            </p>
             {wedding.isDestination && (
               <Badge variant="accent" className="mt-4">
                 Destination wedding

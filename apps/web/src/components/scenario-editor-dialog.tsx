@@ -67,7 +67,12 @@ export function ScenarioEditorDialog({
       </DialogHeader>
       <DialogBody className="flex flex-col gap-3">
         <Field label="Name">
-          <Input value={form.name} onChange={(e) => setForm((f) => ({ ...f, name: e.target.value }))} placeholder="Plan A — Tulum, October" />
+          <Input
+            value={form.name}
+            onChange={(e) => setForm((f) => ({ ...f, name: e.target.value }))}
+            placeholder="Plan A — Tulum, October"
+            data-testid="scenario-name"
+          />
         </Field>
         <Row>
           <Field label="Destination">
