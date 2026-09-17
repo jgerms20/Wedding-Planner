@@ -16,3 +16,4 @@ blob-report/
 .supabase/
 supabase/.temp/
 .claude/worktrees/
+*.tsbuildinfo
