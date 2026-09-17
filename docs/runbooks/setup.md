@@ -9,7 +9,17 @@ Everything the owners need to do themselves, in one sitting. Each item unlocks a
 3. Re-run the "Deploy web (local mode) to GitHub Pages" workflow from the Actions tab (or push any commit).
 4. The app is then live at **https://jgerms20.github.io/Wedding-Planner/**
 
-In this mode all data lives in each browser (IndexedDB). Use **Settings → Export JSON / Import JSON** to move data between your two devices until Phase 0b.
+In this mode all data lives in each browser (IndexedDB). Use **Settings → Export JSON / Import JSON** to move data between your two devices until Phase 0b. First load seeds the app with Joshua & Janel's atlas (six destinations with sourced costs, a plan, an estimated budget, satellite events).
+
+## Turn on the smart features (five minutes)
+
+The Tell Bower bar parses what you say or type into guests, tasks, dates, and notes; the Concierge answers from your whole plan; the Atlas can research venues with sources. These run Claude directly in your browser with your own API key.
+
+1. Create a key at https://console.anthropic.com/settings/keys (this is pay-as-you-go API billing, separate from a Claude subscription; a few dollars covers weeks of use).
+2. Open the app → Settings → **Connect Claude** → paste the key → Verify.
+3. The key is stored only in that browser. Repeat on your second device, or skip it there and use export/import.
+
+Without a key the app still works: the bar handles simple phrasings ("add my cousin Marcus from Atlanta, must invite") on its own and saves anything else as a note.
 
 ## Phase 0b: shared data, accounts, agents
 
