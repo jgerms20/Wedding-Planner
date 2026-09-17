@@ -299,6 +299,20 @@ These become the Intake agent's script. Answer them together; they seed the wedd
 - **Legal guidance liability:** every legal/admin output carries a verify-with-professional note; no jurisdiction-specific claim without a citation.
 - **Collaborators deferred:** couple-only in v1, but `wedding_members.role` and shareable host plans exist so parents/planners are a settings change later, not a migration.
 
+## What shipped (2026-09-17)
+
+The Atlas overhaul is live at https://jgerms20.github.io/Wedding-Planner/ in local data mode.
+
+| Area | State |
+|---|---|
+| Design | "The Atlas" system: ink-green rail, ivory pages, one coral accent, Fraunces + Instrument Sans, postcards with passport stamps, staggered reveals, light and dark. Codified in `.claude/skills/bower-design`. |
+| Bespoke data | First load seeds Joshua & Janel: spring 2028, six researched destinations (Brazil front-runner, Jamaica, Bahamas, Washington DC, Columbia SC, Portland OR) with ~20 real venues, per-guest travel and attendance estimates, weather, legal notes and sources; a 12-line estimated budget; eight satellite events; four logged decisions; a full plan built around the spring 2027 engagement party. |
+| Smart layer | Tell Bower bar (type or dictate via the Web Speech API) and the Concierge both run Claude in the browser with the couple's own API key, returning reviewable action cards with Apply/Undo. A deterministic fallback parser handles simple phrasings with no key. Venue research uses the server-side web search tool and proposes venues with sources. Every call is cost-logged. |
+| Pages | Home as a front page; Atlas with postcards and a scenario comparison matrix; a real month-grid calendar; Plan as phase chapters with anchors and travel windows; Budget with sourced estimates and a guest slider; Guests, Events, Party, Files, Settings. |
+| Verified | 136 tests across five packages, a Playwright smoke over the seeded app, static export, CI with a Postgres service, Pages deploy. |
+
+Still ahead: Phase 0b (accounts and shared data via Supabase, server-side agents, vendor email through Postmark), then the phases below.
+
 ## Sources consulted
 
 - Google restricted-scope verification and CASA: https://developers.google.com/identity/protocols/oauth2/production-readiness/restricted-scope-verification , https://www.unipile.com/integrating-google-oauth-2-0-user-authentication-into-your-app/ , https://deepstrike.io/blog/google-casa-security-assessment-2025

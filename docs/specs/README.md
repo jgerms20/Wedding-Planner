@@ -33,7 +33,8 @@ Unit, RLS isolation, Playwright smoke, agent fixtures.
 
 ## Order
 
-1. `phase-0-foundation.md` (in progress) with `entities.md`, `web-local-mode.md`, `db-package.md`, `agent-runtime.md`
+1. `phase-0-foundation.md` (0a done) with `entities.md`, `web-local-mode.md`, `db-package.md`, `agent-runtime.md`
+2. Atlas overhaul (done): `smart-layer.md`, `pages-atlas-calendar.md`, `pages-redesign.md`
 2. `intake-and-timeline.md`
 3. `budget.md`
 4. `guests.md`
