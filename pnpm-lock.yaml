@@ -90,6 +90,9 @@ importers:
 
   apps/worker:
     dependencies:
+      '@bower/agents':
+        specifier: workspace:*
+        version: link:../../packages/agents
       '@bower/shared':
         specifier: workspace:*
         version: link:../../packages/shared
