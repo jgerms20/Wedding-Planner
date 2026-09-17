@@ -1,6 +1,6 @@
 "use client";
 
-import { nowIso, scenarioMath, type Destination, type Scenario, type Venue } from "@bower/shared";
+import { newId, nowIso, scenarioMath, type Destination, type Scenario, type Venue } from "@bower/shared";
 import { MapPin, Pin, Plus } from "lucide-react";
 import { useCallback, useState } from "react";
 import { PageHeader } from "@/components/page-header";
@@ -15,7 +15,7 @@ import { useRepoContext } from "@/lib/repo-context";
 import { useEntityList } from "@/lib/use-entity-list";
 
 export default function DestinationsPage() {
-  const { repo, wedding, reloadWedding } = useRepoContext();
+  const { repo, wedding, reloadWedding, viewerName } = useRepoContext();
   const weddingId = wedding?.id;
 
   const loadDestinations = useCallback(async () => {
@@ -46,6 +46,16 @@ export default function DestinationsPage() {
     const alreadyPinned = scenario.pinned;
     await Promise.all(scenarios.map((s) => repo!.scenarios.upsert({ ...s, pinned: s.id === scenario.id ? !alreadyPinned : false })));
     await repo!.upsertWedding({ ...wedding!, activeScenarioId: alreadyPinned ? undefined : scenario.id, updatedAt: nowIso() });
+    if (!alreadyPinned) {
+      await repo!.decisions.upsert({
+        id: newId(),
+        weddingId: weddingId!,
+        title: `Pinned scenario "${scenario.name}"`,
+        decidedAt: nowIso(),
+        decidedBy: viewerName,
+        source: "manual",
+      });
+    }
     await Promise.all([reloadScenarios(), reloadWedding()]);
   }
 

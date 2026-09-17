@@ -156,6 +156,15 @@ export default function PlanPage() {
           for (const event of generateAnchorEvents(wedding, planConfig)) {
             await repo.events.upsert(event);
           }
+          await repo.decisions.upsert({
+            id: newId(),
+            weddingId: wedding.id,
+            title: "Updated plan settings",
+            detail: "Anchors, travel windows, or communications offsets changed.",
+            decidedAt: nowIso(),
+            decidedBy: viewerName,
+            source: "manual",
+          });
           await reloadSettings();
         }}
       />

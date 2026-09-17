@@ -49,7 +49,7 @@ const STEPS = ["You two", "When", "Where", "Size & budget", "Vibe & policies", "
 
 export default function IntakePage() {
   const router = useRouter();
-  const { repo, wedding, reloadWedding } = useRepoContext();
+  const { repo, wedding, reloadWedding, viewingAs } = useRepoContext();
   const [step, setStep] = useState(0);
   const [saving, setSaving] = useState(false);
 
@@ -193,6 +193,16 @@ export default function IntakePage() {
     for (const event of events) {
       await repo.events.upsert(event);
     }
+
+    await repo.decisions.upsert({
+      id: newId(),
+      weddingId: wedding.id,
+      title: "Completed intake",
+      detail: `Built the initial plan for ${updatedWedding.name}.`,
+      decidedAt: nowIso(),
+      decidedBy: viewingAs === "a" ? updatedWedding.partnerA.name : updatedWedding.partnerB.name,
+      source: "manual",
+    });
 
     // Refreshes the shared context (the WeddingShell layout persists across this
     // navigation, so Home would otherwise keep showing the pre-intake wedding).
