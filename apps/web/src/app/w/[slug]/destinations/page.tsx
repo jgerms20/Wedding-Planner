@@ -1,7 +1,7 @@
 "use client";
 
 import { newId, nowIso, pinScenario, reestimateBudgetFromScenario, type Destination, type Scenario, type Venue, type VenueStatus, scenarioMath } from "@bower/shared";
-import { Plus } from "lucide-react";
+import { Plus, RefreshCw } from "lucide-react";
 import { useCallback, useMemo, useState } from "react";
 import { DestinationPostcard } from "@/components/atlas/destination-postcard";
 import { GuestTargetControl } from "@/components/atlas/guest-target-control";
@@ -11,12 +11,15 @@ import { PageHeader } from "@/components/page-header";
 import { ScenarioEditorDialog } from "@/components/scenario-editor-dialog";
 import { Button } from "@/components/ui/button";
 import { VenueEditorDialog } from "@/components/venue-editor-dialog";
+import { restoreSeed } from "@/lib/bootstrap";
+import { cn } from "@/lib/utils";
 import { useRepoContext } from "@/lib/repo-context";
 import { useEntityList } from "@/lib/use-entity-list";
 
 export default function DestinationsPage() {
   const { repo, wedding, touch } = useRepoContext();
   const weddingId = wedding?.id;
+  const [restoring, setRestoring] = useState(false);
 
   const loadDestinations = useCallback(async () => (repo && weddingId ? repo.destinations.list(weddingId) : undefined), [repo, weddingId]);
   const { items: destinations, reload: reloadDestinations } = useEntityList(loadDestinations);
@@ -98,6 +101,17 @@ export default function DestinationsPage() {
     await reloadVenues();
   };
 
+  const restoreTheSeed = async () => {
+    if (restoring) return;
+    setRestoring(true);
+    try {
+      await restoreSeed(repo);
+      touch();
+    } finally {
+      setRestoring(false);
+    }
+  };
+
   return (
     <div className="flex flex-col">
       <PageHeader
@@ -114,7 +128,21 @@ export default function DestinationsPage() {
       <GuestTargetControl value={guestTarget} onSave={(next) => void updateGuestTarget(next)} />
 
       {destinations.length === 0 ? (
-        <p className="mt-6 text-sm text-ink-soft">No destinations yet. Tell Bower a place, or add one.</p>
+        <div className="mt-6 flex flex-wrap items-center gap-3 rounded-lg border border-dashed border-line-strong p-4 text-sm">
+          <p className="flex-1 text-ink-soft">
+            This looks like it&apos;s from before we added the destination research. One click brings in Brazil, Jamaica, and the
+            rest with real costs and sources.
+          </p>
+          <button
+            type="button"
+            onClick={() => void restoreTheSeed()}
+            disabled={restoring}
+            className="inline-flex shrink-0 items-center gap-1.5 rounded-full bg-coral px-3 py-1.5 text-sm font-medium text-primary-foreground transition-opacity disabled:opacity-60"
+          >
+            <RefreshCw className={cn("size-3.5", restoring && "animate-spin")} />
+            {restoring ? "Bringing it in…" : "Bring in the atlas"}
+          </button>
+        </div>
       ) : (
         <div className="mt-6 grid gap-4 sm:grid-cols-2 xl:grid-cols-3">
           {orderedDestinations.map((destination, i) => (
