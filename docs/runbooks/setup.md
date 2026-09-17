@@ -1,0 +1,45 @@
+# Setup runbook
+
+Everything the owners need to do themselves, in one sitting. Each item unlocks a phase; nothing here is needed to read the code or run the tests.
+
+## Now: hosted app for both of you (one click)
+
+1. Open https://github.com/jgerms20/Wedding-Planner/settings/pages
+2. Under **Build and deployment → Source**, choose **GitHub Actions**.
+3. Re-run the "Deploy web (local mode) to GitHub Pages" workflow from the Actions tab (or push any commit).
+4. The app is then live at **https://jgerms20.github.io/Wedding-Planner/**
+
+In this mode all data lives in each browser (IndexedDB). Use **Settings → Export JSON / Import JSON** to move data between your two devices until Phase 0b.
+
+## Phase 0b: shared data, accounts, agents
+
+| Service | What to create | What to hand over |
+|---|---|---|
+| Supabase (free) | New project | Project URL, anon key, service role key, database connection string |
+| Anthropic | API key at console.anthropic.com | `ANTHROPIC_API_KEY` |
+| Vercel (free) | Import the GitHub repo, root directory `apps/web` | Nothing else; env vars get pasted into the project |
+| Railway or Fly.io | Service from the repo running `apps/worker` | Nothing else; same env vars |
+| GitHub | Repository secrets for CI (`SUPABASE_*`, `ANTHROPIC_API_KEY`) | Set in Settings → Secrets → Actions |
+| Google Cloud (optional, later) | OAuth consent screen + client for "Sign in with Google" | Client ID and secret |
+
+Paste secrets into Vercel, Railway, and GitHub Secrets directly. Do not paste them into chat.
+
+## Phase 2: vendor email
+
+| Service | What to create |
+|---|---|
+| Domain | A domain for the product (e.g. `bower.<tld>`), or a subdomain of one you own for the mail inbox |
+| Postmark | Server + inbound domain (MX record) so every wedding gets `{slug}@mail.<domain>` |
+
+## Local development
+
+```
+pnpm install
+useradd -m pg                              # once, root
+packages/db/scripts/local-pg.sh start      # prints DATABASE_URL
+export DATABASE_URL=postgresql://pg@127.0.0.1:5544/bower
+pnpm db:migrate && pnpm db:seed
+pnpm typecheck && pnpm lint && pnpm test
+NEXT_PUBLIC_DATA_MODE=local pnpm --filter @bower/web dev   # http://localhost:3000
+ANTHROPIC_FAKE=1 pnpm --filter @bower/worker dev -- dry-run hello "what's next?"
+```

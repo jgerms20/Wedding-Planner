@@ -1,6 +1,6 @@
 # Phase 0: Foundation spec
 
-Status: in progress (0a)
+Status: 0a done (2026-09-17); 0b blocked on accounts (see docs/runbooks/setup.md)
 Design doc sections: §2.1, §2.6, §4, §4.2, §4.3, §6 Phase 0a/0b
 
 ## Goal
@@ -88,3 +88,13 @@ Tasks 1 → 2 → (3, 4, 5 in parallel) → 6 → 7 → (8, 9 in parallel).
 
 - Google sign-in needs an OAuth consent screen with basic scopes only; fine to defer and ship magic link first.
 - Local Supabase needs Docker; cloud dev sessions may need a hosted dev project instead.
+
+## Phase 0a outcome (2026-09-17)
+
+Built and verified: monorepo (Next.js 16, Turborepo), `packages/shared` data layer + timeline engine (29 tests), web app in local mode with all routes and a Playwright smoke, `packages/db` migration + RLS (28 isolation tests against real Postgres), `packages/agents` runtime with fake client (11 tests) and worker dry-run, CI workflow, Pages workflow.
+
+Known polish for 0b or a quick follow-up:
+- Plan page shows nothing before intake is completed; add an empty state pointing to `/intake`.
+- Intake answers without a dedicated field (budget range, priorities, policies, helpers) are stored in `wedding.styleNotes`; promote to real fields when the Budget agent needs them.
+- `createRepo("supabase")` throws until the Supabase adapter lands.
+- Decisions log has no page yet.
