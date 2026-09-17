@@ -1,24 +1,37 @@
 "use client";
 
-import { applyActions } from "@bower/shared";
-import { ArrowUp, Mic, Square } from "lucide-react";
+import { newId, type ApplyResult, type BowerAction } from "@bower/shared";
+import { ArrowUp, Loader2, Mic, Square, X } from "lucide-react";
 import { useEffect, useRef, useState } from "react";
+import { ProposalCards } from "@/components/ai/proposal-cards";
+import { autonomyFor, interpret, runProposal, type ActionSource } from "@/lib/ai/interpret";
 import { useRepoContext } from "@/lib/repo-context";
 import { useDictation } from "@/lib/use-dictation";
 import { cn } from "@/lib/utils";
 
 /**
  * The always-present "Tell Bower" bar: type or dictate, and Bower turns it
- * into changes. This shell handles dictation and a plain fallback (save as a
- * note); the AI pipeline (parse → proposed action cards → apply/undo) plugs
- * into `submit` in apps/web/src/lib/ai.
+ * into changes. Whatever they say goes through `interpret` — Claude when a
+ * key is connected, the deterministic fallback parser when it is not — and
+ * comes back as cards above the bar. Nothing is written until Apply, unless
+ * autonomy is set to auto-apply additions, which still offers Undo.
  */
+
+interface Proposal {
+  /** New per submission, so the cards remount instead of inheriting state. */
+  id: string;
+  reply: string;
+  actions: BowerAction[];
+  applied: ApplyResult[];
+  source: ActionSource;
+}
+
 export function TellBowerBar() {
-  const { repo, wedding, touch } = useRepoContext();
+  const { repo, wedding, settings, touch } = useRepoContext();
   const dictation = useDictation();
   const [text, setText] = useState("");
   const [busy, setBusy] = useState(false);
-  const [toast, setToast] = useState<string | null>(null);
+  const [proposal, setProposal] = useState<Proposal | null>(null);
   const inputRef = useRef<HTMLInputElement>(null);
 
   // Mirror the live transcript into the input while listening.
@@ -26,20 +39,29 @@ export function TellBowerBar() {
     if (dictation.listening || dictation.transcript) setText(dictation.transcript);
   }, [dictation.transcript, dictation.listening]);
 
-  useEffect(() => {
-    if (!toast) return;
-    const t = setTimeout(() => setToast(null), 4000);
-    return () => clearTimeout(t);
-  }, [toast]);
-
   async function submit() {
     const value = text.trim();
     if (!value || !repo || !wedding || busy) return;
+    const source: ActionSource = dictation.transcript ? "voice" : "manual";
     setBusy(true);
+    setProposal(null);
     try {
-      await applyActions(repo, wedding.id, [{ type: "add_note", text: value }], { source: dictation.transcript ? "voice" : "manual" });
-      touch();
-      setToast("Saved as a note. Connect Claude in Settings and I'll turn what you say into guests, tasks, and dates.");
+      const result = await interpret({ text: value, repo, weddingId: wedding.id, source });
+      const outcome = await runProposal({
+        repo,
+        weddingId: wedding.id,
+        actions: result.response.actions,
+        autonomy: autonomyFor(settings?.autonomy),
+        source,
+      });
+      if (outcome.results.length > 0) touch();
+      setProposal({
+        id: newId(),
+        reply: result.response.reply,
+        actions: outcome.pending,
+        applied: outcome.results,
+        source,
+      });
       setText("");
       dictation.reset();
     } finally {
@@ -61,8 +83,29 @@ export function TellBowerBar() {
   return (
     <div className="pointer-events-none fixed inset-x-0 bottom-[4.25rem] z-40 flex justify-center px-3 md:bottom-6 md:left-[var(--rail-w)]">
       <div className="pointer-events-auto w-full max-w-2xl">
-        {toast && (
-          <div className="rise mb-2 rounded-md border border-line bg-card px-4 py-2 text-sm text-ink-soft shadow-lg">{toast}</div>
+        {proposal && (
+          <div className="rise mb-2 max-h-[55vh] overflow-y-auto rounded-lg border border-line bg-card/95 p-3 shadow-[0_20px_50px_-20px_rgba(20,40,32,0.5)] backdrop-blur">
+            <div className="flex items-start gap-3">
+              <p className="min-w-0 flex-1 text-[15px] leading-relaxed text-ink-soft">{proposal.reply}</p>
+              <button
+                type="button"
+                onClick={() => setProposal(null)}
+                aria-label="Dismiss"
+                className="shrink-0 rounded-full p-1.5 text-ink-soft hover:bg-muted"
+              >
+                <X className="size-3.5" />
+              </button>
+            </div>
+            {(proposal.actions.length > 0 || proposal.applied.length > 0) && (
+              <ProposalCards
+                key={proposal.id}
+                actions={proposal.actions}
+                applied={proposal.applied}
+                source={proposal.source}
+                className="mt-3"
+              />
+            )}
+          </div>
         )}
         <form
           onSubmit={(e) => {
@@ -99,7 +142,7 @@ export function TellBowerBar() {
             aria-label="Send"
             className="flex size-9 shrink-0 items-center justify-center rounded-full bg-ink text-rail-foreground transition-opacity disabled:opacity-30"
           >
-            <ArrowUp className="size-4" />
+            {busy ? <Loader2 className="size-4 animate-spin" /> : <ArrowUp className="size-4" />}
           </button>
         </form>
         {dictation.error && <p className="mt-1 text-center text-xs text-destructive">{dictation.error}</p>}

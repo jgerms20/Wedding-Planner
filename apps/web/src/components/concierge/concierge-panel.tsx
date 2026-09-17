@@ -1,10 +1,12 @@
 "use client";
 
-import type { ChatMessage } from "@bower/shared";
-import { newId, nowIso } from "@bower/shared";
-import { ArrowUp, Sparkles, X } from "lucide-react";
+import type { BowerAction, ChatMessage } from "@bower/shared";
+import { actionSchema, newId, nowIso } from "@bower/shared";
+import { ArrowUp, Loader2, Sparkles, X } from "lucide-react";
 import Link from "next/link";
 import { useCallback, useEffect, useRef, useState } from "react";
+import { ProposalCards } from "@/components/ai/proposal-cards";
+import { respond } from "@/lib/ai/concierge";
 import { WEDDING_SLUG } from "@/lib/constants";
 import { useRepoContext } from "@/lib/repo-context";
 import { useEntityList } from "@/lib/use-entity-list";
@@ -12,8 +14,9 @@ import { cn } from "@/lib/utils";
 
 /**
  * The Concierge: a right-side conversation with Bower about the whole wedding.
- * This shell renders history from the local `chatMessages` table and a
- * composer; the model call lives in apps/web/src/lib/ai and replaces `respond`.
+ * History comes from the local `chatMessages` table; each turn goes to Opus 5
+ * with a snapshot of the wedding, and any actions it proposes are stored on
+ * the assistant message and rendered as approval cards underneath it.
  */
 export function ConciergePanel({ open, onOpenChange }: { open: boolean; onOpenChange: (open: boolean) => void }) {
   const { repo, wedding } = useRepoContext();
@@ -42,11 +45,6 @@ export function ConciergePanel({ open, onOpenChange }: { open: boolean; onOpenCh
     listRef.current?.scrollTo({ top: listRef.current.scrollHeight });
   }, [messages, open]);
 
-  async function respond(userText: string): Promise<string> {
-    void userText;
-    return "I can read your whole plan once Claude is connected in Settings. Until then, the tabs on the left are all live.";
-  }
-
   async function send() {
     const value = draft.trim();
     if (!value || !repo || !weddingId || busy) return;
@@ -56,8 +54,15 @@ export function ConciergePanel({ open, onOpenChange }: { open: boolean; onOpenCh
       const userMessage: ChatMessage = { id: newId(), weddingId, role: "user", content: value, createdAt: nowIso() };
       await repo.chatMessages.upsert(userMessage);
       await reload();
-      const reply = await respond(value);
-      await repo.chatMessages.upsert({ id: newId(), weddingId, role: "assistant", content: reply, createdAt: nowIso() });
+      const result = await respond({ text: value, history: messages, repo, weddingId });
+      await repo.chatMessages.upsert({
+        id: newId(),
+        weddingId,
+        role: "assistant",
+        content: result.response.reply,
+        actions: result.response.actions.length > 0 ? (result.response.actions as ChatMessage["actions"]) : undefined,
+        createdAt: nowIso(),
+      });
       await reload();
     } finally {
       setBusy(false);
@@ -99,18 +104,29 @@ export function ConciergePanel({ open, onOpenChange }: { open: boolean; onOpenCh
               </p>
             </div>
           )}
-          {messages.map((m) => (
-            <div key={m.id} className={cn("flex", m.role === "user" ? "justify-end" : "justify-start")}>
-              <div
-                className={cn(
-                  "max-w-[85%] rounded-2xl px-4 py-2.5 text-[15px] leading-relaxed",
-                  m.role === "user" ? "bg-ink text-rail-foreground" : "bg-card border border-line",
-                )}
-              >
-                {m.content}
+          {messages.map((m) => {
+            const actions = m.role === "assistant" ? readActions(m) : [];
+            return (
+              <div key={m.id} className="space-y-2">
+                <div className={cn("flex", m.role === "user" ? "justify-end" : "justify-start")}>
+                  <div
+                    className={cn(
+                      "max-w-[85%] rounded-2xl px-4 py-2.5 text-[15px] leading-relaxed",
+                      m.role === "user" ? "bg-ink text-rail-foreground" : "bg-card border border-line",
+                    )}
+                  >
+                    {m.content}
+                  </div>
+                </div>
+                {actions.length > 0 && <ProposalCards key={m.id} actions={actions} source="chat" />}
               </div>
-            </div>
-          ))}
+            );
+          })}
+          {busy && (
+            <p className="flex items-center gap-2 text-sm text-ink-soft">
+              <Loader2 className="size-3.5 animate-spin" /> Reading your plan…
+            </p>
+          )}
         </div>
         <form
           onSubmit={(e) => {
@@ -137,4 +153,15 @@ export function ConciergePanel({ open, onOpenChange }: { open: boolean; onOpenCh
       </aside>
     </div>
   );
+}
+
+/** Stored actions are plain JSON; validate before handing them to the cards. */
+function readActions(message: ChatMessage): BowerAction[] {
+  if (!message.actions || message.actions.length === 0) return [];
+  const actions: BowerAction[] = [];
+  for (const raw of message.actions) {
+    const parsed = actionSchema.safeParse(raw);
+    if (parsed.success) actions.push(parsed.data);
+  }
+  return actions;
 }
