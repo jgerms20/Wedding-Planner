@@ -1,15 +1,20 @@
 "use client";
 
-import { DEFAULT_BUDGET_CATEGORIES, newId, scenarioMath, type BudgetItem } from "@bower/shared";
-import { Plus } from "lucide-react";
+import { DEFAULT_BUDGET_CATEGORIES, newId, nowIso, reestimateBudgetFromScenario, scenarioMath, type BudgetItem, type Scenario } from "@bower/shared";
+import { RefreshCw } from "lucide-react";
 import { useCallback, useEffect, useMemo, useState } from "react";
 import { BudgetItemEditorDialog } from "@/components/budget-item-editor-dialog";
+import { CategoryRow } from "@/components/budget/category-row";
+import { SourcesDrawer } from "@/components/budget/sources-drawer";
 import { PageHeader } from "@/components/page-header";
 import { Button } from "@/components/ui/button";
-import { Card, CardContent, CardHeader, CardTitle } from "@/components/ui/card";
-import { formatDate, formatMoney } from "@/lib/format";
+import { Slider } from "@/components/ui/slider";
+import { formatMoney } from "@/lib/format";
 import { useRepoContext } from "@/lib/repo-context";
 import { useEntityList } from "@/lib/use-entity-list";
+
+const GUEST_SLIDER_MIN = 50;
+const GUEST_SLIDER_MAX = 200;
 
 export default function BudgetPage() {
   const { repo, wedding } = useRepoContext();
@@ -31,7 +36,7 @@ export default function BudgetPage() {
     if (!repo || !weddingId) return undefined;
     return repo.scenarios.list(weddingId);
   }, [repo, weddingId]);
-  const { items: scenarios } = useEntityList(loadScenarios);
+  const { items: scenarios, reload: reloadScenarios } = useEntityList(loadScenarios);
   const pinned = scenarios.find((s) => s.pinned);
 
   // Seed the typical category split the first time this wedding visits Budget.
@@ -46,6 +51,15 @@ export default function BudgetPage() {
   }, [repo, weddingId, categoriesLoading, categories.length, reloadCategories]);
 
   const [itemDialog, setItemDialog] = useState<{ open: boolean; categoryId?: string; item?: BudgetItem }>({ open: false });
+  const [sourcesItem, setSourcesItem] = useState<BudgetItem | undefined>(undefined);
+  const [reestimating, setReestimating] = useState(false);
+
+  const pinnedId = pinned?.id;
+  const pinnedGuestAssumption = pinned?.guestAssumption;
+  const [previewGuests, setPreviewGuests] = useState<number>(pinnedGuestAssumption ?? 100);
+  useEffect(() => {
+    if (pinnedGuestAssumption !== undefined) setPreviewGuests(pinnedGuestAssumption);
+  }, [pinnedId, pinnedGuestAssumption]);
 
   const totals = useMemo(() => {
     const estimate = items.reduce((s, i) => s + (i.estimate ?? 0), 0);
@@ -56,68 +70,93 @@ export default function BudgetPage() {
   }, [items]);
 
   const target = pinned ? scenarioMath(pinned).totalCost : undefined;
+  const previewMath = pinned ? scenarioMath({ ...pinned, guestAssumption: previewGuests }) : undefined;
 
-  if (!repo || !weddingId) return <p className="text-sm text-muted-foreground">Loading…</p>;
+  async function commitGuestAssumption(nextGuests: number) {
+    if (!repo || !weddingId || !pinned || nextGuests === pinned.guestAssumption) return;
+    const updated: Scenario = { ...pinned, guestAssumption: nextGuests, updatedAt: nowIso() };
+    await repo.scenarios.upsert(updated);
+    await reestimateBudgetFromScenario(repo, weddingId, updated);
+    await Promise.all([reloadScenarios(), reloadItems()]);
+  }
+
+  async function reestimateAll() {
+    if (!repo || !weddingId || !pinned) return;
+    setReestimating(true);
+    await reestimateBudgetFromScenario(repo, weddingId, pinned);
+    await reloadItems();
+    setReestimating(false);
+  }
+
+  if (!repo || !weddingId) return <p className="font-display text-xl text-ink-soft">Loading…</p>;
 
   return (
-    <div className="flex flex-col gap-6">
-      <PageHeader title="Budget" description="Categories seeded from a typical split — adjust freely." />
+    <div className="flex flex-col gap-8">
+      <PageHeader
+        title="Budget"
+        description="Categories seeded from a typical split, with estimates that show where they came from."
+        action={
+          <Button variant="outline" size="sm" onClick={reestimateAll} disabled={!pinned || reestimating}>
+            <RefreshCw className="size-4" /> {reestimating ? "Re-estimating…" : "Re-estimate from scenario"}
+          </Button>
+        }
+      />
 
-      <div className="grid gap-4 sm:grid-cols-2 lg:grid-cols-5">
-        <Stat label="Target (pinned scenario)" value={target !== undefined ? formatMoney(target) : "—"} highlight />
-        <Stat label="Estimated" value={formatMoney(totals.estimate)} />
-        <Stat label="Quoted" value={formatMoney(totals.quoted)} />
-        <Stat label="Contracted" value={formatMoney(totals.contracted)} />
-        <Stat label="Paid" value={formatMoney(totals.paid)} />
+      <div className="postcard rise grid gap-8 p-6 lg:grid-cols-[1.2fr_1fr] lg:items-center">
+        <div>
+          <p className="eyebrow">{pinned ? `Target · ${pinned.name}` : "Target"}</p>
+          <p className="numeral mt-1 text-5xl text-coral">{target !== undefined ? formatMoney(target) : "—"}</p>
+          <p className="mt-2 text-sm text-ink-soft">
+            Sum of estimates so far: <span className="tabular text-foreground">{formatMoney(totals.estimate)}</span>
+          </p>
+        </div>
+        <div>
+          <div className="flex items-baseline justify-between">
+            <p className="eyebrow">Guests we&apos;re planning for</p>
+            <span className="tabular text-sm text-ink-soft">{previewMath ? formatMoney(previewMath.totalCost) : "—"}</span>
+          </div>
+          <p className="numeral mt-1 text-3xl">{previewGuests}</p>
+          <Slider
+            className="mt-3"
+            min={GUEST_SLIDER_MIN}
+            max={GUEST_SLIDER_MAX}
+            value={previewGuests}
+            disabled={!pinned}
+            onChange={(e) => setPreviewGuests(Number(e.target.value))}
+            onMouseUp={(e) => void commitGuestAssumption(Number(e.currentTarget.value))}
+            onTouchEnd={(e) => void commitGuestAssumption(Number(e.currentTarget.value))}
+            onKeyUp={(e) => void commitGuestAssumption(Number(e.currentTarget.value))}
+            aria-label="Guest assumption"
+            data-testid="budget-guest-slider"
+          />
+          <p className="mt-2 text-xs text-ink-soft">Drag to preview; release to update the pinned scenario and re-estimate.</p>
+        </div>
       </div>
 
-      <div className="flex flex-col gap-4">
+      <div className="flex flex-col gap-3">
         {categories
           .slice()
           .sort((a, b) => a.sortOrder - b.sortOrder)
           .map((category) => {
             const categoryItems = items.filter((i) => i.categoryId === category.id);
-            const categoryEstimate = categoryItems.reduce((s, i) => s + (i.estimate ?? 0), 0);
+            const categoryTarget = target !== undefined && category.targetPercent !== undefined ? (target * category.targetPercent) / 100 : undefined;
             return (
-              <Card key={category.id}>
-                <CardHeader className="flex-row items-center justify-between space-y-0">
-                  <CardTitle className="flex items-baseline gap-2">
-                    {category.name}
-                    {category.targetPercent !== undefined && (
-                      <span className="text-xs font-normal text-muted-foreground">~{category.targetPercent}% of budget</span>
-                    )}
-                  </CardTitle>
-                  <div className="flex items-center gap-3">
-                    <span className="text-sm text-muted-foreground">{formatMoney(categoryEstimate)}</span>
-                    <Button variant="outline" size="sm" onClick={() => setItemDialog({ open: true, categoryId: category.id })}>
-                      <Plus className="size-3.5" /> Item
-                    </Button>
-                  </div>
-                </CardHeader>
-                {categoryItems.length > 0 && (
-                  <CardContent>
-                    <div className="flex flex-col divide-y divide-border">
-                      {categoryItems.map((item) => (
-                        <button
-                          key={item.id}
-                          type="button"
-                          onClick={() => setItemDialog({ open: true, item })}
-                          className="flex flex-wrap items-center justify-between gap-2 py-2 text-left text-sm transition-colors hover:bg-accent"
-                        >
-                          <span>{item.name}</span>
-                          <span className="flex gap-3 text-xs text-muted-foreground">
-                            <span>Est. {formatMoney(item.estimate)}</span>
-                            <span>Paid {formatMoney(item.paid)}</span>
-                            {item.dueDate && <span>Due {formatDate(item.dueDate)}</span>}
-                          </span>
-                        </button>
-                      ))}
-                    </div>
-                  </CardContent>
-                )}
-              </Card>
+              <CategoryRow
+                key={category.id}
+                category={category}
+                items={categoryItems}
+                target={categoryTarget}
+                onAddItem={() => setItemDialog({ open: true, categoryId: category.id })}
+                onPatchItem={async (item, patch) => {
+                  await repo.budgetItems.upsert({ ...item, ...patch, updatedAt: nowIso() });
+                  await reloadItems();
+                }}
+                onEditItem={(item) => setItemDialog({ open: true, item })}
+                onSourcesItem={(item) => setSourcesItem(item)}
+              />
             );
           })}
+        {categories.length === 0 && <p className="text-sm text-ink-soft">Categories are loading…</p>}
       </div>
 
       <BudgetItemEditorDialog
@@ -132,17 +171,8 @@ export default function BudgetPage() {
           await reloadItems();
         }}
       />
-    </div>
-  );
-}
 
-function Stat({ label, value, highlight }: { label: string; value: string; highlight?: boolean }) {
-  return (
-    <Card>
-      <CardContent className="pt-6">
-        <p className="text-xs tracking-wide text-muted-foreground uppercase">{label}</p>
-        <p className={`font-display text-xl ${highlight ? "text-rose" : ""}`}>{value}</p>
-      </CardContent>
-    </Card>
+      <SourcesDrawer open={sourcesItem !== undefined} onOpenChange={(open) => !open && setSourcesItem(undefined)} itemName={sourcesItem?.name ?? ""} notes={sourcesItem?.notes} />
+    </div>
   );
 }

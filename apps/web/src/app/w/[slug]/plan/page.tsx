@@ -8,24 +8,27 @@ import {
   PHASE_LABELS,
   PHASE_ORDER,
   type PhaseKey,
+  type PlanConfig,
   type Task,
-  type TaskStatus,
+  type TravelWindow,
 } from "@bower/shared";
-import { Plus, RefreshCw, Settings2 } from "lucide-react";
+import { format, parseISO } from "date-fns";
+import { Plus, Settings2, Sparkles } from "lucide-react";
 import { useCallback, useMemo, useState } from "react";
 import { PageHeader } from "@/components/page-header";
+import { AnchorsCard, TravelWindowsCard } from "@/components/plan/plan-sidebar";
+import { PlanMenu, PlanMenuItem } from "@/components/plan/plan-menu";
+import { TaskRow } from "@/components/plan/task-row";
 import { PlanSettingsDialog } from "@/components/plan-settings-dialog";
-import { Badge } from "@/components/ui/badge";
 import { Button } from "@/components/ui/button";
 import { Dialog, DialogBody, DialogCloseButton, DialogFooter, DialogHeader, DialogTitle } from "@/components/ui/dialog";
 import { Input } from "@/components/ui/input";
 import { Label } from "@/components/ui/label";
 import { Select } from "@/components/ui/select";
-import { formatDate } from "@/lib/format";
 import { useRepoContext } from "@/lib/repo-context";
 import { useEntityList } from "@/lib/use-entity-list";
 
-const STATUS_OPTIONS: TaskStatus[] = ["todo", "doing", "done", "skipped"];
+const NO_DATE_GROUP = "No date yet";
 
 export default function PlanPage() {
   const { repo, wedding, settings, reloadSettings, viewerName } = useRepoContext();
@@ -41,17 +44,13 @@ export default function PlanPage() {
   const [addOpen, setAddOpen] = useState(false);
   const [regenerating, setRegenerating] = useState(false);
 
-  const windowLabels = useMemo(
-    () => Object.fromEntries((settings?.planConfig.travelWindows ?? []).map((w) => [w.id, w.label])),
-    [settings],
-  );
+  const windowLabels = useMemo(() => Object.fromEntries((settings?.planConfig.travelWindows ?? []).map((w) => [w.id, w.label])), [settings]);
+  const tasksById = useMemo(() => new Map(tasks.map((t) => [t.id, t])), [tasks]);
 
   const byPhase = useMemo(() => {
     const map = new Map<PhaseKey, Task[]>();
     for (const phase of PHASE_ORDER) map.set(phase, []);
-    for (const task of tasks) {
-      map.get(task.phase)?.push(task);
-    }
+    for (const task of tasks) map.get(task.phase)?.push(task);
     for (const list of map.values()) {
       list.sort((a, b) => {
         if (a.dueDate && b.dueDate) return a.dueDate < b.dueDate ? -1 : a.dueDate > b.dueDate ? 1 : 0;
@@ -89,10 +88,14 @@ export default function PlanPage() {
     setAddOpen(false);
   }
 
-  async function regenerate() {
-    if (!repo || !wedding || !settings) return;
+  /** The single regenerate path: template + planConfig, preserving edits on existingTasks. Takes an explicit
+   * planConfig so callers that just changed settings don't have to wait a render for the context to catch up. */
+  async function regenerate(planConfig?: PlanConfig) {
+    if (!repo || !wedding) return;
+    const config = planConfig ?? settings?.planConfig;
+    if (!config) return;
     setRegenerating(true);
-    const next = generatePlan({ wedding, planConfig: settings.planConfig, existingTasks: tasks });
+    const next = generatePlan({ wedding, planConfig: config, existingTasks: tasks });
     for (const task of next) {
       await repo.tasks.upsert(task);
     }
@@ -100,9 +103,19 @@ export default function PlanPage() {
     setRegenerating(false);
   }
 
-  if (!repo || !wedding || !settings) {
-    return <p className="text-sm text-muted-foreground">Loading…</p>;
+  async function addTravelWindow(window: TravelWindow) {
+    if (!repo || !wedding || !settings) return;
+    const nextConfig: PlanConfig = { ...settings.planConfig, travelWindows: [...settings.planConfig.travelWindows, window] };
+    await repo.saveSettings({ ...settings, planConfig: nextConfig });
+    await reloadSettings();
+    await regenerate(nextConfig);
   }
+
+  if (!repo || !wedding || !settings) {
+    return <p className="font-display text-xl text-ink-soft">Loading…</p>;
+  }
+
+  const totalTasks = tasks.length;
 
   return (
     <div>
@@ -110,42 +123,72 @@ export default function PlanPage() {
         title="Plan"
         description="Every task moves with your date, anchors, and travel windows. Edit anything; it sticks."
         action={
-          <div className="flex gap-2">
-            <Button variant="outline" size="sm" onClick={() => setSettingsOpen(true)}>
-              <Settings2 className="size-4" /> Plan settings
-            </Button>
-            <Button variant="outline" size="sm" onClick={regenerate} disabled={regenerating}>
-              <RefreshCw className="size-4" /> {regenerating ? "Regenerating…" : "Regenerate from template"}
-            </Button>
+          <div className="flex items-center gap-2">
             <Button size="sm" onClick={() => setAddOpen(true)}>
               <Plus className="size-4" /> Add task
             </Button>
+            <PlanMenu>
+              <PlanMenuItem onClick={() => setSettingsOpen(true)}>
+                <Settings2 className="size-4" /> Plan settings
+              </PlanMenuItem>
+              <PlanMenuItem onClick={() => void regenerate()} disabled={regenerating}>
+                <Sparkles className="size-4" /> {regenerating ? "Regenerating…" : "Regenerate from template"}
+              </PlanMenuItem>
+            </PlanMenu>
           </div>
         }
       />
 
-      <div className="flex flex-col gap-4">
-        {PHASE_ORDER.map((phase) => {
-          const items = byPhase.get(phase) ?? [];
-          if (items.length === 0) return null;
-          const done = items.filter((t) => t.status === "done" || t.status === "skipped").length;
-          return (
-            <details key={phase} className="group rounded-lg border border-border bg-card" open>
-              <summary className="flex cursor-pointer list-none items-center justify-between px-4 py-3">
-                <span className="font-display text-lg">{PHASE_LABELS[phase]}</span>
-                <span className="text-xs text-muted-foreground">
-                  {done}/{items.length} done
-                </span>
-              </summary>
-              <div className="flex flex-col divide-y divide-border border-t border-border">
-                {items.map((task) => (
-                  <TaskRow key={task.id} task={task} windowLabels={windowLabels} onChange={(patch) => updateTask(task, patch)} />
-                ))}
-              </div>
-            </details>
-          );
-        })}
-      </div>
+      {totalTasks === 0 ? (
+        <div className="postcard rise flex flex-col items-start gap-4 p-8">
+          <p className="text-[15px] text-ink-soft">Nothing planned yet. Build the default timeline from your date, anchors, and travel windows — you can edit anything afterward.</p>
+          <Button onClick={() => void regenerate()} disabled={regenerating}>
+            {regenerating ? "Building…" : "Build the plan"}
+          </Button>
+        </div>
+      ) : (
+        <div className="grid grid-cols-1 gap-10 lg:grid-cols-[1.4fr_1fr]">
+          <div className="order-2 flex flex-col lg:order-1">
+            {PHASE_ORDER.map((phase, phaseIndex) => {
+              const items = byPhase.get(phase) ?? [];
+              if (items.length === 0) return null;
+              const closed = items.filter((t) => t.status === "done" || t.status === "skipped").length;
+              const months = groupByMonth(items);
+              return (
+                <section key={phase} className={`rise rise-${Math.min(phaseIndex + 1, 8)}`}>
+                  <div className="flex flex-wrap items-end justify-between gap-2">
+                    <div>
+                      <p className="eyebrow">{dateSpan(items)}</p>
+                      <h2 className="mt-1 text-3xl sm:text-4xl">{PHASE_LABELS[phase]}</h2>
+                    </div>
+                    <span className="tabular text-sm text-ink-soft">
+                      {closed} of {items.length}
+                    </span>
+                  </div>
+                  <div className="mt-4 flex flex-col">
+                    {months.map(([month, monthTasks]) => (
+                      <div key={month}>
+                        <p className="mt-4 text-[0.68rem] font-semibold tracking-[0.14em] text-ink-mute uppercase first:mt-2">{month}</p>
+                        <div className="flex flex-col divide-y divide-line">
+                          {monthTasks.map((task) => (
+                            <TaskRow key={task.id} task={task} tasksById={tasksById} windowLabels={windowLabels} onChange={(patch) => updateTask(task, patch)} />
+                          ))}
+                        </div>
+                      </div>
+                    ))}
+                  </div>
+                  <div className="hairline my-10" />
+                </section>
+              );
+            })}
+          </div>
+
+          <div className="order-1 flex flex-col gap-6 lg:order-2">
+            <AnchorsCard anchors={settings.planConfig.anchors} />
+            <TravelWindowsCard windows={settings.planConfig.travelWindows} onAdd={addTravelWindow} />
+          </div>
+        </div>
+      )}
 
       <PlanSettingsDialog
         open={settingsOpen}
@@ -174,50 +217,25 @@ export default function PlanPage() {
   );
 }
 
-function TaskRow({
-  task,
-  windowLabels,
-  onChange,
-}: {
-  task: Task;
-  windowLabels: Record<string, string>;
-  onChange: (patch: Partial<Task>) => void;
-}) {
-  const [title, setTitle] = useState(task.title);
-  const doneish = task.status === "done" || task.status === "skipped";
+/** Groups a phase's already date-sorted tasks by "Month YYYY", undated tasks last. */
+function groupByMonth(items: Task[]): [string, Task[]][] {
+  const groups = new Map<string, Task[]>();
+  for (const task of items) {
+    const key = task.dueDate ? format(parseISO(task.dueDate), "MMMM yyyy") : NO_DATE_GROUP;
+    const list = groups.get(key);
+    if (list) list.push(task);
+    else groups.set(key, [task]);
+  }
+  return [...groups.entries()];
+}
 
-  return (
-    <div className="flex flex-wrap items-center gap-3 px-4 py-3 text-sm">
-      <Select value={task.status} onChange={(e) => onChange({ status: e.target.value as TaskStatus })} className="h-8 w-28 text-xs">
-        {STATUS_OPTIONS.map((s) => (
-          <option key={s} value={s}>
-            {s}
-          </option>
-        ))}
-      </Select>
-      <input
-        value={title}
-        onChange={(e) => setTitle(e.target.value)}
-        onBlur={() => title !== task.title && onChange({ title })}
-        className={`min-w-40 flex-1 rounded-md border border-transparent bg-transparent px-2 py-1 focus:border-border focus:outline-none ${doneish ? "text-muted-foreground line-through" : ""}`}
-      />
-      {task.windowId && windowLabels[task.windowId] && (
-        <Badge variant="secondary">{windowLabels[task.windowId]}</Badge>
-      )}
-      {task.tags.map((tag) => (
-        <Badge key={tag} variant={tag === "needs-window" ? "destructive" : "outline"}>
-          {tag}
-        </Badge>
-      ))}
-      <input
-        type="date"
-        value={task.dueDate ?? ""}
-        onChange={(e) => onChange({ dueDate: e.target.value || undefined })}
-        className="ml-auto h-8 rounded-md border border-border bg-transparent px-2 text-xs"
-      />
-      <span className="w-16 text-right text-xs text-muted-foreground">{formatDate(task.dueDate)}</span>
-    </div>
-  );
+function dateSpan(items: Task[]): string {
+  const dated = items.map((t) => t.dueDate).filter((d): d is string => Boolean(d));
+  if (dated.length === 0) return "No dates yet";
+  const sorted = [...dated].sort();
+  const first = format(parseISO(sorted[0]!), "MMM yyyy");
+  const last = format(parseISO(sorted[sorted.length - 1]!), "MMM yyyy");
+  return first === last ? first : `${first} – ${last}`;
 }
 
 function AddTaskDialog({
@@ -241,11 +259,11 @@ function AddTaskDialog({
       </DialogHeader>
       <DialogBody className="flex flex-col gap-3">
         <div className="flex flex-col gap-1.5">
-          <Label>Title</Label>
+          <Label className="text-xs">Title</Label>
           <Input value={title} onChange={(e) => setTitle(e.target.value)} placeholder="Call the florist about peonies" />
         </div>
         <div className="flex flex-col gap-1.5">
-          <Label>Phase</Label>
+          <Label className="text-xs">Phase</Label>
           <Select value={phase} onChange={(e) => setPhase(e.target.value as PhaseKey)}>
             {PHASE_ORDER.map((p) => (
               <option key={p} value={p}>
@@ -255,7 +273,7 @@ function AddTaskDialog({
           </Select>
         </div>
         <div className="flex flex-col gap-1.5">
-          <Label>Due date (optional)</Label>
+          <Label className="text-xs">Due date (optional)</Label>
           <Input type="date" value={dueDate} onChange={(e) => setDueDate(e.target.value)} />
         </div>
       </DialogBody>

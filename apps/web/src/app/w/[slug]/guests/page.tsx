@@ -4,10 +4,10 @@ import { newId, type Guest, type Household, type Side, type Tier } from "@bower/
 import { Plus, Scissors } from "lucide-react";
 import { useCallback, useMemo, useState } from "react";
 import { GuestEditorDialog } from "@/components/guest-editor-dialog";
+import { GuestRow } from "@/components/guests/guest-row";
+import { TierTile } from "@/components/guests/tier-tile";
 import { PageHeader } from "@/components/page-header";
-import { Badge } from "@/components/ui/badge";
 import { Button } from "@/components/ui/button";
-import { Card, CardContent, CardHeader, CardTitle } from "@/components/ui/card";
 import { Dialog, DialogBody, DialogCloseButton, DialogFooter, DialogHeader, DialogTitle } from "@/components/ui/dialog";
 import { Input } from "@/components/ui/input";
 import { Label } from "@/components/ui/label";
@@ -18,6 +18,7 @@ import { useEntityList } from "@/lib/use-entity-list";
 
 const TIER_ORDER: Tier[] = ["must", "should", "nice"];
 const TIER_RANK: Record<Tier, number> = { must: 0, should: 1, nice: 2 };
+const NO_HOUSEHOLD = "__none__";
 
 export default function GuestsPage() {
   const { repo, wedding } = useRepoContext();
@@ -39,7 +40,21 @@ export default function GuestsPage() {
   const [householdDialog, setHouseholdDialog] = useState(false);
   const [cut, setCut] = useState(0);
 
-  const householdName = useMemo(() => Object.fromEntries(households.map((h) => [h.id, h.name])), [households]);
+  const groups = useMemo(() => {
+    const byHousehold = new Map<string, Guest[]>();
+    for (const guest of guests) {
+      const key = guest.householdId ?? NO_HOUSEHOLD;
+      const list = byHousehold.get(key);
+      if (list) list.push(guest);
+      else byHousehold.set(key, [guest]);
+    }
+    const named = households
+      .filter((h) => byHousehold.has(h.id))
+      .sort((a, b) => a.name.localeCompare(b.name))
+      .map((h) => ({ id: h.id, name: h.name, guests: sortByName(byHousehold.get(h.id)!) }));
+    const unassigned = byHousehold.get(NO_HOUSEHOLD);
+    return unassigned ? [...named, { id: NO_HOUSEHOLD, name: "No household on file", guests: sortByName(unassigned) }] : named;
+  }, [guests, households]);
 
   const sortedByTier = useMemo(
     () => [...guests].sort((a, b) => TIER_RANK[a.tier] - TIER_RANK[b.tier] || a.firstName.localeCompare(b.firstName)),
@@ -54,17 +69,20 @@ export default function GuestsPage() {
     total: guests.filter((g) => g.tier === tier).length,
   }));
 
-  if (!repo || !weddingId) return <p className="text-sm text-muted-foreground">Loading…</p>;
+  if (!repo || !weddingId) return <p className="font-display text-xl text-ink-soft">Loading…</p>;
 
   async function saveGuest(guest: Guest) {
     await repo!.guests.upsert(guest);
     await reloadGuests();
   }
 
-  const countsBySide = (["a", "b", "both"] as Side[]).map((side) => ({ side, count: guests.filter((g) => g.side === side).length }));
+  async function patchGuest(guest: Guest, patch: Partial<Guest>) {
+    await repo!.guests.upsert({ ...guest, ...patch, updatedAt: new Date().toISOString() });
+    await reloadGuests();
+  }
 
   return (
-    <div className="flex flex-col gap-6">
+    <div className="flex flex-col gap-8">
       <PageHeader
         title="Guests"
         description="Households, tiers, and how many fit if you have to cut."
@@ -80,95 +98,57 @@ export default function GuestsPage() {
         }
       />
 
-      <div className="grid gap-4 sm:grid-cols-2 lg:grid-cols-4">
+      <div className="grid gap-4 sm:grid-cols-3">
         {TIER_ORDER.map((tier) => (
-          <Card key={tier}>
-            <CardContent className="flex items-baseline justify-between pt-6">
-              <span className="text-sm text-muted-foreground capitalize">{tier}</span>
-              <span className="font-display text-2xl">{guests.filter((g) => g.tier === tier).length}</span>
-            </CardContent>
-          </Card>
-        ))}
-        <Card>
-          <CardContent className="flex items-baseline justify-between pt-6">
-            <span className="text-sm text-muted-foreground">Total</span>
-            <span className="font-display text-2xl">{guests.length}</span>
-          </CardContent>
-        </Card>
-      </div>
-
-      <div className="flex flex-wrap gap-3 text-xs text-muted-foreground">
-        {countsBySide.map(({ side, count }) => (
-          <span key={side}>
-            Side {side}: {count}
-          </span>
+          <TierTile key={tier} tier={tier} guests={guests} />
         ))}
       </div>
 
-      <Card>
-        <CardHeader>
-          <CardTitle className="flex items-center gap-2">
-            <Scissors className="size-4 text-rose" /> Cut at N
-          </CardTitle>
-        </CardHeader>
-        <CardContent className="flex flex-col gap-3">
-          <Slider min={0} max={guests.length} value={cutValue} onChange={(e) => setCut(Number(e.target.value))} />
-          <p className="text-sm">
-            Inviting the top <strong>{cutValue}</strong> of {guests.length} (ranked must → should → nice) includes:
-          </p>
-          <div className="flex flex-wrap gap-4 text-sm">
-            {includedByTier.map(({ tier, included: inc, total }) => (
-              <span key={tier}>
-                <span className="capitalize">{tier}</span>: {inc}/{total}
-              </span>
-            ))}
-          </div>
-        </CardContent>
-      </Card>
-
-      <div className="overflow-x-auto rounded-lg border border-border">
-        <table className="w-full min-w-[720px] border-collapse text-sm">
-          <thead>
-            <tr className="border-b border-border bg-muted/50 text-left text-xs text-muted-foreground uppercase">
-              <th className="p-3">Name</th>
-              <th className="p-3">Household</th>
-              <th className="p-3">Side</th>
-              <th className="p-3">Tier</th>
-              <th className="p-3">+1</th>
-              <th className="p-3">Child</th>
-              <th className="p-3">Home city</th>
-            </tr>
-          </thead>
-          <tbody>
-            {guests.map((guest) => (
-              <tr
-                key={guest.id}
-                className="cursor-pointer border-b border-border last:border-0 hover:bg-accent"
-                onClick={() => setGuestDialog({ open: true, guest })}
-              >
-                <td className="p-3">
-                  {guest.firstName} {guest.lastName}
-                </td>
-                <td className="p-3 text-muted-foreground">{guest.householdId ? householdName[guest.householdId] : "—"}</td>
-                <td className="p-3">{guest.side}</td>
-                <td className="p-3">
-                  <Badge variant={guest.tier === "must" ? "default" : guest.tier === "should" ? "secondary" : "outline"}>{guest.tier}</Badge>
-                </td>
-                <td className="p-3">{guest.plusOne ? "Yes" : ""}</td>
-                <td className="p-3">{guest.isChild ? "Yes" : ""}</td>
-                <td className="p-3 text-muted-foreground">{guest.homeCity}</td>
-              </tr>
-            ))}
-            {guests.length === 0 && (
-              <tr>
-                <td colSpan={7} className="p-6 text-center text-muted-foreground">
-                  No guests yet.
-                </td>
-              </tr>
-            )}
-          </tbody>
-        </table>
+      <div className="postcard rise p-5">
+        <p className="eyebrow flex items-center gap-1.5">
+          <Scissors className="size-3.5 text-coral" /> Cut at N
+        </p>
+        <Slider className="mt-4" min={0} max={guests.length} value={cutValue} onChange={(e) => setCut(Number(e.target.value))} data-testid="guests-cut-slider" />
+        <p className="mt-3 text-sm">
+          Inviting the top <strong className="tabular">{cutValue}</strong> of {guests.length} (ranked must → should → nice) includes:
+        </p>
+        <div className="mt-2 flex flex-wrap gap-x-5 gap-y-1 text-sm text-ink-soft">
+          {includedByTier.map(({ tier, included: inc, total }) => (
+            <span key={tier} className="tabular">
+              <span className="text-foreground capitalize">{tier}</span>: {inc}/{total}
+            </span>
+          ))}
+        </div>
       </div>
+
+      <p className="text-sm text-ink-soft">Fastest way in: talk to the bar below. &ldquo;Add the Robinsons from DC, four of them, must-invite.&rdquo;</p>
+
+      {guests.length === 0 ? (
+        <div className="postcard rise flex flex-col items-start gap-2 p-8">
+          <p className="text-[15px] text-ink-soft">No guests yet. Tell Bower who belongs on the list and it lands here, sorted by household.</p>
+        </div>
+      ) : (
+        <div className="overflow-x-auto rounded-lg border border-line">
+          <table className="w-full min-w-[720px] border-collapse text-sm">
+            <thead>
+              <tr className="border-b border-line text-left text-[0.65rem] font-semibold tracking-[0.14em] text-ink-mute uppercase">
+                <th className="p-3">Name</th>
+                <th className="p-3">Side</th>
+                <th className="p-3">Tier</th>
+                <th className="p-3">Home city</th>
+                <th className="p-3 text-center">+1</th>
+                <th className="p-3 text-center">Child</th>
+                <th className="p-3">Dietary</th>
+              </tr>
+            </thead>
+            <tbody>
+              {groups.map((group) => (
+                <GuestGroup key={group.id} name={group.name} guests={group.guests} onOpen={(g) => setGuestDialog({ open: true, guest: g })} onPatch={patchGuest} />
+              ))}
+            </tbody>
+          </table>
+        </div>
+      )}
 
       <GuestEditorDialog
         open={guestDialog.open}
@@ -188,6 +168,25 @@ export default function GuestsPage() {
         }}
       />
     </div>
+  );
+}
+
+function sortByName(list: Guest[]): Guest[] {
+  return [...list].sort((a, b) => a.firstName.localeCompare(b.firstName) || (a.lastName ?? "").localeCompare(b.lastName ?? ""));
+}
+
+function GuestGroup({ name, guests, onOpen, onPatch }: { name: string; guests: Guest[]; onOpen: (g: Guest) => void; onPatch: (g: Guest, patch: Partial<Guest>) => void }) {
+  return (
+    <>
+      <tr>
+        <td colSpan={7} className="bg-paper-deep/60 px-3 py-1.5 text-[0.65rem] font-semibold tracking-[0.14em] text-ink-soft uppercase">
+          {name}
+        </td>
+      </tr>
+      {guests.map((guest) => (
+        <GuestRow key={guest.id} guest={guest} onOpen={() => onOpen(guest)} onPatch={(patch) => onPatch(guest, patch)} />
+      ))}
+    </>
   );
 }
 
