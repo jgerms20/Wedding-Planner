@@ -61,7 +61,7 @@ function ShellChrome({ children }: { children: ReactNode }) {
     : (seasonLabel(wedding?.targetSeason) ?? "Date to come");
 
   return (
-    <div className="flex min-h-screen md:grid md:grid-cols-[var(--rail-w)_1fr]">
+    <div className="flex min-h-screen flex-col md:grid md:grid-cols-[var(--rail-w)_1fr]">
       {/* Desktop rail */}
       <aside className="sticky top-0 hidden h-screen flex-col bg-rail text-rail-foreground md:flex">
         <div className="px-6 pt-7 pb-5">
