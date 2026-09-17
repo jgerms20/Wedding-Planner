@@ -287,3 +287,31 @@ describe("generateAnchorEvents", () => {
     expect(events[0]).toMatchObject({ title: "Engagement party", startsAt: "2027-03-15", kind: "anchor" });
   });
 });
+
+
+describe("generatePlan past-due spreading", () => {
+  it("moves tasks that would be due before `earliest` into the following six weeks, in order", async () => {
+    const { generatePlan } = await import("../src/timeline/generate");
+    const { defaultPlanConfig } = await import("../src/entities/index");
+    const now = "2026-09-17T12:00:00.000Z";
+    const wedding = {
+      id: "w1",
+      slug: "our-wedding",
+      name: "Joshua & Janel",
+      partnerA: { name: "Joshua" },
+      partnerB: { name: "Janel" },
+      dateFlexibility: "season" as const,
+      targetSeason: "spring 2028",
+      isDestination: true,
+      createdAt: now,
+      updatedAt: now,
+    };
+    const tasks = generatePlan({ wedding, planConfig: defaultPlanConfig(), existingTasks: [], earliest: "2026-09-17" });
+    const dated = tasks.filter((t) => t.dueDate);
+    expect(dated.every((t) => t.dueDate! >= "2026-09-17")).toBe(true);
+    const tell = tasks.find((t) => t.templateId === "announce_family")!;
+    const insure = tasks.find((t) => t.templateId === "ring_insurance")!;
+    expect(tell.dueDate! <= insure.dueDate!).toBe(true);
+    expect(tell.dueDate! <= "2026-11-01").toBe(true);
+  });
+});

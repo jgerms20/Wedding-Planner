@@ -72,6 +72,12 @@ export interface GeneratePlanArgs {
   wedding: Wedding;
   planConfig: PlanConfig;
   existingTasks: Task[];
+  /**
+   * No untouched task is due before this date (ISO date; defaults to today).
+   * Template offsets can land before the engagement for a short-lead wedding;
+   * those tasks are spread over the six weeks after this date instead.
+   */
+  earliest?: string;
 }
 
 /**
@@ -81,9 +87,10 @@ export interface GeneratePlanArgs {
  * docs/specs/web-local-mode.md "Timeline engine" for the rules this
  * implements.
  */
-export function generatePlan({ wedding, planConfig, existingTasks }: GeneratePlanArgs): Task[] {
+export function generatePlan({ wedding, planConfig, existingTasks, earliest }: GeneratePlanArgs): Task[] {
   const referenceDate = resolveReferenceDate(wedding);
   const now = nowIso();
+  const floor = earliest ?? now.slice(0, 10);
 
   const existingByTemplateId = new Map(
     existingTasks.filter((t): t is Task & { templateId: string } => Boolean(t.templateId)).map((t) => [t.templateId, t]),
@@ -124,7 +131,30 @@ export function generatePlan({ wedding, planConfig, existingTasks }: GeneratePla
       .filter((id): id is string => Boolean(id));
   }
 
-  return assignTravelWindows(generated, planConfig.travelWindows);
+  return assignTravelWindows(spreadPastDue(generated, floor), planConfig.travelWindows);
+}
+
+function shiftDays(iso: string, days: number): string {
+  const d = new Date(`${iso}T12:00:00Z`);
+  d.setUTCDate(d.getUTCDate() + days);
+  return toIsoDate(d);
+}
+
+/**
+ * Untouched tasks whose computed due date is already in the past get spread,
+ * in their original order, across the six weeks after `floor` so a newly
+ * engaged couple sees a runway instead of a wall of overdue items.
+ */
+function spreadPastDue(tasks: Task[], floor: string): Task[] {
+  const late = tasks
+    .filter((t) => t.status === "todo" && t.dueDate && t.dueDate < floor)
+    .sort((a, b) => (a.dueDate! < b.dueDate! ? -1 : a.dueDate! > b.dueDate! ? 1 : 0));
+  if (late.length === 0) return tasks;
+  const span = 42;
+  late.forEach((task, i) => {
+    task.dueDate = shiftDays(floor, 3 + Math.round((i * span) / late.length));
+  });
+  return tasks;
 }
 
 interface GenerateTaskContext {
