@@ -52,9 +52,12 @@ const admin = new Client({ connectionString: DATABASE_URL });
 // Two ordinary sessions, each connecting as a dedicated login role (not
 // the admin/table-owner role) that will `SET ROLE authenticated` below —
 // this is what actually makes RLS apply to their queries.
+// The login role gets a password so this works under SCRAM (CI's postgres
+// service) as well as trust auth (the local helper script).
+const TEST_LOGIN_PASSWORD = "bower-rls-test";
 const testClientUrl = new URL(DATABASE_URL);
 testClientUrl.username = TEST_LOGIN_ROLE;
-testClientUrl.password = "";
+testClientUrl.password = TEST_LOGIN_PASSWORD;
 const asOwner1 = new Client({ connectionString: testClientUrl.toString() });
 const asOwner2 = new Client({ connectionString: testClientUrl.toString() });
 
@@ -185,11 +188,12 @@ beforeAll(async () => {
     do $$
     begin
       if not exists (select 1 from pg_roles where rolname = '${TEST_LOGIN_ROLE}') then
-        create role ${TEST_LOGIN_ROLE} login;
+        create role ${TEST_LOGIN_ROLE} login password '${TEST_LOGIN_PASSWORD}';
       end if;
     end
     $$;
   `);
+  await admin.query(`alter role ${TEST_LOGIN_ROLE} with password '${TEST_LOGIN_PASSWORD}'`);
   await admin.query(`grant authenticated to ${TEST_LOGIN_ROLE}`);
 
   wedding1 = await createWeddingFixture(`rls-test-${randomUUID()}`, "owner1@example.com");
