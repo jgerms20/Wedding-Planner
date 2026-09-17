@@ -16,6 +16,7 @@ export function ScenarioEditorDialog({
   destinations,
   venues,
   scenario,
+  initialDestinationId,
   onSave,
 }: {
   open: boolean;
@@ -24,14 +25,16 @@ export function ScenarioEditorDialog({
   destinations: Destination[];
   venues: Venue[];
   scenario?: Scenario;
+  /** Preselects the destination when the dialog is launched from a destination card, not the matrix. */
+  initialDestinationId?: string;
   onSave: (scenario: Scenario) => Promise<void>;
 }) {
   const [form, setForm] = useState(() => emptyForm());
 
   useEffect(() => {
     if (!open) return;
-    setForm(scenario ? toForm(scenario) : emptyForm());
-  }, [open, scenario]);
+    setForm(scenario ? toForm(scenario) : emptyForm(initialDestinationId));
+  }, [open, scenario, initialDestinationId]);
 
   const availableVenues = venues.filter((v) => v.destinationId === form.destinationId);
 
@@ -65,7 +68,7 @@ export function ScenarioEditorDialog({
         <DialogTitle>{scenario ? "Edit scenario" : "New scenario"}</DialogTitle>
         <DialogCloseButton onClose={() => onOpenChange(false)} />
       </DialogHeader>
-      <DialogBody className="flex flex-col gap-3">
+      <DialogBody className="flex flex-col gap-3.5">
         <Field label="Name">
           <Input
             value={form.name}
@@ -139,10 +142,10 @@ export function ScenarioEditorDialog({
   );
 }
 
-function emptyForm() {
+function emptyForm(initialDestinationId?: string) {
   return {
     name: "",
-    destinationId: "",
+    destinationId: initialDestinationId ?? "",
     venueId: "",
     dateStart: "",
     dateEnd: "",
@@ -172,13 +175,13 @@ function toForm(s: Scenario) {
 }
 
 function Row({ children }: { children: ReactNode }) {
-  return <div className="grid grid-cols-2 gap-3 sm:grid-cols-3">{children}</div>;
+  return <div className="grid grid-cols-2 gap-3.5 sm:grid-cols-3">{children}</div>;
 }
 
 function Field({ label, children }: { label: string; children: ReactNode }) {
   return (
     <div className="flex flex-col gap-1.5">
-      <Label className="text-xs">{label}</Label>
+      <Label className="eyebrow">{label}</Label>
       {children}
     </div>
   );
