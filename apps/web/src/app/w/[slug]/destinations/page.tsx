@@ -1,197 +1,143 @@
 "use client";
 
-import { newId, nowIso, scenarioMath, type Destination, type Scenario, type Venue } from "@bower/shared";
-import { MapPin, Pin, Plus } from "lucide-react";
-import { useCallback, useState } from "react";
-import { PageHeader } from "@/components/page-header";
+import { newId, nowIso, pinScenario, reestimateBudgetFromScenario, type Destination, type Scenario, type Venue, type VenueStatus } from "@bower/shared";
+import { Plus } from "lucide-react";
+import { useCallback, useMemo, useState } from "react";
+import { DestinationPostcard } from "@/components/atlas/destination-postcard";
+import { GuestTargetControl } from "@/components/atlas/guest-target-control";
+import { ScenarioMatrix } from "@/components/atlas/scenario-matrix";
 import { DestinationEditorDialog } from "@/components/destination-editor-dialog";
+import { PageHeader } from "@/components/page-header";
 import { ScenarioEditorDialog } from "@/components/scenario-editor-dialog";
-import { VenueEditorDialog } from "@/components/venue-editor-dialog";
-import { Badge } from "@/components/ui/badge";
 import { Button } from "@/components/ui/button";
-import { Card, CardContent, CardHeader, CardTitle } from "@/components/ui/card";
-import { formatMoney } from "@/lib/format";
+import { VenueEditorDialog } from "@/components/venue-editor-dialog";
 import { useRepoContext } from "@/lib/repo-context";
 import { useEntityList } from "@/lib/use-entity-list";
 
 export default function DestinationsPage() {
-  const { repo, wedding, reloadWedding, viewerName } = useRepoContext();
+  const { repo, wedding, touch } = useRepoContext();
   const weddingId = wedding?.id;
 
-  const loadDestinations = useCallback(async () => {
-    if (!repo || !weddingId) return undefined;
-    return repo.destinations.list(weddingId);
-  }, [repo, weddingId]);
+  const loadDestinations = useCallback(async () => (repo && weddingId ? repo.destinations.list(weddingId) : undefined), [repo, weddingId]);
   const { items: destinations, reload: reloadDestinations } = useEntityList(loadDestinations);
 
-  const loadVenues = useCallback(async () => {
-    if (!repo || !weddingId) return undefined;
-    return repo.venues.list(weddingId);
-  }, [repo, weddingId]);
+  const loadVenues = useCallback(async () => (repo && weddingId ? repo.venues.list(weddingId) : undefined), [repo, weddingId]);
   const { items: venues, reload: reloadVenues } = useEntityList(loadVenues);
 
-  const loadScenarios = useCallback(async () => {
-    if (!repo || !weddingId) return undefined;
-    return repo.scenarios.list(weddingId);
-  }, [repo, weddingId]);
-  const { items: scenarios, reload: reloadScenarios } = useEntityList(loadScenarios);
+  const loadScenarios = useCallback(async () => (repo && weddingId ? repo.scenarios.list(weddingId) : undefined), [repo, weddingId]);
+  const { items: scenarios } = useEntityList(loadScenarios);
 
+  const [expandedId, setExpandedId] = useState<string | null>(null);
   const [destinationDialog, setDestinationDialog] = useState<{ open: boolean; destination?: Destination }>({ open: false });
   const [venueDialog, setVenueDialog] = useState<{ open: boolean; destinationId: string; venue?: Venue } | null>(null);
-  const [scenarioDialog, setScenarioDialog] = useState<{ open: boolean; scenario?: Scenario }>({ open: false });
+  const [scenarioDialog, setScenarioDialog] = useState<{ open: boolean; scenario?: Scenario; destinationId?: string }>({ open: false });
 
-  if (!repo || !weddingId) return <p className="text-sm text-muted-foreground">Loading…</p>;
-
-  async function pinScenario(scenario: Scenario) {
-    const alreadyPinned = scenario.pinned;
-    await Promise.all(scenarios.map((s) => repo!.scenarios.upsert({ ...s, pinned: s.id === scenario.id ? !alreadyPinned : false })));
-    await repo!.upsertWedding({ ...wedding!, activeScenarioId: alreadyPinned ? undefined : scenario.id, updatedAt: nowIso() });
-    if (!alreadyPinned) {
-      await repo!.decisions.upsert({
-        id: newId(),
-        weddingId: weddingId!,
-        title: `Pinned scenario "${scenario.name}"`,
-        decidedAt: nowIso(),
-        decidedBy: viewerName,
-        source: "manual",
-      });
+  const scenarioByDestination = useMemo(() => {
+    const map = new Map<string, Scenario>();
+    for (const s of scenarios) {
+      if (!s.destinationId) continue;
+      if (!map.has(s.destinationId) || s.pinned) map.set(s.destinationId, s);
     }
-    await Promise.all([reloadScenarios(), reloadWedding()]);
-  }
+    return map;
+  }, [scenarios]);
+
+  const pinned = useMemo(
+    () => scenarios.find((s) => s.id === wedding?.activeScenarioId) ?? scenarios.find((s) => s.pinned),
+    [scenarios, wedding?.activeScenarioId],
+  );
+
+  if (!repo || !wedding) return <p className="font-display text-xl text-ink-soft">Opening the atlas…</p>;
+
+  const guestTarget = wedding.guestTarget ?? 100;
+
+  const updateGuestTarget = async (next: number) => {
+    const oldTarget = guestTarget;
+    await repo.upsertWedding({ ...wedding, guestTarget: next, updatedAt: nowIso() });
+    await Promise.all(
+      scenarios
+        .filter((s) => s.guestAssumption === oldTarget)
+        .map((s) => repo.scenarios.upsert({ ...s, guestAssumption: next, updatedAt: nowIso() })),
+    );
+    touch();
+  };
+
+  const handlePinScenario = async (scenarioId: string) => {
+    await pinScenario(repo, wedding.id, scenarioId);
+    touch();
+  };
+
+  const handleSaveScenario = async (s: Scenario) => {
+    await repo.scenarios.upsert(s);
+    if (s.pinned) await reestimateBudgetFromScenario(repo, wedding.id, s);
+    touch();
+  };
+
+  const handleDuplicateScenario = async (s: Scenario) => {
+    const now = nowIso();
+    await repo.scenarios.upsert({ ...s, id: newId(), name: `${s.name} (copy)`, pinned: false, createdAt: now, updatedAt: now });
+    touch();
+  };
+
+  const handleVenueStatusChange = async (venue: Venue, status: VenueStatus) => {
+    await repo.venues.upsert({ ...venue, status, updatedAt: nowIso() });
+    await reloadVenues();
+  };
 
   return (
-    <div className="flex flex-col gap-8">
+    <div className="flex flex-col">
       <PageHeader
-        title="Destinations"
-        description="Destination → venue → date. Compare scenarios before pinning one."
+        eyebrow="The atlas"
+        title="Where it could be"
+        description="Destination → venue → date. Compare, then make one the plan."
         action={
           <Button size="sm" onClick={() => setDestinationDialog({ open: true })}>
-            <Plus className="size-4" /> Add destination
+            <Plus className="size-4 stroke-[1.5]" /> Add destination
           </Button>
         }
       />
 
-      <div className="grid gap-4 sm:grid-cols-2">
-        {destinations.length === 0 && (
-          <p className="text-sm text-muted-foreground">No destinations yet. Add candidates to start comparing.</p>
-        )}
-        {destinations.map((destination) => (
-          <Card key={destination.id}>
-            <CardHeader className="flex-row items-start justify-between space-y-0">
-              <div>
-                <CardTitle className="flex items-center gap-1.5">
-                  <MapPin className="size-4 text-rose" /> {destination.name}
-                </CardTitle>
-                <p className="text-xs text-muted-foreground">{[destination.region, destination.country].filter(Boolean).join(", ")}</p>
-              </div>
-              <Button variant="ghost" size="sm" onClick={() => setDestinationDialog({ open: true, destination })}>
-                Edit
-              </Button>
-            </CardHeader>
-            <CardContent className="flex flex-col gap-3">
-              {destination.notes && <p className="text-sm text-muted-foreground">{destination.notes}</p>}
-              <div className="flex flex-wrap gap-x-6 gap-y-1 text-xs text-muted-foreground">
-                {destination.travelCostPerGuestEstimate !== undefined && <span>Travel: {formatMoney(destination.travelCostPerGuestEstimate)}/guest</span>}
-                {destination.lodgingPerNightEstimate !== undefined && <span>Lodging: {formatMoney(destination.lodgingPerNightEstimate)}/night</span>}
-                {destination.attendanceRateEstimate !== undefined && <span>Est. attendance: {Math.round(destination.attendanceRateEstimate * 100)}%</span>}
-              </div>
+      <GuestTargetControl value={guestTarget} onSave={(next) => void updateGuestTarget(next)} />
 
-              <div className="flex flex-col gap-2 border-t border-border pt-3">
-                <div className="flex items-center justify-between">
-                  <h4 className="text-xs font-medium tracking-wide text-muted-foreground uppercase">Venues</h4>
-                  <Button variant="outline" size="sm" onClick={() => setVenueDialog({ open: true, destinationId: destination.id })}>
-                    <Plus className="size-3.5" /> Venue
-                  </Button>
-                </div>
-                {venues
-                  .filter((v) => v.destinationId === destination.id)
-                  .map((venue) => (
-                    <button
-                      key={venue.id}
-                      type="button"
-                      onClick={() => setVenueDialog({ open: true, destinationId: destination.id, venue })}
-                      className="flex items-center justify-between gap-2 rounded-md border border-border px-3 py-2 text-left text-sm transition-colors hover:bg-accent"
-                    >
-                      <span>{venue.name}</span>
-                      <Badge variant={venue.status === "booked" ? "default" : venue.status === "declined" ? "destructive" : "secondary"}>
-                        {venue.status}
-                      </Badge>
-                    </button>
-                  ))}
-                {venues.filter((v) => v.destinationId === destination.id).length === 0 && (
-                  <p className="text-xs text-muted-foreground">No venues yet.</p>
-                )}
-              </div>
-            </CardContent>
-          </Card>
-        ))}
-      </div>
+      {destinations.length === 0 ? (
+        <p className="mt-6 text-sm text-ink-soft">No destinations yet. Tell Bower a place, or add one.</p>
+      ) : (
+        <div className="mt-6 grid gap-4 sm:grid-cols-2 xl:grid-cols-3">
+          {destinations.map((destination, i) => (
+            <DestinationPostcard
+              key={destination.id}
+              className={`rise rise-${Math.min(i + 1, 8)}`}
+              destination={destination}
+              venues={venues.filter((v) => v.destinationId === destination.id)}
+              scenario={scenarioByDestination.get(destination.id)}
+              isFrontRunner={pinned?.destinationId === destination.id}
+              guestTarget={guestTarget}
+              expanded={expandedId === destination.id}
+              onToggleExpand={() => setExpandedId((id) => (id === destination.id ? null : destination.id))}
+              onEditDestination={() => setDestinationDialog({ open: true, destination })}
+              onAddVenue={() => setVenueDialog({ open: true, destinationId: destination.id })}
+              onEditVenue={(venue) => setVenueDialog({ open: true, destinationId: destination.id, venue })}
+              onVenueStatusChange={(venue, status) => void handleVenueStatusChange(venue, status)}
+              onNewScenario={() => setScenarioDialog({ open: true, destinationId: destination.id })}
+            />
+          ))}
+        </div>
+      )}
 
-      <section>
-        <PageHeader
-          title="Scenarios"
-          description="Each column is a destination + venue + date + guest-count bet. Pin one to drive the budget and timeline."
-          action={
-            <Button size="sm" onClick={() => setScenarioDialog({ open: true })}>
-              <Plus className="size-4" /> New scenario
-            </Button>
-          }
-        />
-        {scenarios.length === 0 ? (
-          <p className="text-sm text-muted-foreground">No scenarios yet.</p>
-        ) : (
-          <div className="overflow-x-auto rounded-lg border border-border">
-            <table className="w-full min-w-[640px] border-collapse text-sm">
-              <thead>
-                <tr className="border-b border-border bg-muted/50 text-left">
-                  <th className="p-3 font-medium text-muted-foreground">&nbsp;</th>
-                  {scenarios.map((s) => (
-                    <th key={s.id} className="p-3">
-                      <div className="flex items-center gap-2">
-                        <button
-                          type="button"
-                          onClick={() => setScenarioDialog({ open: true, scenario: s })}
-                          className="font-display text-base hover:underline"
-                        >
-                          {s.name}
-                        </button>
-                        <button
-                          type="button"
-                          onClick={() => pinScenario(s)}
-                          className={s.pinned ? "text-rose" : "text-muted-foreground hover:text-rose"}
-                          title={s.pinned ? "Unpin" : "Pin as active"}
-                        >
-                          <Pin className="size-3.5" fill={s.pinned ? "currentColor" : "none"} />
-                        </button>
-                      </div>
-                    </th>
-                  ))}
-                </tr>
-              </thead>
-              <tbody>
-                <ComparisonRow label="Expected guests" values={scenarios.map((s) => String(scenarioMath(s).expectedGuests))} />
-                <ComparisonRow label="Total cost" values={scenarios.map((s) => formatMoney(scenarioMath(s).totalCost))} />
-                <ComparisonRow label="Cost per guest" values={scenarios.map((s) => formatMoney(scenarioMath(s).costPerGuest))} />
-                <ComparisonRow label="Guest travel burden" values={scenarios.map((s) => formatMoney(scenarioMath(s).guestTravelBurden))} />
-                <ComparisonRow
-                  label="Weather"
-                  values={scenarios.map((s) => destinations.find((d) => d.id === s.destinationId)?.weatherNotes ?? "—")}
-                />
-                <ComparisonRow
-                  label="Legal"
-                  values={scenarios.map((s) => destinations.find((d) => d.id === s.destinationId)?.legalNotes ?? "—")}
-                />
-                <ComparisonRow label="Unknowns" values={scenarios.map((s) => s.notes ?? "—")} />
-              </tbody>
-            </table>
-          </div>
-        )}
-      </section>
+      <div className="hairline my-10" />
+
+      <ScenarioMatrix
+        scenarios={scenarios}
+        destinations={destinations}
+        onPin={(id) => void handlePinScenario(id)}
+        onEdit={(scenario) => setScenarioDialog({ open: true, scenario })}
+        onDuplicate={(s) => void handleDuplicateScenario(s)}
+        onNewScenario={() => setScenarioDialog({ open: true })}
+      />
 
       <DestinationEditorDialog
         open={destinationDialog.open}
         onOpenChange={(open) => setDestinationDialog((d) => ({ ...d, open }))}
-        weddingId={weddingId}
+        weddingId={wedding.id}
         destination={destinationDialog.destination}
         onSave={async (d) => {
           await repo.destinations.upsert(d);
@@ -202,7 +148,7 @@ export default function DestinationsPage() {
         <VenueEditorDialog
           open={venueDialog.open}
           onOpenChange={(open) => setVenueDialog((v) => (v ? { ...v, open } : v))}
-          weddingId={weddingId}
+          weddingId={wedding.id}
           destinationId={venueDialog.destinationId}
           venue={venueDialog.venue}
           onSave={async (v) => {
@@ -214,28 +160,13 @@ export default function DestinationsPage() {
       <ScenarioEditorDialog
         open={scenarioDialog.open}
         onOpenChange={(open) => setScenarioDialog((s) => ({ ...s, open }))}
-        weddingId={weddingId}
+        weddingId={wedding.id}
         destinations={destinations}
         venues={venues}
         scenario={scenarioDialog.scenario}
-        onSave={async (s) => {
-          await repo.scenarios.upsert(s);
-          await reloadScenarios();
-        }}
+        initialDestinationId={scenarioDialog.destinationId}
+        onSave={handleSaveScenario}
       />
     </div>
-  );
-}
-
-function ComparisonRow({ label, values }: { label: string; values: string[] }) {
-  return (
-    <tr className="border-b border-border last:border-0">
-      <td className="p-3 text-xs font-medium tracking-wide text-muted-foreground uppercase">{label}</td>
-      {values.map((v, i) => (
-        <td key={i} className="p-3">
-          {v}
-        </td>
-      ))}
-    </tr>
   );
 }

@@ -1,62 +1,79 @@
 "use client";
 
-import { Download, Plane } from "lucide-react";
-import { useCallback, useMemo } from "react";
+import { addMonths, eachDayOfInterval, format, isValid, parseISO, subMonths } from "date-fns";
+import { ChevronLeft, ChevronRight, Download } from "lucide-react";
+import { useCallback, useEffect, useMemo, useState } from "react";
+import { AgendaList } from "@/components/calendar/agenda-list";
+import { calendarLegend, dotClasses, type CalendarItem } from "@/components/calendar/calendar-item";
+import { DayPanel } from "@/components/calendar/day-panel";
+import { dateKey, MonthGrid } from "@/components/calendar/month-grid";
 import { PageHeader } from "@/components/page-header";
-import { Badge } from "@/components/ui/badge";
 import { Button } from "@/components/ui/button";
-import { Card, CardContent, CardHeader, CardTitle } from "@/components/ui/card";
-import { formatDate } from "@/lib/format";
 import { buildIcs, downloadFile } from "@/lib/ics";
 import { useRepoContext } from "@/lib/repo-context";
 import { useEntityList } from "@/lib/use-entity-list";
-
-interface CalendarItem {
-  id: string;
-  date: string;
-  title: string;
-  kind: string;
-}
+import { cn } from "@/lib/utils";
 
 export default function CalendarPage() {
   const { repo, wedding, settings } = useRepoContext();
   const weddingId = wedding?.id;
 
-  const loadEvents = useCallback(async () => {
-    if (!repo || !weddingId) return undefined;
-    return repo.events.list(weddingId);
-  }, [repo, weddingId]);
-  const { items: events } = useEntityList(loadEvents);
+  const loadEvents = useCallback(async () => (repo && weddingId ? repo.events.list(weddingId) : undefined), [repo, weddingId]);
+  const { items: events, loading: loadingEvents } = useEntityList(loadEvents);
 
-  const loadTasks = useCallback(async () => {
-    if (!repo || !weddingId) return undefined;
-    return repo.tasks.list(weddingId);
-  }, [repo, weddingId]);
-  const { items: tasks } = useEntityList(loadTasks);
+  const loadTasks = useCallback(async () => (repo && weddingId ? repo.tasks.list(weddingId) : undefined), [repo, weddingId]);
+  const { items: tasks, loading: loadingTasks } = useEntityList(loadTasks);
 
-  const travelWindows = settings?.planConfig.travelWindows ?? [];
+  const travelWindows = useMemo(() => settings?.planConfig.travelWindows ?? [], [settings]);
 
-  const items = useMemo<CalendarItem[]>(() => {
-    const eventItems: CalendarItem[] = events.map((e) => ({ id: e.id, date: e.startsAt, title: e.title, kind: e.kind }));
-    const taskItems: CalendarItem[] = tasks
+  const calendarItems = useMemo<CalendarItem[]>(() => {
+    const fromEvents: CalendarItem[] = events.map((e) => ({ id: e.id, date: e.startsAt, title: e.title, kind: e.kind }));
+    const fromTasks: CalendarItem[] = tasks
       .filter((t) => t.dueDate && t.status !== "done" && t.status !== "skipped")
-      .map((t) => ({ id: t.id, date: t.dueDate!, title: t.title, kind: "task" }));
-    return [...eventItems, ...taskItems].sort((a, b) => (a.date < b.date ? -1 : 1));
+      .map((t) => ({ id: t.id, date: t.dueDate as string, title: t.title, kind: "task" as const }));
+    return [...fromEvents, ...fromTasks].sort((a, b) => (a.date < b.date ? -1 : 1));
   }, [events, tasks]);
 
-  const byMonth = useMemo(() => {
+  const itemsByDate = useMemo(() => {
     const map = new Map<string, CalendarItem[]>();
-    for (const item of items) {
-      const month = item.date.slice(0, 7);
-      if (!map.has(month)) map.set(month, []);
-      map.get(month)!.push(item);
+    for (const item of calendarItems) {
+      const key = item.date.slice(0, 10);
+      if (!map.has(key)) map.set(key, []);
+      map.get(key)?.push(item);
     }
-    return [...map.entries()];
-  }, [items]);
+    return map;
+  }, [calendarItems]);
+
+  const travelDates = useMemo(() => {
+    const set = new Set<string>();
+    for (const window of travelWindows) {
+      const start = parseISO(window.start);
+      const end = parseISO(window.end);
+      if (!isValid(start) || !isValid(end) || start > end) continue;
+      for (const day of eachDayOfInterval({ start, end })) set.add(dateKey(day));
+    }
+    return set;
+  }, [travelWindows]);
+
+  const todayKey = dateKey(new Date());
+
+  const [monthAnchor, setMonthAnchor] = useState<Date | null>(null);
+  const [selectedDate, setSelectedDate] = useState<string | undefined>(undefined);
+
+  // Initial month/day: the next upcoming item, else today. Runs once, as soon as both lists have loaded.
+  useEffect(() => {
+    if (monthAnchor || loadingEvents || loadingTasks) return;
+    const upcoming = calendarItems.find((i) => i.date.slice(0, 10) >= todayKey);
+    const upcomingKey = upcoming?.date.slice(0, 10);
+    setMonthAnchor(upcomingKey ? parseISO(upcomingKey) : new Date());
+    setSelectedDate(upcomingKey ?? todayKey);
+  }, [monthAnchor, loadingEvents, loadingTasks, calendarItems, todayKey]);
+
+  const upcoming12 = useMemo(() => calendarItems.filter((i) => i.date.slice(0, 10) >= todayKey).slice(0, 12), [calendarItems, todayKey]);
 
   function downloadIcs() {
     const ics = buildIcs(wedding ? wedding.name : "Our wedding", [
-      ...items.map((i) => ({ uid: i.id, title: i.title, date: i.date })),
+      ...calendarItems.map((i) => ({ uid: i.id, title: i.title, date: i.date })),
       ...travelWindows.flatMap((w) => [
         { uid: `${w.id}-start`, title: `${w.label} begins (${w.location})`, date: w.start },
         { uid: `${w.id}-end`, title: `${w.label} ends (${w.location})`, date: w.end },
@@ -65,60 +82,78 @@ export default function CalendarPage() {
     downloadFile("wedding-plan.ics", ics, "text/calendar");
   }
 
-  if (!repo || !weddingId) return <p className="text-sm text-muted-foreground">Loading…</p>;
+  if (!repo || !weddingId) return <p className="font-display text-xl text-ink-soft">Opening the calendar…</p>;
+
+  const shownMonth = monthAnchor ?? new Date();
+
+  function goToday() {
+    setMonthAnchor(new Date());
+    setSelectedDate(todayKey);
+  }
 
   return (
-    <div className="flex flex-col gap-6">
-      <PageHeader
-        title="Calendar"
-        description="Every task due date, event, and anchor in one line-up."
-        action={
-          <Button size="sm" onClick={downloadIcs}>
-            <Download className="size-4" /> Download .ics
-          </Button>
-        }
-      />
+    <div className="flex flex-col">
+      <PageHeader eyebrow="The calendar" title="Calendar" description="Every anchor, satellite event, task due date, and travel window in one line-up." />
 
-      {travelWindows.length > 0 && (
-        <Card>
-          <CardHeader>
-            <CardTitle className="flex items-center gap-2">
-              <Plane className="size-4 text-rose" /> Travel windows
-            </CardTitle>
-          </CardHeader>
-          <CardContent className="flex flex-wrap gap-3">
-            {travelWindows.map((w) => (
-              <Badge key={w.id} variant="secondary">
-                {w.label}: {formatDate(w.start)} – {formatDate(w.end)} ({w.location})
-              </Badge>
+      <div className="rise grid gap-8 lg:grid-cols-[1.4fr_1fr]">
+        <div className="flex flex-col gap-4">
+          <div className="flex flex-wrap items-center justify-between gap-2">
+            <h2 className="text-3xl" data-testid="calendar-month-title">
+              {format(shownMonth, "MMMM yyyy")}
+            </h2>
+            <div className="flex items-center gap-1">
+              <Button variant="ghost" size="icon" aria-label="Previous month" onClick={() => setMonthAnchor(subMonths(shownMonth, 1))}>
+                <ChevronLeft className="size-4 stroke-[1.5]" />
+              </Button>
+              <Button variant="outline" size="sm" onClick={goToday}>
+                Today
+              </Button>
+              <Button variant="ghost" size="icon" aria-label="Next month" onClick={() => setMonthAnchor(addMonths(shownMonth, 1))}>
+                <ChevronRight className="size-4 stroke-[1.5]" />
+              </Button>
+            </div>
+          </div>
+
+          <div className="flex flex-wrap gap-x-4 gap-y-1.5 text-xs text-ink-soft">
+            {calendarLegend().map((l) => (
+              <span key={l.kind} className="inline-flex items-center gap-1.5">
+                <span className={cn("size-2 rounded-full", dotClasses(l.kind))} /> {l.label}
+              </span>
             ))}
-          </CardContent>
-        </Card>
-      )}
+          </div>
 
-      <div className="flex flex-col gap-4">
-        {byMonth.length === 0 && <p className="text-sm text-muted-foreground">Nothing on the calendar yet.</p>}
-        {byMonth.map(([month, monthItems]) => (
-          <Card key={month}>
-            <CardHeader>
-              <CardTitle>{formatDate(`${month}-01`, "MMMM yyyy")}</CardTitle>
-            </CardHeader>
-            <CardContent>
-              <ul className="flex flex-col divide-y divide-border">
-                {monthItems.map((item) => (
-                  <li key={item.id} className="flex items-center justify-between gap-3 py-2 text-sm">
-                    <span>{item.title}</span>
-                    <span className="flex shrink-0 items-center gap-2">
-                      <Badge variant="outline">{item.kind}</Badge>
-                      <span className="text-muted-foreground">{formatDate(item.date)}</span>
-                    </span>
-                  </li>
-                ))}
-              </ul>
-            </CardContent>
-          </Card>
-        ))}
+          <MonthGrid
+            monthAnchor={shownMonth}
+            itemsByDate={itemsByDate}
+            travelDates={travelDates}
+            selectedDate={selectedDate}
+            onSelectDate={setSelectedDate}
+          />
+        </div>
+
+        <DayPanel selectedDate={selectedDate} items={selectedDate ? (itemsByDate.get(selectedDate) ?? []) : []} />
       </div>
+
+      <div className="hairline my-10" />
+
+      <section>
+        <p className="eyebrow">Coming up</p>
+        <h2 className="mt-1 text-3xl">The next dozen</h2>
+        <div className="mt-5">
+          <AgendaList items={upcoming12} />
+        </div>
+      </section>
+
+      <div className="hairline my-10" />
+
+      <section className="flex flex-col items-start gap-3 sm:flex-row sm:items-center sm:justify-between">
+        <p className="max-w-md text-sm text-ink-soft">
+          Downloads a file to import into Google or Apple Calendar. Live sync arrives with accounts.
+        </p>
+        <Button variant="outline" size="sm" onClick={downloadIcs}>
+          <Download className="size-4 stroke-[1.5]" /> Add to Google / Apple Calendar
+        </Button>
+      </section>
     </div>
   );
 }

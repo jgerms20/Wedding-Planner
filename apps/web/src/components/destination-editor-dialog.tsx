@@ -57,7 +57,7 @@ export function DestinationEditorDialog({
         <DialogTitle>{destination ? "Edit destination" : "Add destination"}</DialogTitle>
         <DialogCloseButton onClose={() => onOpenChange(false)} />
       </DialogHeader>
-      <DialogBody className="flex flex-col gap-3">
+      <DialogBody className="flex flex-col gap-3.5">
         <Row>
           <Field label="Name">
             <Input
@@ -150,13 +150,13 @@ function numberOrUndefined(value: string): number | undefined {
 }
 
 function Row({ children }: { children: ReactNode }) {
-  return <div className="grid grid-cols-2 gap-3 sm:grid-cols-3">{children}</div>;
+  return <div className="grid grid-cols-2 gap-3.5 sm:grid-cols-3">{children}</div>;
 }
 
 function Field({ label, children }: { label: string; children: ReactNode }) {
   return (
     <div className="flex flex-col gap-1.5">
-      <Label className="text-xs">{label}</Label>
+      <Label className="eyebrow">{label}</Label>
       {children}
     </div>
   );
