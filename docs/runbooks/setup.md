@@ -18,6 +18,7 @@ GitHub Pages can take a couple of minutes to catch up after a deploy, and browse
 1. Hard-refresh (Ctrl/Cmd+Shift+R), or open the site in a private/incognito window — this rules out a stale cached copy, which is the most common cause.
 2. If the Atlas shows no destinations (no Brazil, Jamaica, etc.), that's an old, empty seed stuck in this browser's local storage from before the research was added — it's not overwritten automatically so nothing you've since typed in gets lost. Home shows a "Bring in the atlas" button in that case, or use **Settings → Restore the Joshua & Janel seed**.
 3. Still broken in a fresh private window after a minute or two? That points to the GitHub Pages configuration itself rather than the app — check Settings → Pages on GitHub still shows Source: GitHub Actions.
+4. If the site shows a plain Markdown-style page (a big repo-name heading and a bullet list of doc links) instead of the app, GitHub's Pages source has reverted to "Deploy from a branch" — its own legacy build races with our deploy and wins. Re-apply step 2 above. As of the "Verify Pages source" step in `pages.yml`, this now also fails the "Deploy web..." check with a red X and an explicit error message instead of silently deploying the wrong thing — a red check there means exactly this.
 
 ## Turn on the smart features (five minutes)
 

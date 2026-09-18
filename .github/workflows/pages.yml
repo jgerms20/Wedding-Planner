@@ -23,6 +23,25 @@ jobs:
       - name: Checkout
         uses: actions/checkout@v4
 
+      # actions/configure-pages below can only ever *try* to switch a repo's
+      # Pages source to "GitHub Actions" — doing so needs Administration:write,
+      # which the default GITHUB_TOKEN never has, so a stale "Deploy from a
+      # branch" setting fails that step silently. When that happens, GitHub's
+      # own legacy branch/Jekyll build keeps racing with (and overriding) this
+      # deploy on the live site, even though every step below still reports
+      # success. Fail loudly here instead of finding out from the live site.
+      - name: Verify Pages source is "GitHub Actions"
+        env:
+          GH_TOKEN: ${{ secrets.GITHUB_TOKEN }}
+        run: |
+          build_type=$(curl -sS -H "Authorization: Bearer $GH_TOKEN" -H "Accept: application/vnd.github+json" \
+            "https://api.github.com/repos/${{ github.repository }}/pages" | jq -r '.build_type // "unknown"')
+          if [ "$build_type" != "workflow" ]; then
+            echo "::error::GitHub Pages 'Source' is set to '$build_type', not 'GitHub Actions' — go to https://github.com/${{ github.repository }}/settings/pages, under Build and deployment -> Source, choose 'GitHub Actions'. Until that's fixed, GitHub's own legacy branch build overrides this deploy and the live site shows the raw repo instead of the app."
+            exit 1
+          fi
+          echo "GitHub Pages source is 'GitHub Actions' — good."
+
       - name: Setup pnpm
         uses: pnpm/action-setup@v4
         with:
