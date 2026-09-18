@@ -1,12 +1,13 @@
 "use client";
 
 import { addMonths, eachDayOfInterval, format, isValid, parseISO, subMonths } from "date-fns";
-import { ChevronLeft, ChevronRight, Download } from "lucide-react";
+import { ChevronLeft, ChevronRight, Download, Plus } from "lucide-react";
 import { useCallback, useEffect, useMemo, useState } from "react";
 import { AgendaList } from "@/components/calendar/agenda-list";
 import { calendarLegend, dotClasses, type CalendarItem } from "@/components/calendar/calendar-item";
 import { DayPanel } from "@/components/calendar/day-panel";
 import { dateKey, MonthGrid } from "@/components/calendar/month-grid";
+import { EventEditorDialog } from "@/components/event-editor-dialog";
 import { PageHeader } from "@/components/page-header";
 import { Button } from "@/components/ui/button";
 import { LoadingState } from "@/components/loading-state";
@@ -20,7 +21,9 @@ export default function CalendarPage() {
   const weddingId = wedding?.id;
 
   const loadEvents = useCallback(async () => (repo && weddingId ? repo.events.list(weddingId) : undefined), [repo, weddingId]);
-  const { items: events, loading: loadingEvents } = useEntityList(loadEvents);
+  const { items: events, loading: loadingEvents, reload: reloadEvents } = useEntityList(loadEvents);
+
+  const [eventDialogOpen, setEventDialogOpen] = useState(false);
 
   const loadTasks = useCallback(async () => (repo && weddingId ? repo.tasks.list(weddingId) : undefined), [repo, weddingId]);
   const { items: tasks, loading: loadingTasks } = useEntityList(loadTasks);
@@ -94,7 +97,16 @@ export default function CalendarPage() {
 
   return (
     <div className="flex flex-col">
-      <PageHeader eyebrow="The calendar" title="Calendar" description="Every anchor, satellite event, task due date, and travel window in one line-up." />
+      <PageHeader
+        eyebrow="The calendar"
+        title="Calendar"
+        description="Every anchor, satellite event, task due date, and travel window in one line-up."
+        action={
+          <Button size="sm" onClick={() => setEventDialogOpen(true)}>
+            <Plus className="size-4 stroke-[1.5]" /> Add event
+          </Button>
+        }
+      />
 
       <div className="rise grid gap-8 lg:grid-cols-[1.4fr_1fr]">
         <div className="flex flex-col gap-4">
@@ -155,6 +167,16 @@ export default function CalendarPage() {
           <Download className="size-4 stroke-[1.5]" /> Add to Google / Apple Calendar
         </Button>
       </section>
+
+      <EventEditorDialog
+        open={eventDialogOpen}
+        onOpenChange={setEventDialogOpen}
+        weddingId={weddingId}
+        onSave={async (event) => {
+          await repo.events.upsert(event);
+          await reloadEvents();
+        }}
+      />
     </div>
   );
 }

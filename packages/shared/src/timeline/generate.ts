@@ -1,8 +1,17 @@
-import type { Event, PlanConfig, Task, TravelWindow, Wedding } from "../entities/index";
+import type { Event, PlanConfig, PlanPace, Task, TravelWindow, Wedding } from "../entities/index";
 import { newId, nowIso } from "../util";
 import { COMMS_TEMPLATE_IDS, TEMPLATE_TASKS, type TemplateTask } from "./template";
 
 const AVERAGE_DAYS_PER_MONTH = 30.4368;
+
+/** Scales every default lead time — an "aggressive" plan compresses the runway, "relaxed"
+ * stretches it. Never applied to an explicit per-task override or a date pinned to an anchor,
+ * since those are the couple's own direct commitments, not a default worth pacing. */
+const PACE_MULTIPLIERS: Record<PlanPace, number> = {
+  relaxed: 1.25,
+  balanced: 1,
+  aggressive: 0.75,
+};
 
 /** Month (0-based) each season starts in, for a couple who only knows a season. Winter is taken as December of the given year. */
 const SEASON_START_MONTH: Record<string, number> = {
@@ -172,19 +181,32 @@ interface GenerateTaskContext {
 function generateTask(template: TemplateTask, ctx: GenerateTaskContext): Task {
   const { wedding, planConfig, referenceDate, now, id, existing } = ctx;
   const override = planConfig.overrides[template.templateId];
+  const pace = planConfig.pace ?? "balanced";
+  const paceMultiplier = PACE_MULTIPLIERS[pace];
 
-  const monthsBefore = override?.monthsBefore ?? commsMonthsBefore(template.templateId, planConfig) ?? template.monthsBefore;
+  const baseMonthsBefore = commsMonthsBefore(template.templateId, planConfig) ?? template.monthsBefore;
+  const monthsBefore = override?.monthsBefore ?? baseMonthsBefore * paceMultiplier;
+  const roundedMonths = Math.round(monthsBefore * 10) / 10;
 
   let freshDueDate = referenceDate ? subtractMonths(referenceDate, monthsBefore) : undefined;
+  let reason: string | undefined = referenceDate
+    ? override?.monthsBefore !== undefined
+      ? `Set to ${roundedMonths} months before the wedding date — you overrode this task's own default lead time in Plan settings.`
+      : pace === "balanced"
+        ? `${roundedMonths} months before the wedding date, this task's default lead time.`
+        : `${roundedMonths} months before the wedding date — the default lead time, ${pace === "relaxed" ? "stretched" : "compressed"} for a ${pace} pace (×${PACE_MULTIPLIERS[pace]}).`
+    : undefined;
 
   // A dated save-the-dates anchor wins over the computed/configured offset.
   if (template.templateId === "save_the_dates" && ctx.saveTheDatesAnchorDate) {
     freshDueDate = ctx.saveTheDatesAnchorDate;
+    reason = "Matches the save-the-dates date you set in Plan settings.";
   }
 
   // The "prepare materials" engagement-party task is pinned 8 weeks before the anchor, when one exists.
   if (template.templateId === "plan_engagement_party" && ctx.engagementAnchorDate) {
     freshDueDate = daysBefore(ctx.engagementAnchorDate, 56);
+    reason = "8 weeks before your engagement party, so there's time to prepare.";
   }
 
   // finalize_date / pin_destination_scenario / choose_wedding_party pull in to
@@ -192,6 +214,7 @@ function generateTask(template: TemplateTask, ctx: GenerateTaskContext): Task {
   const reveal = REVEAL_BY_TEMPLATE_ID[template.templateId];
   if (reveal && ctx.engagementAnchorDate && ctx.engagementReveals.includes(reveal)) {
     freshDueDate = daysBefore(ctx.engagementAnchorDate, 14);
+    reason = "2 weeks before your engagement party, since that's when you're revealing this.";
   }
 
   const isComms = (COMMS_TEMPLATE_IDS as readonly string[]).includes(template.templateId);
@@ -205,6 +228,7 @@ function generateTask(template: TemplateTask, ctx: GenerateTaskContext): Task {
       description: template.description,
       phase: template.phase,
       dueDate: freshDueDate,
+      dueDateReason: reason,
       status: override?.skipped ? "skipped" : "todo",
       tags: [...template.tags],
       dependsOn: [],
@@ -221,7 +245,9 @@ function generateTask(template: TemplateTask, ctx: GenerateTaskContext): Task {
   // untouched ("todo") tasks so a plain regenerate still reacts to a changed
   // wedding date or anchor.
   const manuallyTouched = existing.status !== "todo";
-  const dueDate = override?.monthsBefore !== undefined || isComms ? freshDueDate : manuallyTouched ? existing.dueDate : freshDueDate;
+  const useFresh = override?.monthsBefore !== undefined || isComms || !manuallyTouched;
+  const dueDate = useFresh ? freshDueDate : existing.dueDate;
+  const dueDateReason = useFresh ? reason : "You set this date yourself.";
 
   return {
     id,
@@ -231,6 +257,7 @@ function generateTask(template: TemplateTask, ctx: GenerateTaskContext): Task {
     description: existing.description ?? template.description,
     phase: template.phase,
     dueDate,
+    dueDateReason,
     status: override?.skipped ? "skipped" : existing.status,
     tags: existing.tags.length > 0 ? existing.tags : [...template.tags],
     dependsOn: [],

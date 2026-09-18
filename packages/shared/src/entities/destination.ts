@@ -15,8 +15,13 @@ export const destinationSchema = z.object({
   legalNotes: z.string().optional(),
   seasonNotes: z.string().optional(),
   sourceUrls: z.array(z.string()),
-  /** Which partner(s) have marked this a favorite — independent of the cost-derived ordering. */
+  /** Which partner(s) have marked this a favorite — shown independent of rank. */
   favoritedBy: z.array(z.enum(["A", "B"])).optional(),
+  /** Manual rank, lowest first; the couple's own order, not derived from cost or a pinned scenario.
+   * Rank 1 (the lowest sortOrder) is the "Front-runner". Defaults to seed order; editable via the
+   * postcard's up/down arrows. Optional so destinations created before this field existed still
+   * read back fine — `reconcileDestinations` backfills it once on load. */
+  sortOrder: z.number().optional(),
   createdAt: z.string(),
   updatedAt: z.string(),
 });

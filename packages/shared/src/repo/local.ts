@@ -11,11 +11,13 @@ import {
   guestSchema,
   householdSchema,
   noteSchema,
+  prioritySchema,
   scenarioSchema,
   settingsSchema,
   subEventSchema,
   taskSchema,
   venueSchema,
+  watchItemSchema,
   weddingPartyMemberSchema,
   weddingSchema,
   type AiUsage,
@@ -28,6 +30,7 @@ import {
   type Guest,
   type Household,
   type Note,
+  type Priority,
   type Scenario,
   type Settings,
   type SubEvent,
@@ -35,6 +38,7 @@ import {
   type Venue,
   type Wedding,
   type WeddingPartyMember,
+  type WatchItem,
 } from "../entities/index";
 import { EXPORT_BUNDLE_VERSION, exportBundleSchema } from "./export-bundle";
 import type { EntityRepo, WeddingRepo } from "./types";
@@ -58,6 +62,8 @@ class BowerDatabase extends Dexie {
   notes!: Table<Note, string>;
   chatMessages!: Table<ChatMessage, string>;
   aiUsage!: Table<AiUsage, string>;
+  priorities!: Table<Priority, string>;
+  watchItems!: Table<WatchItem, string>;
 
   constructor(name = "bower") {
     super(name);
@@ -82,6 +88,11 @@ class BowerDatabase extends Dexie {
       notes: "id, weddingId, createdAt, linkedId",
       chatMessages: "id, weddingId, createdAt",
       aiUsage: "id, weddingId, createdAt, feature",
+    });
+    // v3: must-haves and the wedding-media watch-list (also browser-only until Phase 0b).
+    this.version(3).stores({
+      priorities: "id, weddingId, area",
+      watchItems: "id, weddingId, kind",
     });
   }
 }
@@ -127,6 +138,8 @@ export function createLocalRepo(databaseName = "bower"): WeddingRepo {
   const notes = entityRepo(db.notes, noteSchema);
   const chatMessages = entityRepo(db.chatMessages, chatMessageSchema);
   const aiUsage = entityRepo(db.aiUsage, aiUsageSchema);
+  const priorities = entityRepo(db.priorities, prioritySchema);
+  const watchItems = entityRepo(db.watchItems, watchItemSchema);
 
   const bundleTables = [
     db.weddings,
@@ -144,6 +157,8 @@ export function createLocalRepo(databaseName = "bower"): WeddingRepo {
     db.partyMembers,
     db.decisions,
     db.notes,
+    db.priorities,
+    db.watchItems,
   ];
 
   return {
@@ -162,6 +177,8 @@ export function createLocalRepo(databaseName = "bower"): WeddingRepo {
     notes,
     chatMessages,
     aiUsage,
+    priorities,
+    watchItems,
 
     async getWedding(slug) {
       return db.weddings.where("slug").equals(slug).first();
@@ -203,6 +220,8 @@ export function createLocalRepo(databaseName = "bower"): WeddingRepo {
         partyMembers: await partyMembers.list(weddingId),
         decisions: await decisions.list(weddingId),
         notes: await notes.list(weddingId),
+        priorities: await priorities.list(weddingId),
+        watchItems: await watchItems.list(weddingId),
       };
       const parsed = exportBundleSchema.parse(bundle);
       return JSON.stringify(parsed, null, 2);
@@ -233,6 +252,8 @@ export function createLocalRepo(databaseName = "bower"): WeddingRepo {
         await db.partyMembers.bulkPut(bundle.partyMembers);
         await db.decisions.bulkPut(bundle.decisions);
         await db.notes.bulkPut(bundle.notes);
+        await db.priorities.bulkPut(bundle.priorities);
+        await db.watchItems.bulkPut(bundle.watchItems);
       });
     },
   };

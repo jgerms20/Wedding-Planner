@@ -7,11 +7,14 @@ import { InlineDate, InlineMoney } from "@/components/budget/inline-fields";
 
 export function BudgetItemRow({
   item,
+  mode,
   onPatch,
   onEdit,
   onSources,
 }: {
   item: BudgetItem;
+  /** Which pair of money fields to emphasize: "estimate" (Est/Quoted) or "actuals" (Contracted/Paid). */
+  mode: "estimate" | "actuals";
   onPatch: (patch: Partial<BudgetItem>) => void;
   onEdit: () => void;
   onSources: () => void;
@@ -38,10 +41,10 @@ export function BudgetItemRow({
         </button>
       </div>
       <div className="flex flex-wrap items-end gap-4">
-        <InlineMoney label="Est" value={item.estimate} onCommit={(v) => onPatch({ estimate: v })} />
-        <InlineMoney label="Quoted" value={item.quoted} onCommit={(v) => onPatch({ quoted: v })} />
-        <InlineMoney label="Contracted" value={item.contracted} onCommit={(v) => onPatch({ contracted: v })} />
-        <InlineMoney label="Paid" value={item.paid} onCommit={(v) => onPatch({ paid: v })} />
+        <InlineMoney label="Est" value={item.estimate} onCommit={(v) => onPatch({ estimate: v })} muted={mode === "actuals"} />
+        <InlineMoney label="Quoted" value={item.quoted} onCommit={(v) => onPatch({ quoted: v })} muted={mode === "actuals"} />
+        <InlineMoney label="Contracted" value={item.contracted} onCommit={(v) => onPatch({ contracted: v })} muted={mode === "estimate"} />
+        <InlineMoney label="Paid" value={item.paid} onCommit={(v) => onPatch({ paid: v })} muted={mode === "estimate"} />
         <InlineDate value={item.dueDate} onCommit={(v) => onPatch({ dueDate: v })} />
       </div>
     </div>

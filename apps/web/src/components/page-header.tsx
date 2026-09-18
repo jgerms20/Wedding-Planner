@@ -12,7 +12,13 @@ export function PageHeader({
   action?: ReactNode;
 }) {
   return (
-    <div className="rise mb-8 flex flex-wrap items-end justify-between gap-4">
+    // Deliberately not `.rise`: a completed rise animation leaves a computed transform
+    // (an identity matrix, not the literal keyword `none`), which permanently creates a new
+    // stacking context. That traps any dropdown/menu placed in `action` (e.g. Plan's "More plan
+    // actions") inside it, so a later, unrelated section of the page can paint on top of the menu
+    // regardless of its own z-index. PageHeader is used on every page, so this is fixed at the
+    // source rather than worked around per page.
+    <div className="mb-8 flex flex-wrap items-end justify-between gap-4">
       <div>
         {eyebrow && <p className="eyebrow mb-2">{eyebrow}</p>}
         <h1 className="text-4xl sm:text-5xl">{title}</h1>

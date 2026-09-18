@@ -75,8 +75,13 @@ export interface BudgetBenchmark {
   /** Matches a budget category name in the app, e.g. "Venue & catering". */
   category: string;
   key: string;
-  /** Typical share of total spend, 0..100. */
+  /** Typical share of total spend, 0..100 — used as the single target the budget is built from. */
   percent: number;
+  /** The low/high ends of the range planner guidance actually cites in `note`, when it does.
+   * Promotes a range already in the prose into structured data; left unset rather than guessed
+   * for categories whose note only cites a single figure. */
+  percentLow?: number;
+  percentHigh?: number;
   sortOrder: number;
   note: string;
   sourceUrls: string[];

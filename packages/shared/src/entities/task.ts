@@ -9,6 +9,9 @@ export const taskSchema = z.object({
   description: z.string().optional(),
   phase: phaseKeySchema,
   dueDate: z.string().optional(),
+  /** Plain-language explanation of why dueDate is what it is — set once by generatePlan, not
+   * recomputed in the UI, so it always matches the actual rule that decided the date. */
+  dueDateReason: z.string().optional(),
   status: taskStatusSchema,
   tags: z.array(z.string()),
   dependsOn: z.array(z.string()),

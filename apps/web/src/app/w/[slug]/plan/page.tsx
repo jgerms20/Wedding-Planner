@@ -20,12 +20,14 @@ import { AnchorsCard, TravelWindowsCard } from "@/components/plan/plan-sidebar";
 import { PlanMenu, PlanMenuItem } from "@/components/plan/plan-menu";
 import { TaskRow } from "@/components/plan/task-row";
 import { PlanSettingsDialog } from "@/components/plan-settings-dialog";
+import { PrioritiesCard } from "@/components/priorities/priorities-card";
 import { Button } from "@/components/ui/button";
 import { Dialog, DialogBody, DialogCloseButton, DialogFooter, DialogHeader, DialogTitle } from "@/components/ui/dialog";
 import { Input } from "@/components/ui/input";
 import { Label } from "@/components/ui/label";
 import { Select } from "@/components/ui/select";
 import { LoadingState } from "@/components/loading-state";
+import { usePriorities } from "@/lib/use-priorities";
 import { useRepoContext } from "@/lib/repo-context";
 import { useEntityList } from "@/lib/use-entity-list";
 
@@ -40,6 +42,8 @@ export default function PlanPage() {
     return repo.tasks.list(weddingId);
   }, [repo, weddingId]);
   const { items: tasks, reload } = useEntityList(loadTasks);
+
+  const { priorities, add: addPriority, toggle: togglePriority, remove: removePriority } = usePriorities();
 
   const [settingsOpen, setSettingsOpen] = useState(false);
   const [addOpen, setAddOpen] = useState(false);
@@ -185,6 +189,14 @@ export default function PlanPage() {
           </div>
 
           <div className="order-1 flex flex-col gap-6 lg:order-2">
+            <PrioritiesCard
+              title="Wedding must-haves"
+              area="Overall"
+              priorities={priorities}
+              onAdd={(area, label) => void addPriority(area, label)}
+              onToggle={(p) => void togglePriority(p)}
+              onRemove={(p) => void removePriority(p)}
+            />
             <AnchorsCard anchors={settings.planConfig.anchors} />
             <TravelWindowsCard windows={settings.planConfig.travelWindows} onAdd={addTravelWindow} />
           </div>

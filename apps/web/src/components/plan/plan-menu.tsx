@@ -37,7 +37,7 @@ export function PlanMenu({ children }: { children: ReactNode }) {
         <MoreHorizontal className="size-4" />
       </button>
       {open && (
-        <div role="menu" className="absolute right-0 z-20 mt-2 w-56 rounded-lg border border-line bg-card py-1.5 shadow-xl" onClick={() => setOpen(false)}>
+        <div role="menu" className="absolute right-0 z-50 mt-2 w-56 rounded-lg border border-line bg-card py-1.5 shadow-xl" onClick={() => setOpen(false)}>
           {children}
         </div>
       )}

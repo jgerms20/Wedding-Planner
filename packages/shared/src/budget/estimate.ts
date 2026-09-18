@@ -60,3 +60,17 @@ export async function pinScenario(repo: WeddingRepo, weddingId: string, scenario
   await reestimateBudgetFromScenario(repo, weddingId, pinned);
   return pinned;
 }
+
+/** The reverse of `pinScenario`: nothing drives the budget/plan until another scenario is pinned. The
+ * scenario itself, and everything already typed into the budget, is left exactly as it is. */
+export async function unpinScenario(repo: WeddingRepo, weddingId: string, scenarioId: string): Promise<void> {
+  const scenarios = await repo.scenarios.list(weddingId);
+  const target = scenarios.find((s) => s.id === scenarioId);
+  if (!target?.pinned) return;
+  const now = nowIso();
+  await repo.scenarios.upsert({ ...target, pinned: false, updatedAt: now });
+  const wedding = await repo.getWedding("our-wedding");
+  if (wedding && wedding.id === weddingId && wedding.activeScenarioId === scenarioId) {
+    await repo.upsertWedding({ ...wedding, activeScenarioId: undefined, updatedAt: now });
+  }
+}

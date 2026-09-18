@@ -45,6 +45,9 @@ export const travelWindowSchema = z.object({
 });
 export type TravelWindow = z.infer<typeof travelWindowSchema>;
 
+export const planPaceSchema = z.enum(["relaxed", "balanced", "aggressive"]);
+export type PlanPace = z.infer<typeof planPaceSchema>;
+
 export const planConfigSchema = z.object({
   anchors: z.array(anchorSchema),
   travelWindows: z.array(travelWindowSchema),
@@ -58,6 +61,9 @@ export const planConfigSchema = z.object({
       skipped: z.boolean().optional(),
     }),
   ),
+  /** Scales every default lead time (not explicit per-task overrides or anchor-pinned dates).
+   * Optional so plans saved before this existed keep their exact current dates. */
+  pace: planPaceSchema.optional(),
 });
 export type PlanConfig = z.infer<typeof planConfigSchema>;
 
@@ -78,6 +84,7 @@ export function defaultPlanConfig(): PlanConfig {
     invitationsMonthsBefore: 2,
     rsvpDeadlineMonthsBefore: 1,
     overrides: {},
+    pace: "balanced",
   };
 }
 

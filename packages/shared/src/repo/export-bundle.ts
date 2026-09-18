@@ -8,11 +8,13 @@ import {
   guestSchema,
   householdSchema,
   noteSchema,
+  prioritySchema,
   scenarioSchema,
   settingsSchema,
   subEventSchema,
   taskSchema,
   venueSchema,
+  watchItemSchema,
   weddingPartyMemberSchema,
   weddingSchema,
 } from "../entities/index";
@@ -38,5 +40,7 @@ export const exportBundleSchema = z.object({
   decisions: z.array(decisionSchema),
   /** Added after version 1 shipped; older exports simply have none. */
   notes: z.array(noteSchema).default([]),
+  priorities: z.array(prioritySchema).default([]),
+  watchItems: z.array(watchItemSchema).default([]),
 });
 export type ExportBundle = z.infer<typeof exportBundleSchema>;

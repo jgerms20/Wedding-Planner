@@ -17,10 +17,13 @@ import { BudgetItemEditorDialog } from "@/components/budget-item-editor-dialog";
 import { CategoryRow } from "@/components/budget/category-row";
 import { SourcesDrawer } from "@/components/budget/sources-drawer";
 import { PageHeader } from "@/components/page-header";
+import { PrioritiesCard } from "@/components/priorities/priorities-card";
 import { Button } from "@/components/ui/button";
 import { Slider } from "@/components/ui/slider";
 import { formatMoney } from "@/lib/format";
 import { LoadingState } from "@/components/loading-state";
+import { cn } from "@/lib/utils";
+import { usePriorities } from "@/lib/use-priorities";
 import { useRepoContext } from "@/lib/repo-context";
 import { useEntityList } from "@/lib/use-entity-list";
 
@@ -36,6 +39,8 @@ export default function BudgetPage() {
     return repo.budgetCategories.list(weddingId);
   }, [repo, weddingId]);
   const { items: categories, reload: reloadCategories, loading: categoriesLoading } = useEntityList(loadCategories);
+
+  const { priorities, add: addPriority, toggle: togglePriority, remove: removePriority } = usePriorities();
 
   const loadItems = useCallback(async () => {
     if (!repo || !weddingId) return undefined;
@@ -83,13 +88,17 @@ export default function BudgetPage() {
   const [sourcesItem, setSourcesItem] = useState<BudgetItem | undefined>(undefined);
   const [infoCategory, setInfoCategory] = useState<BudgetCategory | undefined>(undefined);
   const [reestimating, setReestimating] = useState(false);
+  const [mode, setMode] = useState<"estimate" | "actuals">("estimate");
 
-  // The seeded benchmark categories are researched in the same fixed order as
-  // DEFAULT_BUDGET_CATEGORIES (both 12 entries, same sequence), so a category's
-  // 0-based sortOrder lines up with its benchmark entry even though the two
-  // lists' category names don't always match verbatim (e.g. "Transport" vs.
-  // "Transportation").
-  const benchmarkFor = useCallback((category: BudgetCategory) => SEED_BENCHMARKS?.categories[category.sortOrder], []);
+  // buildSeedBundle copies bench.category verbatim as the BudgetCategory name, so matching by
+  // name is exact for every real (research-seeded) wedding. It only falls back to sortOrder as a
+  // 0-based array position for the rare DEFAULT_BUDGET_CATEGORIES path (no research registered at
+  // first bootstrap), whose abbreviated names ("Transport" vs. "Transportation") don't match —
+  // that path's sortOrder really is 0-based, unlike the research path's 1-based bench.sortOrder.
+  const benchmarkFor = useCallback(
+    (category: BudgetCategory) => SEED_BENCHMARKS?.categories.find((b) => b.category === category.name) ?? SEED_BENCHMARKS?.categories[category.sortOrder],
+    [],
+  );
 
   const pinnedId = pinned?.id;
   const pinnedGuestAssumption = pinned?.guestAssumption;
@@ -170,6 +179,35 @@ export default function BudgetPage() {
         </div>
       </div>
 
+      <PrioritiesCard
+        title="Budget must-haves"
+        area="Budget"
+        priorities={priorities}
+        onAdd={(area, label) => void addPriority(area, label)}
+        onToggle={(p) => void togglePriority(p)}
+        onRemove={(p) => void removePriority(p)}
+      />
+
+      <div className="flex items-center justify-between gap-2">
+        <p className="eyebrow">Category lines</p>
+        <div className="inline-flex rounded-full border border-line p-0.5 text-xs">
+          {(["estimate", "actuals"] as const).map((m) => (
+            <button
+              key={m}
+              type="button"
+              onClick={() => setMode(m)}
+              aria-pressed={mode === m}
+              className={cn(
+                "rounded-full px-3 py-1 capitalize transition-colors",
+                mode === m ? "bg-ink text-rail-foreground" : "text-ink-soft hover:text-foreground",
+              )}
+            >
+              {m}
+            </button>
+          ))}
+        </div>
+      </div>
+
       <div className="flex flex-col gap-3">
         {categories
           .slice()
@@ -177,12 +215,16 @@ export default function BudgetPage() {
           .map((category) => {
             const categoryItems = items.filter((i) => i.categoryId === category.id);
             const categoryTarget = target !== undefined && category.targetPercent !== undefined ? (target * category.targetPercent) / 100 : undefined;
+            const benchmark = benchmarkFor(category);
             return (
               <CategoryRow
                 key={category.id}
                 category={category}
                 items={categoryItems}
                 target={categoryTarget}
+                percentLow={benchmark?.percentLow}
+                percentHigh={benchmark?.percentHigh}
+                mode={mode}
                 onAddItem={() => setItemDialog({ open: true, categoryId: category.id })}
                 onPatchItem={async (item, patch) => {
                   await repo.budgetItems.upsert({ ...item, ...patch, updatedAt: nowIso() });

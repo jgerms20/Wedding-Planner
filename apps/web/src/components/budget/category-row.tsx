@@ -12,6 +12,9 @@ export function CategoryRow({
   category,
   items,
   target,
+  percentLow,
+  percentHigh,
+  mode,
   onAddItem,
   onPatchItem,
   onEditItem,
@@ -22,6 +25,11 @@ export function CategoryRow({
   items: BudgetItem[];
   /** The dollar amount this category's target percent implies, from the pinned scenario's total. */
   target: number | undefined;
+  /** The low/high ends of the range planner guidance cites, when the benchmark has one. */
+  percentLow?: number;
+  percentHigh?: number;
+  /** Which pair of money fields to emphasize across every line in this category. */
+  mode: "estimate" | "actuals";
   onAddItem: () => void;
   onPatchItem: (item: BudgetItem, patch: Partial<BudgetItem>) => void;
   onEditItem: (item: BudgetItem) => void;
@@ -47,7 +55,11 @@ export function CategoryRow({
         <div className="min-w-48 flex-1">
           <div className="flex items-baseline gap-2">
             <span className="font-display text-lg">{category.name}</span>
-            {category.targetPercent !== undefined && <span className="text-xs text-ink-mute">target {category.targetPercent}%</span>}
+            {category.targetPercent !== undefined && (
+              <span className="text-xs text-ink-mute">
+                target {category.targetPercent}%{percentLow !== undefined && percentHigh !== undefined && ` (${percentLow}-${percentHigh}%)`}
+              </span>
+            )}
             <button
               type="button"
               onClick={(e) => {
@@ -66,10 +78,10 @@ export function CategoryRow({
           </div>
         </div>
         <div className="flex flex-wrap gap-x-4 gap-y-1 text-xs">
-          <MoneyStat label="Est" value={estimate} />
-          <MoneyStat label="Quoted" value={quoted} />
-          <MoneyStat label="Contracted" value={contracted} />
-          <MoneyStat label="Paid" value={paid} />
+          <MoneyStat label="Est" value={estimate} muted={mode === "actuals"} />
+          <MoneyStat label="Quoted" value={quoted} muted={mode === "actuals"} />
+          <MoneyStat label="Contracted" value={contracted} muted={mode === "estimate"} />
+          <MoneyStat label="Paid" value={paid} muted={mode === "estimate"} />
         </div>
         <button
           type="button"
@@ -95,6 +107,7 @@ export function CategoryRow({
                 <BudgetItemRow
                   key={item.id}
                   item={item}
+                  mode={mode}
                   onPatch={(patch) => onPatchItem(item, patch)}
                   onEdit={() => onEditItem(item)}
                   onSources={() => onSourcesItem(item)}
@@ -120,9 +133,9 @@ export function CategoryRow({
   );
 }
 
-function MoneyStat({ label, value }: { label: string; value: number }) {
+function MoneyStat({ label, value, muted }: { label: string; value: number; muted?: boolean }) {
   return (
-    <span className="flex flex-col items-end">
+    <span className={cn("flex flex-col items-end", muted && "opacity-50")}>
       <span className="text-[0.6rem] tracking-wide text-ink-mute uppercase">{label}</span>
       <span className="tabular">{formatMoney(value)}</span>
     </span>

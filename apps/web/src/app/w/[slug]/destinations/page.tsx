@@ -1,13 +1,15 @@
 "use client";
 
-import { newId, nowIso, pinScenario, reestimateBudgetFromScenario, type Destination, type Scenario, type Venue, type VenueStatus, scenarioMath } from "@bower/shared";
+import { newId, nowIso, pinScenario, unpinScenario, reestimateBudgetFromScenario, type Destination, type Scenario, type Venue, type VenueStatus } from "@bower/shared";
 import { Plus, RefreshCw } from "lucide-react";
 import { useCallback, useMemo, useState } from "react";
+import { DestinationDetailDialog } from "@/components/atlas/destination-detail-dialog";
 import { DestinationPostcard } from "@/components/atlas/destination-postcard";
 import { GuestTargetControl } from "@/components/atlas/guest-target-control";
 import { ScenarioMatrix } from "@/components/atlas/scenario-matrix";
 import { DestinationEditorDialog } from "@/components/destination-editor-dialog";
 import { PageHeader } from "@/components/page-header";
+import { PrioritiesCard } from "@/components/priorities/priorities-card";
 import { ScenarioEditorDialog } from "@/components/scenario-editor-dialog";
 import { Button } from "@/components/ui/button";
 import { VenueEditorDialog } from "@/components/venue-editor-dialog";
@@ -15,6 +17,7 @@ import { restoreSeed } from "@/lib/bootstrap";
 import { isDomesticCountry } from "@/lib/country-code";
 import { cn } from "@/lib/utils";
 import { LoadingState } from "@/components/loading-state";
+import { usePriorities } from "@/lib/use-priorities";
 import { useRepoContext } from "@/lib/repo-context";
 import { useEntityList } from "@/lib/use-entity-list";
 
@@ -32,7 +35,9 @@ export default function DestinationsPage() {
   const loadScenarios = useCallback(async () => (repo && weddingId ? repo.scenarios.list(weddingId) : undefined), [repo, weddingId]);
   const { items: scenarios } = useEntityList(loadScenarios);
 
-  const [expandedId, setExpandedId] = useState<string | null>(null);
+  const { priorities, add: addPriority, toggle: togglePriority, remove: removePriority } = usePriorities();
+
+  const [detailId, setDetailId] = useState<string | null>(null);
   const [destinationDialog, setDestinationDialog] = useState<{ open: boolean; destination?: Destination }>({ open: false });
   const [venueDialog, setVenueDialog] = useState<{ open: boolean; destinationId: string; venue?: Venue } | null>(null);
   const [scenarioDialog, setScenarioDialog] = useState<{ open: boolean; scenario?: Scenario; destinationId?: string }>({ open: false });
@@ -46,28 +51,18 @@ export default function DestinationsPage() {
     return map;
   }, [scenarios]);
 
-  const pinned = useMemo(
-    () => scenarios.find((s) => s.id === wedding?.activeScenarioId) ?? scenarios.find((s) => s.pinned),
-    [scenarios, wedding?.activeScenarioId],
+  // Order is the couple's own call (sortOrder), not derived from cost or whatever scenario
+  // happens to be pinned — that's what made Brazil "stuck" as the front-runner before. Rank 1
+  // (lowest sortOrder) is the front-runner, full stop.
+  const orderedDestinations = useMemo(
+    () => [...destinations].sort((a, b) => (a.sortOrder ?? Number.MAX_SAFE_INTEGER) - (b.sortOrder ?? Number.MAX_SAFE_INTEGER)),
+    [destinations],
   );
-
-  // The front-runner leads the atlas; everything else follows by total cost, so
-  // the cheapest alternative is the next thing they see.
-  const orderedDestinations = useMemo(() => {
-    const totalFor = (id: string) => {
-      const scenario = scenarioByDestination.get(id);
-      return scenario ? scenarioMath(scenario).totalCost : Number.MAX_SAFE_INTEGER;
-    };
-    return [...destinations].sort((a, b) => {
-      const aPinned = pinned?.destinationId === a.id;
-      const bPinned = pinned?.destinationId === b.id;
-      if (aPinned !== bPinned) return aPinned ? -1 : 1;
-      return totalFor(a.id) - totalFor(b.id);
-    });
-  }, [destinations, scenarioByDestination, pinned?.destinationId]);
+  const frontRunnerId = orderedDestinations[0]?.id;
 
   const domesticDestinations = useMemo(() => orderedDestinations.filter((d) => isDomesticCountry(d.country)), [orderedDestinations]);
   const internationalDestinations = useMemo(() => orderedDestinations.filter((d) => !isDomesticCountry(d.country)), [orderedDestinations]);
+  const detailDestination = detailId ? destinations.find((d) => d.id === detailId) : undefined;
 
   if (!repo || !wedding) return <LoadingState label="Opening the atlas…" />;
 
@@ -86,6 +81,11 @@ export default function DestinationsPage() {
 
   const handlePinScenario = async (scenarioId: string) => {
     await pinScenario(repo, wedding.id, scenarioId);
+    touch();
+  };
+
+  const handleUnpinScenario = async (scenarioId: string) => {
+    await unpinScenario(repo, wedding.id, scenarioId);
     touch();
   };
 
@@ -110,6 +110,22 @@ export default function DestinationsPage() {
     const current = destination.favoritedBy ?? [];
     const favoritedBy = current.includes(partner) ? current.filter((p) => p !== partner) : [...current, partner];
     await repo.destinations.upsert({ ...destination, favoritedBy, updatedAt: nowIso() });
+    await reloadDestinations();
+  };
+
+  // Moves a destination up/down within its own Domestic/International group by swapping
+  // sortOrder with that neighbor — keeps reordering intuitive without a drag-and-drop library.
+  const handleReorder = async (group: Destination[], destination: Destination, direction: -1 | 1) => {
+    const index = group.findIndex((d) => d.id === destination.id);
+    const neighbor = group[index + direction];
+    if (!neighbor) return;
+    const now = nowIso();
+    const a = destination.sortOrder ?? index + 1;
+    const b = neighbor.sortOrder ?? index + 1 + direction;
+    await Promise.all([
+      repo.destinations.upsert({ ...destination, sortOrder: b, updatedAt: now }),
+      repo.destinations.upsert({ ...neighbor, sortOrder: a, updatedAt: now }),
+    ]);
     await reloadDestinations();
   };
 
@@ -138,6 +154,15 @@ export default function DestinationsPage() {
       />
 
       <GuestTargetControl value={guestTarget} onSave={(next) => void updateGuestTarget(next)} />
+
+      <PrioritiesCard
+        title="Venue must-haves"
+        area="Venue"
+        priorities={priorities}
+        onAdd={(area, label) => void addPriority(area, label)}
+        onToggle={(p) => void togglePriority(p)}
+        onRemove={(p) => void removePriority(p)}
+      />
 
       {destinations.length === 0 ? (
         <div className="mt-6 flex flex-wrap items-center gap-3 rounded-lg border border-dashed border-line-strong p-4 text-sm">
@@ -171,17 +196,15 @@ export default function DestinationsPage() {
                         key={destination.id}
                         className={`rise rise-${Math.min(i + 1, 8)}`}
                         destination={destination}
-                        venues={venues.filter((v) => v.destinationId === destination.id)}
+                        venueCount={venues.filter((v) => v.destinationId === destination.id).length}
                         scenario={scenarioByDestination.get(destination.id)}
-                        isFrontRunner={pinned?.destinationId === destination.id}
+                        isFrontRunner={destination.id === frontRunnerId}
                         guestTarget={guestTarget}
-                        expanded={expandedId === destination.id}
-                        onToggleExpand={() => setExpandedId((id) => (id === destination.id ? null : destination.id))}
-                        onEditDestination={() => setDestinationDialog({ open: true, destination })}
-                        onAddVenue={() => setVenueDialog({ open: true, destinationId: destination.id })}
-                        onEditVenue={(venue) => setVenueDialog({ open: true, destinationId: destination.id, venue })}
-                        onVenueStatusChange={(venue, status) => void handleVenueStatusChange(venue, status)}
-                        onNewScenario={() => setScenarioDialog({ open: true, destinationId: destination.id })}
+                        onViewDetails={() => setDetailId(destination.id)}
+                        canMoveUp={i > 0}
+                        canMoveDown={i < group.items.length - 1}
+                        onMoveUp={() => void handleReorder(group.items, destination, -1)}
+                        onMoveDown={() => void handleReorder(group.items, destination, 1)}
                         partnerAName={wedding.partnerA.name}
                         partnerBName={wedding.partnerB.name}
                         onToggleFavorite={(partner) => void handleToggleFavorite(destination, partner)}
@@ -200,9 +223,26 @@ export default function DestinationsPage() {
         scenarios={scenarios}
         destinations={destinations}
         onPin={(id) => void handlePinScenario(id)}
+        onUnpin={(id) => void handleUnpinScenario(id)}
         onEdit={(scenario) => setScenarioDialog({ open: true, scenario })}
         onDuplicate={(s) => void handleDuplicateScenario(s)}
         onNewScenario={() => setScenarioDialog({ open: true })}
+      />
+
+      <DestinationDetailDialog
+        open={detailId !== null}
+        onOpenChange={(open) => !open && setDetailId(null)}
+        destination={detailDestination}
+        venues={detailDestination ? venues.filter((v) => v.destinationId === detailDestination.id) : []}
+        onEditDestination={() => detailDestination && setDestinationDialog({ open: true, destination: detailDestination })}
+        onAddVenue={() => detailDestination && setVenueDialog({ open: true, destinationId: detailDestination.id })}
+        onEditVenue={(venue) => detailDestination && setVenueDialog({ open: true, destinationId: detailDestination.id, venue })}
+        onVenueStatusChange={(venue, status) => void handleVenueStatusChange(venue, status)}
+        onNewScenario={() => {
+          if (!detailDestination) return;
+          setDetailId(null);
+          setScenarioDialog({ open: true, destinationId: detailDestination.id });
+        }}
       />
 
       <DestinationEditorDialog

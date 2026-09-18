@@ -362,3 +362,29 @@
     text-wrap: pretty;
   }
 }
+
+/* "Export as PDF" is the browser's own Print → Save as PDF, not a client-side PDF library: mark
+   whatever should end up on paper with .print-area, and printing hides everything else. */
+@media print {
+  body * {
+    visibility: hidden;
+  }
+  .print-area,
+  .print-area * {
+    visibility: visible;
+  }
+  .print-area {
+    position: absolute;
+    inset: 0;
+    width: 100%;
+  }
+  .no-print {
+    display: none !important;
+  }
+  /* Never ship a truncated "how we got these" onto paper just because it was collapsed on screen. */
+  .print-area [class*="line-clamp"] {
+    display: block !important;
+    overflow: visible !important;
+    -webkit-line-clamp: unset !important;
+  }
+}

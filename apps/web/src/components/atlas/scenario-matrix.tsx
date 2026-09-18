@@ -2,7 +2,7 @@
 
 import { scenarioMath, type Destination, type Scenario } from "@bower/shared";
 import { format, isValid, parseISO } from "date-fns";
-import { Copy, Plus } from "lucide-react";
+import { Copy, Plus, Printer } from "lucide-react";
 import { useState, type ReactNode } from "react";
 import { AccentChip } from "@/components/atlas/chips";
 import { Button } from "@/components/ui/button";
@@ -13,6 +13,7 @@ export function ScenarioMatrix({
   scenarios,
   destinations,
   onPin,
+  onUnpin,
   onEdit,
   onDuplicate,
   onNewScenario,
@@ -20,6 +21,7 @@ export function ScenarioMatrix({
   scenarios: Scenario[];
   destinations: Destination[];
   onPin: (scenarioId: string) => void;
+  onUnpin: (scenarioId: string) => void;
   onEdit: (scenario: Scenario) => void;
   onDuplicate: (scenario: Scenario) => void;
   onNewScenario: () => void;
@@ -35,7 +37,7 @@ export function ScenarioMatrix({
   const pinnedMath = pinned ? scenarioMath(pinned) : undefined;
 
   return (
-    <section>
+    <section className="print-area">
       <div className="rise flex flex-wrap items-end justify-between gap-4">
         <div>
           <p className="eyebrow">The comparison</p>
@@ -44,9 +46,14 @@ export function ScenarioMatrix({
             Each column is a destination, venue, date, and guest-count bet. Pin one to drive the budget and timeline.
           </p>
         </div>
-        <Button size="sm" onClick={onNewScenario}>
-          <Plus className="size-4 stroke-[1.5]" /> New scenario
-        </Button>
+        <div className="no-print flex items-center gap-2">
+          <Button variant="outline" size="sm" onClick={() => window.print()} disabled={ordered.length === 0}>
+            <Printer className="size-4 stroke-[1.5]" /> Print / Save as PDF
+          </Button>
+          <Button size="sm" onClick={onNewScenario}>
+            <Plus className="size-4 stroke-[1.5]" /> New scenario
+          </Button>
+        </div>
       </div>
 
       {ordered.length === 0 ? (
@@ -66,8 +73,10 @@ export function ScenarioMatrix({
                       {s.pinned && <AccentChip className="shrink-0">Our plan</AccentChip>}
                     </div>
                     <p className="mt-0.5 text-xs text-ink-mute">{destinationById.get(s.destinationId ?? "")?.name ?? "No destination set"}</p>
-                    <div className="mt-2.5 flex flex-wrap gap-1.5">
-                      {!s.pinned && (
+                    <div className="no-print mt-2.5 flex flex-wrap gap-1.5">
+                      {s.pinned ? (
+                        <ActionPill onClick={() => onUnpin(s.id)}>Unpin</ActionPill>
+                      ) : (
                         <ActionPill onClick={() => onPin(s.id)}>Make this our plan</ActionPill>
                       )}
                       <ActionPill onClick={() => onEdit(s)}>Edit</ActionPill>

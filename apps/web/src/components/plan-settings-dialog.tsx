@@ -1,6 +1,6 @@
 "use client";
 
-import { newId, type Anchor, type AnchorKind, type PlanConfig, type TravelWindow } from "@bower/shared";
+import { newId, planPaceSchema, type Anchor, type AnchorKind, type PlanConfig, type PlanPace, type TravelWindow } from "@bower/shared";
 import { Trash2 } from "lucide-react";
 import { useEffect, useState, type ReactNode } from "react";
 import { Button } from "@/components/ui/button";
@@ -9,9 +9,15 @@ import { Dialog, DialogBody, DialogCloseButton, DialogFooter, DialogHeader, Dial
 import { Input } from "@/components/ui/input";
 import { Label } from "@/components/ui/label";
 import { Select } from "@/components/ui/select";
+import { cn } from "@/lib/utils";
 
 const ANCHOR_KINDS: AnchorKind[] = ["engagement_party", "save_the_dates", "invitations", "custom"];
 const REVEAL_OPTIONS = ["date", "destination", "wedding_party"] as const;
+const PACE_DESCRIPTIONS: Record<PlanPace, string> = {
+  relaxed: "Stretches every default lead time (×1.25) — more breathing room, later deadlines.",
+  balanced: "The default lead times, as researched.",
+  aggressive: "Compresses every default lead time (×0.75) — for a shorter runway to the wedding.",
+};
 
 export function PlanSettingsDialog({
   open,
@@ -29,6 +35,7 @@ export function PlanSettingsDialog({
   const [saveTheDatesMonthsBefore, setSaveTheDatesMonthsBefore] = useState(planConfig.saveTheDatesMonthsBefore);
   const [invitationsMonthsBefore, setInvitationsMonthsBefore] = useState(planConfig.invitationsMonthsBefore);
   const [rsvpDeadlineMonthsBefore, setRsvpDeadlineMonthsBefore] = useState(planConfig.rsvpDeadlineMonthsBefore);
+  const [pace, setPace] = useState<PlanPace>(planConfig.pace ?? "balanced");
   const [saving, setSaving] = useState(false);
 
   // Re-sync local state whenever the dialog opens with fresh data.
@@ -39,6 +46,7 @@ export function PlanSettingsDialog({
     setSaveTheDatesMonthsBefore(planConfig.saveTheDatesMonthsBefore);
     setInvitationsMonthsBefore(planConfig.invitationsMonthsBefore);
     setRsvpDeadlineMonthsBefore(planConfig.rsvpDeadlineMonthsBefore);
+    setPace(planConfig.pace ?? "balanced");
     // Intentionally re-syncs only when the dialog opens, not on every planConfig change.
   }, [open]);
 
@@ -51,6 +59,7 @@ export function PlanSettingsDialog({
       saveTheDatesMonthsBefore,
       invitationsMonthsBefore,
       rsvpDeadlineMonthsBefore,
+      pace,
     });
     setSaving(false);
     onOpenChange(false);
@@ -63,6 +72,24 @@ export function PlanSettingsDialog({
         <DialogCloseButton onClose={() => onOpenChange(false)} />
       </DialogHeader>
       <DialogBody className="flex flex-col gap-6">
+        <section className="flex flex-col gap-3">
+          <p className="eyebrow">Pace</p>
+          <div className="inline-flex w-fit rounded-full border border-line p-0.5 text-xs">
+            {planPaceSchema.options.map((p) => (
+              <button
+                key={p}
+                type="button"
+                onClick={() => setPace(p)}
+                aria-pressed={pace === p}
+                className={cn("rounded-full px-3 py-1 capitalize transition-colors", pace === p ? "bg-ink text-rail-foreground" : "text-ink-soft hover:text-foreground")}
+              >
+                {p}
+              </button>
+            ))}
+          </div>
+          <p className="text-xs text-ink-soft">{PACE_DESCRIPTIONS[pace]} Never changes a date you've already edited yourself, an anchor date, or a task you overrode individually.</p>
+        </section>
+
         <section className="flex flex-col gap-3">
           <p className="eyebrow">Communications offsets</p>
           <div className="grid grid-cols-3 gap-3">

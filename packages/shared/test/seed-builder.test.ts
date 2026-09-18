@@ -82,9 +82,9 @@ describe("buildSeedBundle", () => {
 });
 
 describe("registered seed", () => {
-  it("builds the real Joshua & Janel bundle with six destinations and sourced numbers", async () => {
+  it("builds the real Joshua & Janel bundle with all destinations and sourced numbers", async () => {
     const { SEED_BENCHMARKS, SEED_DESTINATIONS } = await import("../src/seed/registry");
-    expect(SEED_DESTINATIONS).toHaveLength(6);
+    expect(SEED_DESTINATIONS).toHaveLength(7);
     expect(SEED_DESTINATIONS[0].name).toBe("Brazil");
     for (const d of SEED_DESTINATIONS) {
       expect(d.sourceUrls.length).toBeGreaterThan(0);

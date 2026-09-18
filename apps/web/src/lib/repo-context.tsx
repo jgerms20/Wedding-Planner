@@ -2,7 +2,7 @@
 
 import { createRepo, type Settings, type Wedding, type WeddingRepo } from "@bower/shared";
 import { createContext, useCallback, useContext, useEffect, useState, type ReactNode } from "react";
-import { ensureWedding } from "./bootstrap";
+import { ensureWedding, reconcileDestinations } from "./bootstrap";
 import { DATA_MODE } from "./constants";
 
 /** How long `ready` can stay false before pages start offering a reload hint. */
@@ -74,6 +74,8 @@ export function RepoProvider({ children }: { children: ReactNode }) {
     let cancelled = false;
     (async () => {
       const found = await ensureWedding(repo);
+      if (cancelled) return;
+      await reconcileDestinations(repo, found.id);
       if (cancelled) return;
       setWedding(found);
       setSettings((await repo.getSettings(found.id)) ?? null);

@@ -48,3 +48,32 @@ export const aiUsageSchema = z.object({
   createdAt: z.string(),
 });
 export type AiUsage = z.infer<typeof aiUsageSchema>;
+
+/** A must-have, either overall or for a specific area (venue, catering, ...). `area` is a plain
+ * string rather than a closed enum so the couple can categorize however makes sense to them; the
+ * UI offers a few common areas as quick picks. */
+export const prioritySchema = z.object({
+  id: z.string(),
+  weddingId: z.string(),
+  area: z.string(),
+  label: z.string(),
+  done: z.boolean(),
+  notes: z.string().optional(),
+  createdAt: z.string(),
+  updatedAt: z.string(),
+});
+export type Priority = z.infer<typeof prioritySchema>;
+
+export const watchItemKindSchema = z.enum(["movie", "show", "podcast"]);
+export type WatchItemKind = z.infer<typeof watchItemKindSchema>;
+
+/** One title on the couple's wedding-themed movies/shows/podcasts checklist. */
+export const watchItemSchema = z.object({
+  id: z.string(),
+  weddingId: z.string(),
+  kind: watchItemKindSchema,
+  title: z.string(),
+  done: z.boolean(),
+  createdAt: z.string(),
+});
+export type WatchItem = z.infer<typeof watchItemSchema>;

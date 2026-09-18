@@ -10,6 +10,7 @@ import type {
   SubEventKind,
   Task,
   Venue,
+  WatchItem,
   Wedding,
 } from "../entities/index";
 import { defaultSettings, scenarioMath } from "../entities/index";
@@ -109,6 +110,83 @@ function round(n: number): number {
 }
 
 /**
+ * Builds one destination (plus its venues and a starting scenario) from a researched seed.
+ * Shared by `buildSeedBundle` (the first-ever bootstrap) and `reconcileDestinations` (adding a
+ * newly-registered seed destination to an existing wedding later, without touching anything
+ * else) — `sortOrder`/`pinned` are the caller's call since they mean different things in each
+ * context (seed rank vs. "append after what's already there"; "the initial pick" vs. "never
+ * auto-pin something the couple hasn't looked at yet").
+ */
+export function buildDestinationFromSeed(
+  seed: DestinationSeed,
+  weddingId: string,
+  now: string,
+  options: { guestTarget: number; sortOrder: number; pinned: boolean },
+): { destination: Destination; venues: Venue[]; scenario: Scenario } {
+  const destinationId = newId();
+  const destination: Destination = {
+    id: destinationId,
+    weddingId,
+    name: seed.name,
+    country: seed.country,
+    region: seed.region,
+    notes: [seed.whyHere, seed.notes, seed.travelNotes].filter(Boolean).join("\n\n"),
+    travelCostPerGuestEstimate: seed.travelCostPerGuestEstimate,
+    lodgingPerNightEstimate: seed.lodgingPerNightEstimate,
+    attendanceRateEstimate: seed.attendanceRateEstimate,
+    weatherNotes: seed.weatherNotes,
+    legalNotes: seed.legalNotes,
+    seasonNotes: seed.seasonNotes,
+    sourceUrls: seed.sourceUrls,
+    sortOrder: options.sortOrder,
+    createdAt: now,
+    updatedAt: now,
+  };
+
+  const venues: Venue[] = seed.venues.map((v) => ({
+    id: newId(),
+    weddingId,
+    destinationId,
+    name: v.name,
+    website: v.website,
+    email: v.email,
+    phone: v.phone,
+    capacity: v.capacity,
+    rentalFee: v.rentalFee,
+    fbMinimum: v.fbMinimum,
+    perGuestCost: v.perGuestCost,
+    inHouseCatering: v.inHouseCatering,
+    lodgingOnSite: v.lodgingOnSite,
+    styleNotes: [v.styleNotes, v.estimated ? "Figures are estimates, not published prices." : undefined]
+      .filter(Boolean)
+      .join(" "),
+    availabilityNotes: v.availabilityNotes,
+    status: v.status ?? "idea",
+    sourceUrls: v.sourceUrls,
+    createdAt: now,
+    updatedAt: now,
+  }));
+
+  const scenario: Scenario = {
+    id: newId(),
+    weddingId,
+    name: seed.name,
+    destinationId,
+    guestAssumption: options.guestTarget,
+    attendanceRate: seed.scenario.attendanceRate,
+    fixedCosts: seed.scenario.fixedCosts,
+    perGuestCost: seed.scenario.perGuestCost,
+    travelCostPerGuest: seed.scenario.travelCostPerGuest,
+    notes: seed.scenario.notes,
+    pinned: options.pinned,
+    createdAt: now,
+    updatedAt: now,
+  };
+
+  return { destination, venues, scenario };
+}
+
+/**
  * Builds the bespoke first-load bundle for Joshua & Janel from researched
  * destination seeds and cost benchmarks. Everything derived is labeled as such
  * in notes so the couple can see where a number came from.
@@ -125,66 +203,14 @@ export function buildSeedBundle(input: SeedInput): ExportBundle {
   const scenarios: Scenario[] = [];
 
   for (const seed of sortedDestinations) {
-    const destinationId = newId();
-    destinations.push({
-      id: destinationId,
-      weddingId,
-      name: seed.name,
-      country: seed.country,
-      region: seed.region,
-      notes: [seed.whyHere, seed.notes, seed.travelNotes].filter(Boolean).join("\n\n"),
-      travelCostPerGuestEstimate: seed.travelCostPerGuestEstimate,
-      lodgingPerNightEstimate: seed.lodgingPerNightEstimate,
-      attendanceRateEstimate: seed.attendanceRateEstimate,
-      weatherNotes: seed.weatherNotes,
-      legalNotes: seed.legalNotes,
-      seasonNotes: seed.seasonNotes,
-      sourceUrls: seed.sourceUrls,
-      createdAt: now,
-      updatedAt: now,
-    });
-
-    for (const v of seed.venues) {
-      venues.push({
-        id: newId(),
-        weddingId,
-        destinationId,
-        name: v.name,
-        website: v.website,
-        email: v.email,
-        phone: v.phone,
-        capacity: v.capacity,
-        rentalFee: v.rentalFee,
-        fbMinimum: v.fbMinimum,
-        perGuestCost: v.perGuestCost,
-        inHouseCatering: v.inHouseCatering,
-        lodgingOnSite: v.lodgingOnSite,
-        styleNotes: [v.styleNotes, v.estimated ? "Figures are estimates, not published prices." : undefined]
-          .filter(Boolean)
-          .join(" "),
-        availabilityNotes: v.availabilityNotes,
-        status: v.status ?? "idea",
-        sourceUrls: v.sourceUrls,
-        createdAt: now,
-        updatedAt: now,
-      });
-    }
-
-    scenarios.push({
-      id: newId(),
-      weddingId,
-      name: seed.name,
-      destinationId,
-      guestAssumption: COUPLE.guestTarget,
-      attendanceRate: seed.scenario.attendanceRate,
-      fixedCosts: seed.scenario.fixedCosts,
-      perGuestCost: seed.scenario.perGuestCost,
-      travelCostPerGuest: seed.scenario.travelCostPerGuest,
-      notes: seed.scenario.notes,
+    const built = buildDestinationFromSeed(seed, weddingId, now, {
+      guestTarget: COUPLE.guestTarget,
+      sortOrder: seed.rank,
       pinned: seed.rank === 1,
-      createdAt: now,
-      updatedAt: now,
     });
+    destinations.push(built.destination);
+    venues.push(...built.venues);
+    scenarios.push(built.scenario);
   }
 
   const pinned = scenarios.find((s) => s.pinned) ?? scenarios[0];
@@ -370,7 +396,28 @@ export function buildSeedBundle(input: SeedInput): ExportBundle {
     partyMembers: [],
     decisions,
     notes: [],
+    priorities: [],
+    watchItems: buildStarterWatchList(weddingId),
   };
+}
+
+const STARTER_WATCH_LIST: Array<{ kind: WatchItem["kind"]; title: string }> = [
+  { kind: "movie", title: "Materialists (2025)" },
+  { kind: "movie", title: "The Wedding Banquet (2025)" },
+  { kind: "movie", title: "Plus One (2019)" },
+  { kind: "show", title: "Love Is Blind" },
+];
+
+function buildStarterWatchList(weddingId: string): WatchItem[] {
+  const now = nowIso();
+  return STARTER_WATCH_LIST.map((item) => ({
+    id: newId(),
+    weddingId,
+    kind: item.kind,
+    title: item.title,
+    done: false,
+    createdAt: now,
+  }));
 }
 
 function midpoint(benchmarks: CostBenchmarks, kind: SubEventKind): number | undefined {

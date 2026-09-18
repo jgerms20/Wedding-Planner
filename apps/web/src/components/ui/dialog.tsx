@@ -9,9 +9,11 @@ interface DialogProps {
   open: boolean;
   onOpenChange: (open: boolean) => void;
   children: React.ReactNode;
+  /** Overrides the default `max-w-lg` panel width, e.g. for a large detail view. */
+  className?: string;
 }
 
-function Dialog({ open, onOpenChange, children }: DialogProps) {
+function Dialog({ open, onOpenChange, children, className }: DialogProps) {
   React.useEffect(() => {
     if (!open) return;
     const onKey = (e: KeyboardEvent) => {
@@ -31,7 +33,7 @@ function Dialog({ open, onOpenChange, children }: DialogProps) {
   return (
     <div className="fixed inset-0 z-50 flex items-start justify-center overflow-y-auto p-4 pt-[10vh] sm:pt-[14vh]" role="dialog" aria-modal="true">
       <div className="fixed inset-0 bg-ink/40 backdrop-blur-[2px]" onClick={() => onOpenChange(false)} />
-      <div className="relative z-10 w-full max-w-lg animate-in rounded-lg border border-border bg-card text-card-foreground shadow-xl">
+      <div className={cn("relative z-10 w-full max-w-lg animate-in rounded-lg border border-border bg-card text-card-foreground shadow-xl", className)}>
         {children}
       </div>
     </div>

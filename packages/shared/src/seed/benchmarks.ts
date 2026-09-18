@@ -28,6 +28,8 @@ export const benchmarks: CostBenchmarks = {
       category: "Venue & catering",
       key: "venue_catering",
       percent: 43,
+      percentLow: 45,
+      percentHigh: 55,
       sortOrder: 1,
       note:
         "Planner guidance puts venue+catering at 45-55% of total spend; we use 43% here so the other 11 required categories (several of which The Knot's own per-item averages push above typical planner ranges) still sum to exactly 100%. The Knot's 2026 Real Weddings Study puts the average venue alone at $12,900 and average catering at $80/guest.",
@@ -42,6 +44,8 @@ export const benchmarks: CostBenchmarks = {
       category: "Photo & video",
       key: "photo_video",
       percent: 10,
+      percentLow: 10,
+      percentHigh: 12,
       sortOrder: 2,
       note:
         "The Knot's 2026 Real Weddings Study puts the average photographer at $3,000 and average videographer at $2,300 (37% of couples book one); blended, that's close to the 10-12% of budget that planner guidance assigns this category.",
@@ -55,6 +59,8 @@ export const benchmarks: CostBenchmarks = {
       category: "Attire & beauty",
       key: "attire_beauty",
       percent: 6,
+      percentLow: 5,
+      percentHigh: 8,
       sortOrder: 3,
       note:
         "The Knot's average wedding dress is $2,100 and average hair+makeup is about $480 (78% of brides hire a pro); combined with groom's attire this tracks the low-mid end of planner guidance's 5-8% range.",
@@ -67,6 +73,8 @@ export const benchmarks: CostBenchmarks = {
       category: "Flowers & decor",
       key: "flowers_decor",
       percent: 8,
+      percentLow: 8,
+      percentHigh: 10,
       sortOrder: 4,
       note:
         "The Knot's 2026 Real Weddings Study puts average wedding flowers at $2,800, and the Study itself states most couples dedicate 8-10% of total budget to florals — we use the low end of that self-reported range.",
@@ -76,6 +84,8 @@ export const benchmarks: CostBenchmarks = {
       category: "Music & entertainment",
       key: "music_entertainment",
       percent: 6,
+      percentLow: 5,
+      percentHigh: 10,
       sortOrder: 5,
       note:
         "71% of couples book a DJ (The Knot 2026 average: $1,800) versus 12% who book a live band (average $4,500); the DJ figure, as the majority choice, anchors this category near the low end of planner guidance's 5-10% range.",
@@ -85,6 +95,8 @@ export const benchmarks: CostBenchmarks = {
       category: "Stationery & postage",
       key: "stationery_postage",
       percent: 2,
+      percentLow: 2,
+      percentHigh: 3,
       sortOrder: 6,
       note:
         "The Knot's average stationery spend is $518-$530 for invitations; adding postage for ~100 guests (budgeted at a minimum of $1.50/invite per wedding-budget-mistake guidance) brings the category to roughly $650-700, in line with planner guidance's 2-3% range.",
@@ -142,6 +154,8 @@ export const benchmarks: CostBenchmarks = {
       category: "Contingency",
       key: "contingency",
       percent: 8,
+      percentLow: 5,
+      percentHigh: 15,
       sortOrder: 12,
       note: "Planner guidance recommends holding 5-15% of total budget as an unallocated contingency reserve for surprises; 8% sits in the middle of that range once the 11 named categories above are set.",
       sourceUrls: [
@@ -204,6 +218,24 @@ export const benchmarks: CostBenchmarks = {
       ],
     },
     {
+      kind: "joint_bachelor_bachelorette",
+      low: 1100,
+      high: 1600,
+      note:
+        "No dedicated dataset exists for a combined co-ed bachelor/bachelorette trip; estimated by blending the 2026 solo-trip averages (bachelorette ~$1,300/person, bachelor ~$1,500/person) and discounting roughly 10-15% for the group-size and shared-lodging savings planner sources describe for joint trips.",
+      sourceUrls: [
+        "https://withjoy.com/blog/bachelor-vs-bachelorette-parties-hidden-costs-traditions-revealed/",
+        "https://letsbatch.com/blog/planning-a-joint-bachelor-and-bachelorette-party",
+      ],
+    },
+    {
+      kind: "premarital_counseling",
+      low: 350,
+      high: 900,
+      note: "A typical 4-8 session package runs $90-175/hour; a 5-session package commonly totals $600-875, whether secular or faith-based (e.g. Pre-Cana).",
+      sourceUrls: ["https://www.thumbtack.com/p/premarital-counseling-cost", "https://www.estestherapy.com/average-cost-of-premarital-counseling"],
+    },
+    {
       kind: "rehearsal_dinner",
       low: 1630,
       high: 4500,
@@ -223,12 +255,39 @@ export const benchmarks: CostBenchmarks = {
       sourceUrls: ["https://www.greatevent.com/wedding-venue-cost-2026-guide/"],
     },
     {
+      kind: "after_party",
+      low: 1000,
+      high: 3500,
+      note:
+        "No dedicated dataset exists for a late-night post-reception event; estimated by scaling the published welcome-party light-apps-and-drinks rate ($20-50/head) to a smaller late-night headcount (roughly 40-70 of ~100 guests typically stay), plus a $700-1,400 DJ time-extension add-on.",
+      sourceUrls: [
+        "https://www.greatevent.com/wedding-venue-cost-2026-guide/",
+        "https://liventgroup.com/cost-of-dj-for-wedding/",
+      ],
+    },
+    {
       kind: "brunch",
       low: 1000,
       high: 4000,
       note:
         "A lunch/brunch event typically runs about 30% cheaper per person than an equivalent evening dinner event; for a smaller post-wedding guest list (family and out-of-town guests staying an extra day, not the full ~100-person list) that puts a catered brunch in roughly the $1,000-4,000 range depending on venue and headcount.",
       sourceUrls: ["https://www.zola.com/expert-advice/how-much-does-a-rehearsal-dinner-cost"],
+    },
+    {
+      kind: "second_reception",
+      low: 25000,
+      high: 40000,
+      note:
+        "A full reception-scale event (minus the ceremony) held at home for guests who couldn't travel to a destination wedding — planner guidance is to budget it like a full wedding day, not a small party.",
+      sourceUrls: ["https://www.theknot.com/content/throwing-a-second-party-back-home"],
+    },
+    {
+      kind: "sangeet",
+      low: 5000,
+      high: 20000,
+      note:
+        "A pre-wedding music-and-dance celebration, a South Asian wedding tradition, hosted by either or both families. Published venue costs run $50-300+/guest with a commonly cited ~$15,000 typical spend, but that figure assumes the 200-800-guest scale common to this tradition; scaled down here for a couple planning around 100 guests overall.",
+      sourceUrls: ["https://melamatch.com/budget/sangeet"],
     },
   ],
   tips: [

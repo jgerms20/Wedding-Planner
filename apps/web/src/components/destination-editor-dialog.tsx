@@ -44,6 +44,8 @@ export function DestinationEditorDialog({
       legalNotes: form.legalNotes || undefined,
       seasonNotes: form.seasonNotes || undefined,
       sourceUrls: destination?.sourceUrls ?? [],
+      favoritedBy: destination?.favoritedBy,
+      sortOrder: destination?.sortOrder,
       createdAt: destination?.createdAt ?? now,
       updatedAt: now,
     };

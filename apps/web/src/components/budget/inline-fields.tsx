@@ -4,13 +4,24 @@ import { useState } from "react";
 import { formatDate, formatMoney } from "@/lib/format";
 import { cn } from "@/lib/utils";
 
-/** A money figure that becomes a number input on click, and saves on blur/Enter. */
-export function InlineMoney({ label, value, onCommit }: { label: string; value: number | undefined; onCommit: (value: number | undefined) => void }) {
+/** A money figure that becomes a number input on click, and saves on blur/Enter. `muted` de-emphasizes
+ * it (still fully editable) when the page's Estimate/Actuals toggle favors the other pair of fields. */
+export function InlineMoney({
+  label,
+  value,
+  onCommit,
+  muted,
+}: {
+  label: string;
+  value: number | undefined;
+  onCommit: (value: number | undefined) => void;
+  muted?: boolean;
+}) {
   const [editing, setEditing] = useState(false);
 
   if (editing) {
     return (
-      <label className="flex flex-col items-end gap-0.5">
+      <label className={cn("flex flex-col items-end gap-0.5", muted && "opacity-50")}>
         <span className="text-[0.6rem] tracking-wide text-ink-mute uppercase">{label}</span>
         <input
           type="number"
@@ -32,7 +43,7 @@ export function InlineMoney({ label, value, onCommit }: { label: string; value: 
   }
 
   return (
-    <button type="button" onClick={() => setEditing(true)} className="flex flex-col items-end gap-0.5 text-right">
+    <button type="button" onClick={() => setEditing(true)} className={cn("flex flex-col items-end gap-0.5 text-right", muted && "opacity-50")}>
       <span className="text-[0.6rem] tracking-wide text-ink-mute uppercase">{label}</span>
       <span className={cn("tabular text-sm", value === undefined ? "text-ink-mute" : "text-foreground")}>{formatMoney(value)}</span>
     </button>

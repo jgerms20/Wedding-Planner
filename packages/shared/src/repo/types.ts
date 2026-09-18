@@ -9,6 +9,7 @@ import type {
   Guest,
   Household,
   Note,
+  Priority,
   Scenario,
   Settings,
   SubEvent,
@@ -16,6 +17,7 @@ import type {
   Venue,
   Wedding,
   WeddingPartyMember,
+  WatchItem,
 } from "../entities/index";
 
 /** Per-entity CRUD, scoped to a wedding for list(). */
@@ -47,6 +49,8 @@ export interface WeddingRepo {
   notes: EntityRepo<Note>;
   chatMessages: EntityRepo<ChatMessage>;
   aiUsage: EntityRepo<AiUsage>;
+  priorities: EntityRepo<Priority>;
+  watchItems: EntityRepo<WatchItem>;
 
   getWedding(slug: string): Promise<Wedding | undefined>;
   upsertWedding(wedding: Wedding): Promise<Wedding>;

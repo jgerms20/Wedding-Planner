@@ -1,7 +1,7 @@
 "use client";
 
 import type { Task } from "@bower/shared";
-import { Check } from "lucide-react";
+import { Check, Info } from "lucide-react";
 import { useState } from "react";
 import { formatDate } from "@/lib/format";
 import { cn } from "@/lib/utils";
@@ -118,9 +118,21 @@ export function TaskRow({
           className="h-8 shrink-0 rounded-md border border-line-strong bg-transparent px-2 text-xs"
         />
       ) : (
-        <button type="button" onClick={() => setEditingDate(true)} className="tabular shrink-0 text-xs text-ink-soft hover:text-coral">
-          {task.dueDate ? formatDate(task.dueDate, "EEE, MMM d") : "Set date"}
-        </button>
+        <div className="flex shrink-0 items-center gap-1">
+          <button type="button" onClick={() => setEditingDate(true)} className="tabular text-xs text-ink-soft hover:text-coral">
+            {task.dueDate ? formatDate(task.dueDate, "EEE, MMM d") : "Set date"}
+          </button>
+          {task.dueDateReason && (
+            <button
+              type="button"
+              title={task.dueDateReason}
+              aria-label={`Why this date: ${task.dueDateReason}`}
+              className="rounded-full p-0.5 text-ink-mute transition-colors hover:bg-muted hover:text-foreground"
+            >
+              <Info className="size-3" />
+            </button>
+          )}
+        </div>
       )}
     </div>
   );

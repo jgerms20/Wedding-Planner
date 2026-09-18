@@ -5,6 +5,7 @@ import {
   Crown,
   FolderOpen,
   Home,
+  Lightbulb,
   ListChecks,
   MapPinned,
   Moon,
@@ -35,6 +36,7 @@ const NAV_ITEMS = [
   { href: "/party", label: "Party", icon: Crown },
   { href: "/calendar", label: "Calendar", icon: CalendarDays },
   { href: "/files", label: "Files", icon: FolderOpen },
+  { href: "/tips", label: "Tips", icon: Lightbulb },
   { href: "/settings", label: "Settings", icon: SettingsIcon },
 ];
 
