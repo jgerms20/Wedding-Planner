@@ -1,7 +1,7 @@
 "use client";
 
 import { newId, type ApplyResult, type BowerAction } from "@bower/shared";
-import { ArrowUp, Loader2, Mic, Square, X } from "lucide-react";
+import { ArrowUp, Loader2, Mic, Sparkles, Square, X } from "lucide-react";
 import { useEffect, useRef, useState } from "react";
 import { ProposalCards } from "@/components/ai/proposal-cards";
 import { autonomyFor, interpret, runProposal, type ActionSource } from "@/lib/ai/interpret";
@@ -10,11 +10,13 @@ import { useDictation } from "@/lib/use-dictation";
 import { cn } from "@/lib/utils";
 
 /**
- * The always-present "Tell Bower" bar: type or dictate, and Bower turns it
- * into changes. Whatever they say goes through `interpret` — Claude when a
- * key is connected, the deterministic fallback parser when it is not — and
- * comes back as cards above the bar. Nothing is written until Apply, unless
- * autonomy is set to auto-apply additions, which still offers Undo.
+ * "Tell Atlas": type or dictate, and Atlas turns it into changes. Collapsed
+ * by default to a small round button so it never sits over page content;
+ * tapping it opens the input + proposal-card UI below. Whatever they say
+ * goes through `interpret` — Claude when a key is connected, the
+ * deterministic fallback parser when it is not — and comes back as cards.
+ * Nothing is written until Apply, unless autonomy is set to auto-apply
+ * additions, which still offers Undo.
  */
 
 interface Proposal {
@@ -29,6 +31,7 @@ interface Proposal {
 export function TellBowerBar() {
   const { repo, wedding, settings, touch } = useRepoContext();
   const dictation = useDictation();
+  const [open, setOpen] = useState(false);
   const [text, setText] = useState("");
   const [busy, setBusy] = useState(false);
   const [proposal, setProposal] = useState<Proposal | null>(null);
@@ -38,6 +41,10 @@ export function TellBowerBar() {
   useEffect(() => {
     if (dictation.listening || dictation.transcript) setText(dictation.transcript);
   }, [dictation.transcript, dictation.listening]);
+
+  useEffect(() => {
+    if (open) inputRef.current?.focus();
+  }, [open]);
 
   async function submit() {
     const value = text.trim();
@@ -80,11 +87,32 @@ export function TellBowerBar() {
     }
   }
 
+  function close() {
+    setOpen(false);
+    setProposal(null);
+    setText("");
+    if (dictation.listening) dictation.stop();
+  }
+
+  if (!open) {
+    return (
+      <button
+        type="button"
+        onClick={() => setOpen(true)}
+        aria-label="Tell Atlas something"
+        title="Tell Atlas something"
+        className="fixed right-4 bottom-[4.75rem] z-40 flex size-14 items-center justify-center rounded-full bg-coral text-primary-foreground shadow-[0_14px_32px_-10px_rgba(20,40,32,0.5)] transition-transform hover:scale-105 md:right-6 md:bottom-6"
+      >
+        <Sparkles className="size-5" />
+      </button>
+    );
+  }
+
   return (
     <div className="pointer-events-none fixed inset-x-0 bottom-[4.25rem] z-40 flex justify-center px-3 md:bottom-6 md:left-[var(--rail-w)]">
       <div className="pointer-events-auto w-full max-w-2xl">
         {proposal && (
-          <div className="rise mb-2 max-h-[55vh] overflow-y-auto rounded-lg border border-line bg-card/95 p-3 shadow-[0_20px_50px_-20px_rgba(20,40,32,0.5)] backdrop-blur">
+          <div className="rise mb-2 max-h-[45vh] overflow-y-auto rounded-lg border border-line bg-card/95 p-3 shadow-[0_20px_50px_-20px_rgba(20,40,32,0.5)] backdrop-blur">
             <div className="flex items-start gap-3">
               <p className="min-w-0 flex-1 text-[15px] leading-relaxed text-ink-soft">{proposal.reply}</p>
               <button
@@ -119,7 +147,7 @@ export function TellBowerBar() {
             onClick={toggleMic}
             disabled={!dictation.supported}
             aria-label={dictation.listening ? "Stop listening" : "Dictate"}
-            title={dictation.supported ? (dictation.listening ? "Stop" : "Talk to Bower") : "Dictation needs Chrome, Safari, or Edge"}
+            title={dictation.supported ? (dictation.listening ? "Stop" : "Talk to Atlas") : "Dictation needs Chrome, Safari, or Edge"}
             className={cn(
               "flex size-10 shrink-0 items-center justify-center rounded-full text-primary-foreground transition-colors",
               dictation.listening ? "listening bg-coral-deep" : "bg-coral hover:bg-coral-deep",
@@ -132,7 +160,7 @@ export function TellBowerBar() {
             ref={inputRef}
             value={text}
             onChange={(e) => setText(e.target.value)}
-            placeholder={dictation.listening ? "Listening…" : "Tell Bower anything: “add my cousin Marcus from Atlanta, must-invite”"}
+            placeholder={dictation.listening ? "Listening…" : "Tell Atlas anything: “add my cousin Marcus from Atlanta, must-invite”"}
             className="min-w-0 flex-1 bg-transparent text-[15px] text-foreground outline-none placeholder:text-ink-mute"
             data-testid="tell-bower-input"
           />
@@ -143,6 +171,15 @@ export function TellBowerBar() {
             className="flex size-9 shrink-0 items-center justify-center rounded-full bg-ink text-rail-foreground transition-opacity disabled:opacity-30"
           >
             {busy ? <Loader2 className="size-4 animate-spin" /> : <ArrowUp className="size-4" />}
+          </button>
+          <button
+            type="button"
+            onClick={close}
+            aria-label="Collapse"
+            title="Collapse"
+            className="flex size-9 shrink-0 items-center justify-center rounded-full text-ink-soft transition-colors hover:bg-muted"
+          >
+            <X className="size-4" />
           </button>
         </form>
         {dictation.error && <p className="mt-1 text-center text-xs text-destructive">{dictation.error}</p>}

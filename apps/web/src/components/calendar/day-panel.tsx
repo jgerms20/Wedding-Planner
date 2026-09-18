@@ -20,7 +20,7 @@ export function DayPanel({ selectedDate, items }: { selectedDate?: string; items
         <>
           <p className="mt-1 font-display text-xl">{format(parseISO(selectedDate), "EEEE, MMM d")}</p>
           {items.length === 0 ? (
-            <p className="mt-3 text-sm text-ink-soft">Nothing scheduled. Tell Bower to plan something here.</p>
+            <p className="mt-3 text-sm text-ink-soft">Nothing scheduled. Tell Atlas to plan something here.</p>
           ) : (
             <ul className="mt-3 divide-y divide-line">
               {items.map((item) => (

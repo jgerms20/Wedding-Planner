@@ -8,6 +8,7 @@ import { SubEventEditorDialog } from "@/components/sub-event-editor-dialog";
 import { Badge } from "@/components/ui/badge";
 import { Button } from "@/components/ui/button";
 import { formatDate, formatMoney } from "@/lib/format";
+import { LoadingState } from "@/components/loading-state";
 import { useRepoContext } from "@/lib/repo-context";
 import { useEntityList } from "@/lib/use-entity-list";
 
@@ -34,7 +35,7 @@ export default function EventsPage() {
     [subEvents],
   );
 
-  if (!repo || !weddingId) return <p className="font-display text-xl text-ink-soft">Loading…</p>;
+  if (!repo || !weddingId) return <LoadingState />;
 
   return (
     <div className="flex flex-col gap-6">
@@ -50,7 +51,7 @@ export default function EventsPage() {
 
       {ordered.length === 0 ? (
         <div className="postcard rise flex flex-col items-start gap-2 p-8">
-          <p className="text-[15px] text-ink-soft">No satellite events yet. Tell Bower about a shower, a bach trip, or a rehearsal dinner and it lands here.</p>
+          <p className="text-[15px] text-ink-soft">No satellite events yet. Tell Atlas about a shower, a bach trip, or a rehearsal dinner and it lands here.</p>
         </div>
       ) : (
         <div className="grid gap-4 sm:grid-cols-2 lg:grid-cols-3">

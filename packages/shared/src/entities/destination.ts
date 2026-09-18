@@ -15,6 +15,8 @@ export const destinationSchema = z.object({
   legalNotes: z.string().optional(),
   seasonNotes: z.string().optional(),
   sourceUrls: z.array(z.string()),
+  /** Which partner(s) have marked this a favorite — independent of the cost-derived ordering. */
+  favoritedBy: z.array(z.enum(["A", "B"])).optional(),
   createdAt: z.string(),
   updatedAt: z.string(),
 });

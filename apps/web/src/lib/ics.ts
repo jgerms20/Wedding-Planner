@@ -12,7 +12,7 @@ function toIcsDate(iso: string): string {
 
 /** Builds a minimal all-day-event ICS file from a list of dated items. */
 export function buildIcs(calendarName: string, events: IcsEvent[]): string {
-  const lines = ["BEGIN:VCALENDAR", "VERSION:2.0", "PRODID:-//Bower//Wedding Planner//EN", `X-WR-CALNAME:${calendarName}`];
+  const lines = ["BEGIN:VCALENDAR", "VERSION:2.0", "PRODID:-//Atlas//Wedding Planner//EN", `X-WR-CALNAME:${calendarName}`];
   for (const event of events) {
     lines.push(
       "BEGIN:VEVENT",

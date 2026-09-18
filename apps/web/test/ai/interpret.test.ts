@@ -49,7 +49,7 @@ describe("interpret", () => {
     const [call] = port.parseCalls;
     expect(call!.system).toHaveLength(2);
     expect(call!.system[0]!.cache_control).toEqual({ type: "ephemeral" });
-    expect(call!.system[0]!.text).toContain("You are Bower");
+    expect(call!.system[0]!.text).toContain("You are Atlas");
     expect(call!.system[1]!.cache_control).toBeUndefined();
     expect(call!.system[1]!.text).toContain("TODAY: 2026-09-17");
     expect(call!.model).toBe("claude-sonnet-5");

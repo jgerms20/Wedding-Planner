@@ -9,6 +9,7 @@ import { DayPanel } from "@/components/calendar/day-panel";
 import { dateKey, MonthGrid } from "@/components/calendar/month-grid";
 import { PageHeader } from "@/components/page-header";
 import { Button } from "@/components/ui/button";
+import { LoadingState } from "@/components/loading-state";
 import { buildIcs, downloadFile } from "@/lib/ics";
 import { useRepoContext } from "@/lib/repo-context";
 import { useEntityList } from "@/lib/use-entity-list";
@@ -69,7 +70,7 @@ export default function CalendarPage() {
     setSelectedDate(upcomingKey ?? todayKey);
   }, [monthAnchor, loadingEvents, loadingTasks, calendarItems, todayKey]);
 
-  const upcoming12 = useMemo(() => calendarItems.filter((i) => i.date.slice(0, 10) >= todayKey).slice(0, 12), [calendarItems, todayKey]);
+  const upcoming = useMemo(() => calendarItems.filter((i) => i.date.slice(0, 10) >= todayKey), [calendarItems, todayKey]);
 
   function downloadIcs() {
     const ics = buildIcs(wedding ? wedding.name : "Our wedding", [
@@ -82,7 +83,7 @@ export default function CalendarPage() {
     downloadFile("wedding-plan.ics", ics, "text/calendar");
   }
 
-  if (!repo || !weddingId) return <p className="font-display text-xl text-ink-soft">Opening the calendar…</p>;
+  if (!repo || !weddingId) return <LoadingState label="Opening the calendar…" />;
 
   const shownMonth = monthAnchor ?? new Date();
 
@@ -138,9 +139,9 @@ export default function CalendarPage() {
 
       <section>
         <p className="eyebrow">Coming up</p>
-        <h2 className="mt-1 text-3xl">The next dozen</h2>
+        <h2 className="mt-1 text-3xl">Everything ahead</h2>
         <div className="mt-5">
-          <AgendaList items={upcoming12} />
+          <AgendaList items={upcoming} />
         </div>
       </section>
 

@@ -325,7 +325,7 @@ export default function IntakePage() {
       <PageHeader
         eyebrow="Refine our profile"
         title="Update anything, anytime"
-        description="Same questions as day one. Change an answer and Bower re-derives the plan, keeping whatever you've already edited by hand."
+        description="Same questions as day one. Change an answer and Atlas re-derives the plan, keeping whatever you've already edited by hand."
       />
 
       <div className="flex flex-wrap gap-1.5 text-xs text-ink-soft">

@@ -50,7 +50,7 @@ export function ScenarioMatrix({
       </div>
 
       {ordered.length === 0 ? (
-        <p className="mt-5 text-sm text-ink-soft">No scenarios yet. Tell Bower a place, or add one.</p>
+        <p className="mt-5 text-sm text-ink-soft">No scenarios yet. Tell Atlas a place, or add one.</p>
       ) : (
         <div className="rise rise-2 mt-5 overflow-x-auto rounded-lg border border-line">
           <table className="w-full min-w-[760px] border-collapse text-sm">

@@ -2,7 +2,7 @@
 
 import { ResearchVenuesButton } from "@/components/ai/research-venues-button";
 import { scenarioMath, venueStatusSchema, type Destination, type Scenario, type Venue, type VenueStatus } from "@bower/shared";
-import { ChevronDown, ExternalLink, Pencil, Plus } from "lucide-react";
+import { ChevronDown, ExternalLink, Heart, Pencil, Plus } from "lucide-react";
 import { AccentChip, EstimateChip, NeutralChip, SourceChips } from "@/components/atlas/chips";
 import { Button } from "@/components/ui/button";
 import { Select } from "@/components/ui/select";
@@ -25,6 +25,9 @@ export function DestinationPostcard({
   onEditVenue,
   onVenueStatusChange,
   onNewScenario,
+  partnerAName,
+  partnerBName,
+  onToggleFavorite,
   className,
 }: {
   destination: Destination;
@@ -39,6 +42,9 @@ export function DestinationPostcard({
   onEditVenue: (venue: Venue) => void;
   onVenueStatusChange: (venue: Venue, status: VenueStatus) => void;
   onNewScenario: () => void;
+  partnerAName: string;
+  partnerBName: string;
+  onToggleFavorite: (partner: "A" | "B") => void;
   className?: string;
 }) {
   const math = scenario ? scenarioMath(scenario) : undefined;
@@ -55,13 +61,16 @@ export function DestinationPostcard({
     Travel: travelNotes,
   };
 
+  const favoritedBy = destination.favoritedBy ?? [];
+
   return (
     <div className={cn("postcard flex flex-col p-5", className)}>
       <div className="flex items-start justify-between gap-2">
         <span className="stamp stamp-sm">{countryCode(destination.country, destination.name)}</span>
         <div className="flex items-center gap-2">
           {isFrontRunner && <AccentChip>Front-runner</AccentChip>}
-          {/* research-venues-button slot */}
+          <FavoriteToggle label={partnerAName} active={favoritedBy.includes("A")} onClick={() => onToggleFavorite("A")} />
+          <FavoriteToggle label={partnerBName} active={favoritedBy.includes("B")} onClick={() => onToggleFavorite("B")} />
         </div>
       </div>
 
@@ -133,7 +142,7 @@ export function DestinationPostcard({
               </div>
             </div>
             {venues.length === 0 ? (
-              <p className="mt-2 text-sm text-ink-mute">No venues yet. Tell Bower to find some, or add one.</p>
+              <p className="mt-2 text-sm text-ink-mute">No venues yet. Tell Atlas to find some, or add one.</p>
             ) : (
               <ul className="mt-2 flex flex-col gap-2">
                 {venues.map((venue) => (
@@ -154,6 +163,28 @@ export function DestinationPostcard({
         </div>
       )}
     </div>
+  );
+}
+
+/** One partner's own favorite marker — independent of the other partner's, since they don't always agree. */
+function FavoriteToggle({ label, active, onClick }: { label: string; active: boolean; onClick: () => void }) {
+  return (
+    <button
+      type="button"
+      onClick={(e) => {
+        e.stopPropagation();
+        onClick();
+      }}
+      aria-pressed={active}
+      title={active ? `${label}'s favorite` : `Mark as ${label}'s favorite`}
+      className={cn(
+        "inline-flex items-center gap-1 rounded-full border px-2 py-0.5 text-xs transition-colors",
+        active ? "border-coral bg-coral/10 text-coral" : "border-line text-ink-mute hover:border-line-strong hover:text-ink-soft",
+      )}
+    >
+      <Heart className={cn("size-3", active && "fill-coral")} />
+      {label}
+    </button>
   );
 }
 

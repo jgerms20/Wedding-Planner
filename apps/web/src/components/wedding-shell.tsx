@@ -28,7 +28,7 @@ import { cn } from "@/lib/utils";
 const NAV_ITEMS = [
   { href: "", label: "Home", icon: Home },
   { href: "/plan", label: "Plan", icon: ListChecks },
-  { href: "/destinations", label: "Atlas", icon: MapPinned },
+  { href: "/destinations", label: "Destinations", icon: MapPinned },
   { href: "/guests", label: "Guests", icon: Users },
   { href: "/budget", label: "Budget", icon: Wallet },
   { href: "/events", label: "Events", icon: PartyPopper },
@@ -66,7 +66,7 @@ function ShellChrome({ children }: { children: ReactNode }) {
       <aside className="sticky top-0 hidden h-screen flex-col bg-rail text-rail-foreground md:flex">
         <div className="px-6 pt-7 pb-5">
           <Link href={base} className="font-display text-3xl italic tracking-tight">
-            Bower
+            Atlas
           </Link>
           <p className="mt-0.5 text-[0.65rem] font-semibold tracking-[0.22em] text-rail-muted uppercase">Wedding atlas</p>
         </div>
@@ -109,7 +109,7 @@ function ShellChrome({ children }: { children: ReactNode }) {
       {/* Mobile top bar */}
       <header className="sticky top-0 z-40 flex items-center justify-between bg-rail px-4 py-3 text-rail-foreground md:hidden">
         <Link href={base} className="font-display text-2xl italic">
-          Bower
+          Atlas
         </Link>
         <div className="flex items-center gap-2">
           <button
@@ -124,7 +124,7 @@ function ShellChrome({ children }: { children: ReactNode }) {
       </header>
 
       <div className="flex min-w-0 flex-1 flex-col">
-        <main className="paper-content mx-auto w-full max-w-6xl flex-1 px-4 pt-6 pb-40 sm:px-8 sm:pt-10 md:pb-32">{children}</main>
+        <main className="paper-content mx-auto w-full max-w-6xl flex-1 px-4 pt-6 pb-24 sm:px-8 sm:pt-10 md:pb-10">{children}</main>
       </div>
 
       {/* Mobile tab bar */}

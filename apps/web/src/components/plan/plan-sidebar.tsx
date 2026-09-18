@@ -53,7 +53,7 @@ export function TravelWindowsCard({ windows, onAdd }: { windows: TravelWindow[];
   return (
     <div className="postcard rise rise-2 p-5">
       <p className="eyebrow">Travel windows</p>
-      <p className="mt-2 text-sm text-ink-soft">Add the dates you&apos;ll be on the East Coast; Bower will schedule tours and tastings into them.</p>
+      <p className="mt-2 text-sm text-ink-soft">Add the dates you&apos;ll be on the East Coast; Atlas will schedule tours and tastings into them.</p>
 
       {windows.length > 0 && (
         <ul className="mt-4 flex flex-col gap-2 text-sm">

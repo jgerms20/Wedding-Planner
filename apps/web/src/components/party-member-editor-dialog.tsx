@@ -58,7 +58,7 @@ export function PartyMemberEditorDialog({
             <Input value={form.name} onChange={(e) => setForm((f) => ({ ...f, name: e.target.value }))} />
           </Field>
           <Field label="Role">
-            <Input value={form.role} onChange={(e) => setForm((f) => ({ ...f, role: e.target.value }))} placeholder="Maid of honor" />
+            <Input value={form.role} onChange={(e) => setForm((f) => ({ ...f, role: e.target.value }))} placeholder="Honor attendant" />
           </Field>
         </Row>
         <Row>

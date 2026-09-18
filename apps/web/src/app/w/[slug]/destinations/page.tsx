@@ -12,7 +12,9 @@ import { ScenarioEditorDialog } from "@/components/scenario-editor-dialog";
 import { Button } from "@/components/ui/button";
 import { VenueEditorDialog } from "@/components/venue-editor-dialog";
 import { restoreSeed } from "@/lib/bootstrap";
+import { isDomesticCountry } from "@/lib/country-code";
 import { cn } from "@/lib/utils";
+import { LoadingState } from "@/components/loading-state";
 import { useRepoContext } from "@/lib/repo-context";
 import { useEntityList } from "@/lib/use-entity-list";
 
@@ -64,7 +66,10 @@ export default function DestinationsPage() {
     });
   }, [destinations, scenarioByDestination, pinned?.destinationId]);
 
-  if (!repo || !wedding) return <p className="font-display text-xl text-ink-soft">Opening the atlas…</p>;
+  const domesticDestinations = useMemo(() => orderedDestinations.filter((d) => isDomesticCountry(d.country)), [orderedDestinations]);
+  const internationalDestinations = useMemo(() => orderedDestinations.filter((d) => !isDomesticCountry(d.country)), [orderedDestinations]);
+
+  if (!repo || !wedding) return <LoadingState label="Opening the atlas…" />;
 
   const guestTarget = wedding.guestTarget ?? 100;
 
@@ -99,6 +104,13 @@ export default function DestinationsPage() {
   const handleVenueStatusChange = async (venue: Venue, status: VenueStatus) => {
     await repo.venues.upsert({ ...venue, status, updatedAt: nowIso() });
     await reloadVenues();
+  };
+
+  const handleToggleFavorite = async (destination: Destination, partner: "A" | "B") => {
+    const current = destination.favoritedBy ?? [];
+    const favoritedBy = current.includes(partner) ? current.filter((p) => p !== partner) : [...current, partner];
+    await repo.destinations.upsert({ ...destination, favoritedBy, updatedAt: nowIso() });
+    await reloadDestinations();
   };
 
   const restoreTheSeed = async () => {
@@ -144,25 +156,41 @@ export default function DestinationsPage() {
           </button>
         </div>
       ) : (
-        <div className="mt-6 grid gap-4 sm:grid-cols-2 xl:grid-cols-3">
-          {orderedDestinations.map((destination, i) => (
-            <DestinationPostcard
-              key={destination.id}
-              className={`rise rise-${Math.min(i + 1, 8)}`}
-              destination={destination}
-              venues={venues.filter((v) => v.destinationId === destination.id)}
-              scenario={scenarioByDestination.get(destination.id)}
-              isFrontRunner={pinned?.destinationId === destination.id}
-              guestTarget={guestTarget}
-              expanded={expandedId === destination.id}
-              onToggleExpand={() => setExpandedId((id) => (id === destination.id ? null : destination.id))}
-              onEditDestination={() => setDestinationDialog({ open: true, destination })}
-              onAddVenue={() => setVenueDialog({ open: true, destinationId: destination.id })}
-              onEditVenue={(venue) => setVenueDialog({ open: true, destinationId: destination.id, venue })}
-              onVenueStatusChange={(venue, status) => void handleVenueStatusChange(venue, status)}
-              onNewScenario={() => setScenarioDialog({ open: true, destinationId: destination.id })}
-            />
-          ))}
+        <div className="mt-6 flex flex-col gap-8">
+          {[
+            { label: "Domestic", items: domesticDestinations },
+            { label: "International", items: internationalDestinations },
+          ].map(
+            (group) =>
+              group.items.length > 0 && (
+                <div key={group.label}>
+                  <p className="eyebrow mb-3">{group.label}</p>
+                  <div className="grid gap-4 sm:grid-cols-2 xl:grid-cols-3">
+                    {group.items.map((destination, i) => (
+                      <DestinationPostcard
+                        key={destination.id}
+                        className={`rise rise-${Math.min(i + 1, 8)}`}
+                        destination={destination}
+                        venues={venues.filter((v) => v.destinationId === destination.id)}
+                        scenario={scenarioByDestination.get(destination.id)}
+                        isFrontRunner={pinned?.destinationId === destination.id}
+                        guestTarget={guestTarget}
+                        expanded={expandedId === destination.id}
+                        onToggleExpand={() => setExpandedId((id) => (id === destination.id ? null : destination.id))}
+                        onEditDestination={() => setDestinationDialog({ open: true, destination })}
+                        onAddVenue={() => setVenueDialog({ open: true, destinationId: destination.id })}
+                        onEditVenue={(venue) => setVenueDialog({ open: true, destinationId: destination.id, venue })}
+                        onVenueStatusChange={(venue, status) => void handleVenueStatusChange(venue, status)}
+                        onNewScenario={() => setScenarioDialog({ open: true, destinationId: destination.id })}
+                        partnerAName={wedding.partnerA.name}
+                        partnerBName={wedding.partnerB.name}
+                        onToggleFavorite={(partner) => void handleToggleFavorite(destination, partner)}
+                      />
+                    ))}
+                  </div>
+                </div>
+              ),
+          )}
         </div>
       )}
 

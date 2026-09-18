@@ -5,7 +5,7 @@ import type { CalendarItem } from "@/components/calendar/calendar-item";
 import { chipClasses } from "@/components/calendar/calendar-item";
 import { cn } from "@/lib/utils";
 
-/** Sunday-start weeks, matching the "Sat, Apr 17" US-calendar voice used across Bower. */
+/** Sunday-start weeks, matching the "Sat, Apr 17" US-calendar voice used across Atlas. */
 const WEEK_STARTS_ON = 0;
 
 export const WEEKDAY_LABELS = ["Sun", "Mon", "Tue", "Wed", "Thu", "Fri", "Sat"];

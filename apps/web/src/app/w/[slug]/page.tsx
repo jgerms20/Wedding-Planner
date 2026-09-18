@@ -9,6 +9,7 @@ import { restoreSeed } from "@/lib/bootstrap";
 import { WEDDING_SLUG } from "@/lib/constants";
 import { countryCode } from "@/lib/country-code";
 import { daysUntil, formatMoney, seasonLabel } from "@/lib/format";
+import { LoadingState } from "@/components/loading-state";
 import { useRepoContext } from "@/lib/repo-context";
 import { useEntityList } from "@/lib/use-entity-list";
 import { cn } from "@/lib/utils";
@@ -47,7 +48,7 @@ export default function HomePage() {
   const committedTotal = budgetItems.reduce((sum, item) => sum + (item.contracted ?? item.quoted ?? 0), 0);
 
   if (!ready || !wedding) {
-    return <p className="font-display text-xl text-ink-soft">Opening your atlas…</p>;
+    return <LoadingState label="Opening your atlas…" />;
   }
 
   const countdown = countdownFor(wedding.targetDate, wedding.targetSeason);
@@ -243,7 +244,7 @@ export default function HomePage() {
           <Mic className="size-4" />
         </span>
         <p>
-          Talk to the bar below. “Add my aunt Denise and uncle Ray from Columbia, must-invite.” “Move the engagement party to May.” Bower
+          Talk to the bar below. “Add my aunt Denise and uncle Ray from Columbia, must-invite.” “Move the engagement party to May.” Atlas
           proposes, you approve.
         </p>
       </section>
@@ -347,5 +348,5 @@ function countdownFor(targetDate?: string, targetSeason?: string): { headline: s
       caption: "days until the season opens",
     };
   }
-  return { headline: "A date to come", days: "—", caption: "tell Bower when you know" };
+  return { headline: "A date to come", days: "—", caption: "tell Atlas when you know" };
 }

@@ -24,3 +24,8 @@ export function countryCode(country: string | undefined, name?: string): string 
   const source = name ?? country ?? "??";
   return source.replace(/[^A-Za-z]/g, "").slice(0, 2).toUpperCase() || "??";
 }
+
+/** True for anywhere in the United States, for grouping the atlas into domestic/international. */
+export function isDomesticCountry(country: string | undefined): boolean {
+  return countryCode(country) === "US";
+}

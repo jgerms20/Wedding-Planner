@@ -3,7 +3,7 @@ import { zodOutputFormat } from "@anthropic-ai/sdk/helpers/zod";
 import type { z } from "zod";
 
 /**
- * The browser side of Bower's Claude connection.
+ * The browser side of Atlas's Claude connection.
  *
  * The app is a static export with no server routes, so the key the couple
  * pastes into Settings lives in this browser's localStorage and the SDK runs
@@ -144,7 +144,7 @@ export interface PortCreateResult {
 }
 
 /**
- * The seam between Bower and Anthropic. `parse` is structured extraction,
+ * The seam between Atlas and Anthropic. `parse` is structured extraction,
  * `create` is a free-form turn (the one that carries server tools), and
  * `models` backs the Settings "Verify" button.
  */

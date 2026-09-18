@@ -1,6 +1,16 @@
 "use client";
 
-import { DEFAULT_BUDGET_CATEGORIES, newId, nowIso, reestimateBudgetFromScenario, scenarioMath, type BudgetItem, type Scenario } from "@bower/shared";
+import {
+  DEFAULT_BUDGET_CATEGORIES,
+  newId,
+  nowIso,
+  reestimateBudgetFromScenario,
+  scenarioMath,
+  SEED_BENCHMARKS,
+  type BudgetCategory,
+  type BudgetItem,
+  type Scenario,
+} from "@bower/shared";
 import { RefreshCw } from "lucide-react";
 import { useCallback, useEffect, useMemo, useState } from "react";
 import { BudgetItemEditorDialog } from "@/components/budget-item-editor-dialog";
@@ -10,6 +20,7 @@ import { PageHeader } from "@/components/page-header";
 import { Button } from "@/components/ui/button";
 import { Slider } from "@/components/ui/slider";
 import { formatMoney } from "@/lib/format";
+import { LoadingState } from "@/components/loading-state";
 import { useRepoContext } from "@/lib/repo-context";
 import { useEntityList } from "@/lib/use-entity-list";
 
@@ -70,7 +81,15 @@ export default function BudgetPage() {
 
   const [itemDialog, setItemDialog] = useState<{ open: boolean; categoryId?: string; item?: BudgetItem }>({ open: false });
   const [sourcesItem, setSourcesItem] = useState<BudgetItem | undefined>(undefined);
+  const [infoCategory, setInfoCategory] = useState<BudgetCategory | undefined>(undefined);
   const [reestimating, setReestimating] = useState(false);
+
+  // The seeded benchmark categories are researched in the same fixed order as
+  // DEFAULT_BUDGET_CATEGORIES (both 12 entries, same sequence), so a category's
+  // 0-based sortOrder lines up with its benchmark entry even though the two
+  // lists' category names don't always match verbatim (e.g. "Transport" vs.
+  // "Transportation").
+  const benchmarkFor = useCallback((category: BudgetCategory) => SEED_BENCHMARKS?.categories[category.sortOrder], []);
 
   const pinnedId = pinned?.id;
   const pinnedGuestAssumption = pinned?.guestAssumption;
@@ -106,7 +125,7 @@ export default function BudgetPage() {
     setReestimating(false);
   }
 
-  if (!repo || !weddingId) return <p className="font-display text-xl text-ink-soft">Loading…</p>;
+  if (!repo || !weddingId) return <LoadingState />;
 
   return (
     <div className="flex flex-col gap-8">
@@ -171,6 +190,7 @@ export default function BudgetPage() {
                 }}
                 onEditItem={(item) => setItemDialog({ open: true, item })}
                 onSourcesItem={(item) => setSourcesItem(item)}
+                onInfo={() => setInfoCategory(category)}
               />
             );
           })}
@@ -191,6 +211,13 @@ export default function BudgetPage() {
       />
 
       <SourcesDrawer open={sourcesItem !== undefined} onOpenChange={(open) => !open && setSourcesItem(undefined)} itemName={sourcesItem?.name ?? ""} notes={sourcesItem?.notes} />
+      <SourcesDrawer
+        open={infoCategory !== undefined}
+        onOpenChange={(open) => !open && setInfoCategory(undefined)}
+        itemName={infoCategory?.name ?? ""}
+        notes={infoCategory && benchmarkFor(infoCategory)?.note}
+        sourceUrls={infoCategory && benchmarkFor(infoCategory)?.sourceUrls}
+      />
     </div>
   );
 }

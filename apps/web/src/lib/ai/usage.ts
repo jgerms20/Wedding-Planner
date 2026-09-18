@@ -135,7 +135,7 @@ export function formatCents(cents: number): string {
 }
 
 export const USAGE_FEATURE_LABELS: Record<string, string> = {
-  tell_bower: "Tell Bower",
+  tell_bower: "Tell Atlas",
   concierge: "Concierge",
   research: "Venue research",
 };

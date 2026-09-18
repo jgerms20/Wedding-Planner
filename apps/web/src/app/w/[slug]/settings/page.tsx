@@ -16,6 +16,7 @@ import { Select } from "@/components/ui/select";
 import { restoreSeed } from "@/lib/bootstrap";
 import { WEDDING_SLUG } from "@/lib/constants";
 import { downloadFile } from "@/lib/ics";
+import { LoadingState } from "@/components/loading-state";
 import { useRepoContext } from "@/lib/repo-context";
 
 type ThemeChoice = "system" | "light" | "dark";
@@ -27,7 +28,7 @@ export default function SettingsPage() {
   const [confirmingRestore, setConfirmingRestore] = useState(false);
   const [restoring, setRestoring] = useState(false);
 
-  if (!repo || !wedding) return <p className="font-display text-xl text-ink-soft">Loading…</p>;
+  if (!repo || !wedding) return <LoadingState />;
 
   async function saveField(patch: Partial<typeof wedding>) {
     await repo!.upsertWedding({ ...wedding!, ...patch, updatedAt: nowIso() });

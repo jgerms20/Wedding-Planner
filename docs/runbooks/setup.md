@@ -21,7 +21,7 @@ GitHub Pages can take a couple of minutes to catch up after a deploy, and browse
 
 ## Turn on the smart features (five minutes)
 
-The Tell Bower bar parses what you say or type into guests, tasks, dates, and notes; the Concierge answers from your whole plan; the Atlas can research venues with sources. These run Claude directly in your browser with your own API key.
+The Tell Atlas bar parses what you say or type into guests, tasks, dates, and notes; the Concierge answers from your whole plan; the Atlas can research venues with sources. These run Claude directly in your browser with your own API key.
 
 1. Create a key at https://console.anthropic.com/settings/keys (this is pay-as-you-go API billing, separate from a Claude subscription; a few dollars covers weeks of use).
 2. Open the app → Settings → **Connect Claude** → paste the key → Verify.

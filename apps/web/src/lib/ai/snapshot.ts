@@ -2,7 +2,7 @@ import { scenarioMath, type Guest, type WeddingRepo } from "@bower/shared";
 import { WEDDING_SLUG } from "@/lib/constants";
 
 /**
- * Everything Bower needs to know about this wedding, as compact text.
+ * Everything Atlas needs to know about this wedding, as compact text.
  *
  * It is deliberately deterministic — sorted lists, no timestamps, no ids that
  * change between runs — because it rides after the cached system block and any

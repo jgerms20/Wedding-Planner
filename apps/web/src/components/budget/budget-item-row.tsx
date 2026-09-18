@@ -1,6 +1,7 @@
 "use client";
 
 import { isAutoEstimated, type BudgetItem } from "@bower/shared";
+import { Info } from "lucide-react";
 import { Badge } from "@/components/ui/badge";
 import { InlineDate, InlineMoney } from "@/components/budget/inline-fields";
 
@@ -26,6 +27,15 @@ export function BudgetItemRow({
             estimate
           </Badge>
         )}
+        <button
+          type="button"
+          onClick={onSources}
+          aria-label="Where this number came from"
+          title="Where this number came from"
+          className="rounded-full p-1 text-ink-mute transition-colors hover:bg-muted hover:text-coral"
+        >
+          <Info className="size-3.5" />
+        </button>
       </div>
       <div className="flex flex-wrap items-end gap-4">
         <InlineMoney label="Est" value={item.estimate} onCommit={(v) => onPatch({ estimate: v })} />
@@ -34,11 +44,6 @@ export function BudgetItemRow({
         <InlineMoney label="Paid" value={item.paid} onCommit={(v) => onPatch({ paid: v })} />
         <InlineDate value={item.dueDate} onCommit={(v) => onPatch({ dueDate: v })} />
       </div>
-      {item.notes && (
-        <button type="button" onClick={onSources} className="text-xs text-coral underline underline-offset-2">
-          Sources
-        </button>
-      )}
     </div>
   );
 }

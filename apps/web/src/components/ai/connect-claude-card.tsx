@@ -6,7 +6,7 @@ import { getApiKey, setApiKey, verifyApiKey } from "@/lib/ai/client";
 import { useRepoContext } from "@/lib/repo-context";
 
 /**
- * Settings: the one place the couple hands Bower a Claude API key.
+ * Settings: the one place the couple hands Atlas a Claude API key.
  *
  * The key never leaves this browser — there is no server in this build — so
  * the copy says exactly that, and Verify is a single cheap call to the models
@@ -14,8 +14,8 @@ import { useRepoContext } from "@/lib/repo-context";
  */
 
 const AUTONOMY_OPTIONS: Array<{ value: 0 | 1 | 2; label: string; hint: string }> = [
-  { value: 0, label: "Suggest", hint: "Bower answers and explains, but proposes nothing." },
-  { value: 1, label: "Draft and approve", hint: "Bower proposes changes as cards. You press Apply." },
+  { value: 0, label: "Suggest", hint: "Atlas answers and explains, but proposes nothing." },
+  { value: 1, label: "Draft and approve", hint: "Atlas proposes changes as cards. You press Apply." },
   { value: 2, label: "Auto-apply additions", hint: "New guests, tasks and notes are added right away, with Undo." },
 ];
 
@@ -54,7 +54,7 @@ export function ConnectClaudeCard() {
     setStored(getApiKey());
     setDraft("");
     setStatus("ok");
-    setMessage("Connected. Bower can read your plan and propose changes now.");
+    setMessage("Connected. Atlas can read your plan and propose changes now.");
   }
 
   function disconnect() {
@@ -66,10 +66,10 @@ export function ConnectClaudeCard() {
 
   return (
     <section className="postcard p-5">
-      <p className="eyebrow">Bower&rsquo;s brain</p>
+      <p className="eyebrow">Atlas&rsquo; brain</p>
       <h2 className="mt-1 font-display text-2xl">Connect Claude</h2>
       <p className="mt-2 text-[15px] leading-relaxed text-ink-soft">
-        Paste an Anthropic API key and Bower can read your whole plan, answer questions, and turn what you say into guests, tasks and
+        Paste an Anthropic API key and Atlas can read your whole plan, answer questions, and turn what you say into guests, tasks and
         dates. The key is stored only in this browser, never sent anywhere but Anthropic, and it is separate from a Claude.ai
         subscription &mdash; API usage is billed per call.
       </p>

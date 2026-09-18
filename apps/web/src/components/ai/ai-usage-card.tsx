@@ -7,7 +7,7 @@ import { useRepoContext } from "@/lib/repo-context";
 import { useEntityList } from "@/lib/use-entity-list";
 
 /**
- * What Bower has cost so far, by feature and over the last week. Every model
+ * What Atlas has cost so far, by feature and over the last week. Every model
  * call writes an `aiUsage` row as it happens, so this is a sum, not an
  * estimate — priced from the published per-token rates.
  */
@@ -24,7 +24,7 @@ export function AiUsageCard() {
 
   return (
     <section className="postcard p-5">
-      <p className="eyebrow">What Bower costs</p>
+      <p className="eyebrow">What Atlas costs</p>
       <h2 className="mt-1 font-display text-2xl">
         <span className="tabular">{formatCents(summary.costCents)}</span> so far
       </h2>

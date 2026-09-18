@@ -25,7 +25,7 @@ jobs:
       DATABASE_URL: postgresql://bower:bower@127.0.0.1:5432/bower
       ANTHROPIC_FAKE: "1"
       NEXT_PUBLIC_DATA_MODE: local
-      NEXT_PUBLIC_APP_NAME: Bower
+      NEXT_PUBLIC_APP_NAME: Atlas
     steps:
       - uses: actions/checkout@v4
       - uses: pnpm/action-setup@v4

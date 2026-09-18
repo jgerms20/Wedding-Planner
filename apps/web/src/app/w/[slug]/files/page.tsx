@@ -12,7 +12,7 @@ export default function FilesPage() {
         <p className="font-display text-xl">This is where the paperwork will live</p>
         <p className="max-w-md text-[15px] text-ink-soft">
           Contracts, quotes, inspiration boards, marriage-license paperwork, and the vows you don&apos;t want to lose — a
-          contract will file itself against its vendor, a quote against its budget line. Uploads arrive once Bower has
+          contract will file itself against its vendor, a quote against its budget line. Uploads arrive once Atlas has
           accounts to keep them behind; for now, keep files wherever you already do, and note the highlights in
           Destinations, Budget, or Plan.
         </p>

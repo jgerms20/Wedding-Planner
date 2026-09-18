@@ -8,4 +8,4 @@ A wedding operating system where specialist AI agents do the legwork and the cou
 
 Live app (local data mode): https://jgerms20.github.io/Wedding-Planner/ (requires GitHub Pages enabled once; see `docs/runbooks/setup.md`).
 
-Status: Phase 0a plus the Atlas overhaul (bespoke seed for Joshua & Janel, Atlas design system, Tell Bower dictation, Concierge, in-browser Claude). Phase 0b (shared data, accounts, server-side agents) needs the accounts listed in `docs/runbooks/setup.md`.
+Status: Phase 0a plus the Atlas overhaul (bespoke seed for Joshua & Janel, Atlas design system, Tell Atlas dictation, Concierge, in-browser Claude). Phase 0b (shared data, accounts, server-side agents) needs the accounts listed in `docs/runbooks/setup.md`.

@@ -8,6 +8,7 @@ import { PartyMemberEditorDialog } from "@/components/party-member-editor-dialog
 import { MemberCard } from "@/components/party/member-card";
 import { RoleScaffold } from "@/components/party/role-scaffold";
 import { Button } from "@/components/ui/button";
+import { LoadingState } from "@/components/loading-state";
 import { useRepoContext } from "@/lib/repo-context";
 import { useEntityList } from "@/lib/use-entity-list";
 
@@ -18,11 +19,23 @@ interface RoleSlot {
   match: RegExp;
 }
 
+// Neutral by design: no fixed "her side / his side" buckets. Either partner
+// assigns anyone to any role; the regexes still catch traditional names
+// (maid of honor, best man, bridesmaid, groomsman, ...) so existing data and
+// old habits of speech land in the right neutral slot automatically.
 const ROLE_SLOTS: RoleSlot[] = [
-  { key: "honor", label: "Maid / matron of honor", duties: ["Leads the bridesmaids", "Plans the shower", "Speech"], match: /maid of honor|matron of honor/i },
-  { key: "best", label: "Best man / best woman", duties: ["Leads the groomsmen", "Plans the bachelor trip", "Speech"], match: /best (man|woman)/i },
-  { key: "bridesmaids", label: "Bridesmaids", duties: ["Dress fittings", "Shower & bachelorette help"], match: /bridesmaid/i },
-  { key: "groomsmen", label: "Groomsmen", duties: ["Attire fittings", "Bachelor party help"], match: /groomsmen|groomsman/i },
+  {
+    key: "honor",
+    label: "Honor attendant",
+    duties: ["Leads the wedding party", "Helps plan a shower or celebration", "Speech"],
+    match: /maid of honor|matron of honor|best (man|woman|person)|honor attendant/i,
+  },
+  {
+    key: "party",
+    label: "Wedding party",
+    duties: ["Attire and fittings", "Helps plan showers & parties"],
+    match: /bridesmaid|groomsmen?|wedding party/i,
+  },
   { key: "officiant", label: "Officiant", duties: ["Leads the ceremony", "Files the paperwork"], match: /officiant/i },
   { key: "flower", label: "Flower kid", duties: ["Petals down the aisle"], match: /flower/i },
   { key: "ring-bearer", label: "Ring bearer", duties: ["Carries the rings (or stand-ins)"], match: /ring bearer/i },
@@ -52,7 +65,7 @@ export default function PartyPage() {
     return { slots: slotted, unmatched: rest };
   }, [members]);
 
-  if (!repo || !weddingId) return <p className="font-display text-xl text-ink-soft">Loading…</p>;
+  if (!repo || !weddingId) return <LoadingState />;
 
   async function addMember(role: string, name: string) {
     const member: WeddingPartyMember = { id: newId(), weddingId: weddingId!, name, role, side: "both" as Side, asked: false };
@@ -70,7 +83,7 @@ export default function PartyPage() {
     <div className="flex flex-col gap-8">
       <PageHeader
         title="Wedding party"
-        description="Who's standing up with you, how they were asked, and what they're on the hook for."
+        description="The people standing up with the two of you — anyone in any role. How they were asked, and what they're on the hook for."
         action={
           <Button size="sm" variant="outline" onClick={() => setDialog({ open: true })}>
             <Plus className="size-4" /> Add someone else

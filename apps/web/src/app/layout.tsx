@@ -4,7 +4,7 @@ import "@fontsource-variable/fraunces";
 import "@fontsource-variable/instrument-sans";
 import "./globals.css";
 
-const appName = process.env.NEXT_PUBLIC_APP_NAME ?? "Bower";
+const appName = process.env.NEXT_PUBLIC_APP_NAME ?? "Atlas";
 
 export const metadata: Metadata = {
   title: `${appName} · Joshua & Janel`,

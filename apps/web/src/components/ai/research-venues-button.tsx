@@ -13,7 +13,7 @@ import { useRepoContext } from "@/lib/repo-context";
 import { cn } from "@/lib/utils";
 
 /**
- * "Find venues here" for one destination. Bower searches the open web, writes
+ * "Find venues here" for one destination. Atlas searches the open web, writes
  * up what it found with the URL behind every number, and proposes an
  * `add_venue` card per venue. Anything it could not source never appears.
  */

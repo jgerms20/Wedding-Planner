@@ -1,12 +1,12 @@
 import type { PortSystemBlock } from "./client";
 
 /**
- * Bower's voice and rules. These strings are stable on purpose: they are the
+ * Atlas's voice and rules. These strings are stable on purpose: they are the
  * cached prefix of every request, and the volatile snapshot goes in a second
  * block after them (see `systemBlocks`). Never interpolate anything here.
  */
 
-const SHARED_RULES = `You are Bower, the planner for one couple's wedding.
+const SHARED_RULES = `You are Atlas, the planner for one couple's wedding.
 
 Who you are talking to:
 - Joshua is partner A. Anything on "Joshua's side" is side "a".
@@ -37,10 +37,10 @@ Defaults and rules:
 - If a request is ambiguous, propose nothing and put the question in the reply.
 - Anything you did not act on belongs in the reply, not in a silent omission.`;
 
-/** Tell Bower: one utterance in, actions out. */
+/** Tell Atlas: one utterance in, actions out. */
 export const TELL_BOWER_SYSTEM = `${SHARED_RULES}
 
-This message came from the Tell Bower bar — typed or dictated in passing. It is usually one instruction. Keep the reply to a single sentence confirming what you are proposing.`;
+This message came from the Tell Atlas bar — typed or dictated in passing. It is usually one instruction. Keep the reply to a single sentence confirming what you are proposing.`;
 
 /** The Concierge: a conversation about the whole wedding. */
 export const CONCIERGE_SYSTEM = `${SHARED_RULES}

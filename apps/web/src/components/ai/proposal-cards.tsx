@@ -8,7 +8,7 @@ import type { ActionSource } from "@/lib/ai/interpret";
 import { cn } from "@/lib/utils";
 
 /**
- * What Bower proposes, as cards the couple approves one at a time.
+ * What Atlas proposes, as cards the couple approves one at a time.
  *
  * Nothing here touches the data until Apply is pressed, and everything that
  * was applied stays undoable until the toast clears — `undoResults` reverses
@@ -39,7 +39,7 @@ export interface ProposalCardsProps {
  * Card state (applied, skipped, edited) lives here for the life of the
  * component, so a new proposal must arrive as a new instance: give each one a
  * stable `key` — the message id in the Concierge, a per-submission id in the
- * Tell Bower bar. Re-deriving state from the props would wipe "applied" every
+ * Tell Atlas bar. Re-deriving state from the props would wipe "applied" every
  * time a data refresh re-rendered the list.
  */
 export function ProposalCards({ actions, applied, source = "chat", onResolved, className }: ProposalCardsProps) {

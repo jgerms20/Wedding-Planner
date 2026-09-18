@@ -21,14 +21,37 @@ function linkify(text: string) {
   );
 }
 
-export function SourcesDrawer({ open, onOpenChange, itemName, notes }: { open: boolean; onOpenChange: (open: boolean) => void; itemName: string; notes: string | undefined }) {
+export function SourcesDrawer({
+  open,
+  onOpenChange,
+  itemName,
+  notes,
+  sourceUrls,
+}: {
+  open: boolean;
+  onOpenChange: (open: boolean) => void;
+  itemName: string;
+  notes: string | undefined;
+  /** Extra source links to list below the notes, separate from any URLs embedded in the notes text. */
+  sourceUrls?: string[];
+}) {
   return (
     <Drawer open={open} onOpenChange={onOpenChange} title="How we estimated this">
       <p className="eyebrow">{itemName}</p>
       {notes ? (
         <p className="mt-3 text-[15px] leading-relaxed whitespace-pre-wrap text-ink-soft">{linkify(notes)}</p>
       ) : (
-        <p className="mt-3 text-sm text-ink-soft">No notes on this line yet.</p>
+        <p className="mt-3 text-sm text-ink-soft">No notes on this line yet — add some, or edit it to explain where the number came from.</p>
+      )}
+      {sourceUrls && sourceUrls.length > 0 && (
+        <div className="mt-4 flex flex-col gap-1.5 border-t border-line pt-4">
+          <p className="eyebrow">Sources</p>
+          {sourceUrls.map((url) => (
+            <a key={url} href={url} target="_blank" rel="noreferrer" className="text-xs text-coral underline underline-offset-2 break-all">
+              {url}
+            </a>
+          ))}
+        </div>
       )}
     </Drawer>
   );

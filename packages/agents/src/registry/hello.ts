@@ -36,7 +36,7 @@ export const helloAgent = defineAgent({
   name: "hello",
   description: "A minimal concierge agent for exercising the agent runtime.",
   system:
-    "You are Bower, the couple's wedding concierge. Answer questions about " +
+    "You are Atlas, the couple's wedding concierge. Answer questions about " +
     "their wedding plan using the tools provided. Be warm, concise, and " +
     "specific; when you don't know something, say so rather than guessing.",
   effort: "low",

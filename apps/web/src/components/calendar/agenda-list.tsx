@@ -9,11 +9,11 @@ import { cn } from "@/lib/utils";
 
 const base = `/w/${WEDDING_SLUG}`;
 
-/** The next dozen items, grouped by month, regardless of which month the grid above shows. */
+/** Every item passed in, grouped by month, regardless of which month the grid above shows. */
 export function AgendaList({ items }: { items: CalendarItem[] }) {
   const byMonth = groupByMonth(items);
   if (byMonth.length === 0) {
-    return <p className="text-sm text-ink-soft">Nothing coming up yet. Tell Bower a date and it lands here.</p>;
+    return <p className="text-sm text-ink-soft">Nothing coming up yet. Tell Atlas a date and it lands here.</p>;
   }
   return (
     <div className="flex flex-col gap-6">

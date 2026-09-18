@@ -13,6 +13,7 @@ import { Input } from "@/components/ui/input";
 import { Label } from "@/components/ui/label";
 import { Select } from "@/components/ui/select";
 import { Slider } from "@/components/ui/slider";
+import { LoadingState } from "@/components/loading-state";
 import { useRepoContext } from "@/lib/repo-context";
 import { useEntityList } from "@/lib/use-entity-list";
 
@@ -69,7 +70,7 @@ export default function GuestsPage() {
     total: guests.filter((g) => g.tier === tier).length,
   }));
 
-  if (!repo || !weddingId) return <p className="font-display text-xl text-ink-soft">Loading…</p>;
+  if (!repo || !weddingId) return <LoadingState />;
 
   async function saveGuest(guest: Guest) {
     await repo!.guests.upsert(guest);
@@ -125,7 +126,7 @@ export default function GuestsPage() {
 
       {guests.length === 0 ? (
         <div className="postcard rise flex flex-col items-start gap-2 p-8">
-          <p className="text-[15px] text-ink-soft">No guests yet. Tell Bower who belongs on the list and it lands here, sorted by household.</p>
+          <p className="text-[15px] text-ink-soft">No guests yet. Tell Atlas who belongs on the list and it lands here, sorted by household.</p>
         </div>
       ) : (
         <div className="overflow-x-auto rounded-lg border border-line">

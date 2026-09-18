@@ -13,7 +13,7 @@ import { useEntityList } from "@/lib/use-entity-list";
 import { cn } from "@/lib/utils";
 
 /**
- * The Concierge: a right-side conversation with Bower about the whole wedding.
+ * The Concierge: a right-side conversation with Atlas about the whole wedding.
  * History comes from the local `chatMessages` table; each turn goes to Opus 5
  * with a snapshot of the wedding, and any actions it proposes are stored on
  * the assistant message and rendered as approval cards underneath it.
@@ -83,7 +83,7 @@ export function ConciergePanel({ open, onOpenChange }: { open: boolean; onOpenCh
         <header className="flex items-center justify-between border-b border-line px-5 py-4">
           <div>
             <p className="eyebrow">Concierge</p>
-            <h2 className="font-display text-2xl">Ask Bower anything</h2>
+            <h2 className="font-display text-2xl">Ask Atlas anything</h2>
           </div>
           <button type="button" onClick={() => onOpenChange(false)} aria-label="Close" className="rounded-full p-2 text-ink-soft hover:bg-muted">
             <X className="size-4" />

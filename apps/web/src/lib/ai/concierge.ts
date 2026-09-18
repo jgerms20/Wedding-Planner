@@ -35,7 +35,7 @@ export interface ConciergeResult {
 }
 
 const NO_KEY_REPLY =
-  "I can read your whole plan once Claude is connected in Settings. Until then, every tab on the left is live and the Tell Bower bar still saves what you say.";
+  "I can read your whole plan once Claude is connected in Settings. Until then, every tab on the left is live and the Tell Atlas bar still saves what you say.";
 
 export async function respond(input: ConciergeInput): Promise<ConciergeResult> {
   const port = input.port ?? (hasApiKey() ? createBrowserPort() : undefined);

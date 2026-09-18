@@ -15,7 +15,7 @@ import { buildSnapshot } from "./snapshot";
 import { logUsage } from "./usage";
 
 /**
- * One utterance from the Tell Bower bar becomes a reply plus a proposal.
+ * One utterance from the Tell Atlas bar becomes a reply plus a proposal.
  *
  * With a key: Sonnet 5 reads the wedding snapshot and returns a
  * `BowerResponse` through structured output. Without one: the deterministic
@@ -137,7 +137,7 @@ export async function runProposal({
   return { pending, results };
 }
 
-/** Reads the Tell Bower autonomy level off settings, defaulting to "draft and approve". */
+/** Reads the Tell Atlas autonomy level off settings, defaulting to "draft and approve". */
 export function autonomyFor(autonomy: Record<string, number> | undefined, key = "tell_bower"): AutonomyLevel {
   const level = autonomy?.[key];
   return level === 0 || level === 1 || level === 2 || level === 3 ? level : 1;

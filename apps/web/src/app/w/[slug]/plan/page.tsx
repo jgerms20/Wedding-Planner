@@ -25,6 +25,7 @@ import { Dialog, DialogBody, DialogCloseButton, DialogFooter, DialogHeader, Dial
 import { Input } from "@/components/ui/input";
 import { Label } from "@/components/ui/label";
 import { Select } from "@/components/ui/select";
+import { LoadingState } from "@/components/loading-state";
 import { useRepoContext } from "@/lib/repo-context";
 import { useEntityList } from "@/lib/use-entity-list";
 
@@ -112,7 +113,7 @@ export default function PlanPage() {
   }
 
   if (!repo || !wedding || !settings) {
-    return <p className="font-display text-xl text-ink-soft">Loading…</p>;
+    return <LoadingState />;
   }
 
   const totalTasks = tasks.length;

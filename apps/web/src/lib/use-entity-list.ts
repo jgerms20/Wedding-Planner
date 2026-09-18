@@ -6,7 +6,7 @@ import { useRepoContext } from "./repo-context";
  * callback for after a mutation. `loader` should be a stable callback (e.g.
  * from `useCallback`) that resolves to `undefined` while its dependencies
  * (repo, weddingId) aren't ready yet. Lists also reload whenever the shared
- * `dataVersion` changes (Tell Bower or the Concierge applied something).
+ * `dataVersion` changes (Tell Atlas or the Concierge applied something).
  */
 export function useEntityList<T>(loader: () => Promise<T[] | undefined>) {
   const { dataVersion } = useRepoContext();

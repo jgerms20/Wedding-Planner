@@ -20,7 +20,7 @@ test("first load lands on the pre-seeded Home, and the redesigned pages hold up"
   await page.getByTestId("budget-category-toggle").first().click();
   const estimateChip = page.getByTestId("budget-estimate-chip").first();
   await expect(estimateChip).toBeVisible();
-  await page.getByRole("button", { name: "Sources" }).first().click();
+  await page.getByRole("button", { name: "Where this number came from" }).first().click();
   await expect(page.getByRole("heading", { name: "How we estimated this" })).toBeVisible();
   // It is a modal: close it before navigating, the way a person would.
   await page.keyboard.press("Escape");
