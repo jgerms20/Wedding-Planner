@@ -76,13 +76,19 @@ export const bahamas: DestinationSeed = {
       key: "bahamas-goldwynn-nassau",
       name: "Goldwynn Resort & Residences",
       website: "https://goldwynnresorts.com/nassau-bahamas-wedding/",
-      capacity: 200,
+      capacity: 100,
       rentalFee: 5000,
+      estimated: true,
       lodgingOnSite: true,
       styleNotes:
-        "Modern, minimalist Cable Beach (Nassau) resort with private villas and oceanfront pools; wedding events run from small and intimate up to 200 guests. Starting wedding price of $5,000 is published directly by the resort.",
-      availabilityNotes: "Final pricing is customized by guest count, date and services.",
-      sourceUrls: ["https://goldwynnresorts.com/nassau-bahamas-wedding/"],
+        "A boutique Cable Beach (Nassau) resort — exactly 81 guest rooms/suites (studios up to a 3-bedroom penthouse), well under the couple's ~100-room ceiling, with two on-site restaurants (OIA, Mediterranean/Japanese-fusion; Amara, a poolside international-tapas lounge) rather than a single dining room, plus two lounges. The SkyScape rooftop is a separate, private ceremony space with its own ocean views — distinct from the main pool deck, so a ceremony there isn't visible to other resort guests the way a poolside ceremony would be. Concierge service comes with the penthouse suite categories, and the resort books guided itinerary add-ons directly (a rum-tasting-and-historic-Nassau-walking-tour, plus paddleboarding/kayaking/snorkeling) and can arrange private airport transfers (15 minutes from Lynden Pindling International). This is a genuinely intimate venue, not a scaled-up one: its own event space totals 11,310 sq ft across just 3 meeting rooms (largest 1,300 sq ft), and the one real Goldwynn wedding reported publicly (via WeddingWire) had 45 guests — capacity above is a cautious middle estimate, not a published ceiling, and the couple should confirm directly whether the full property (SkyScape plus North Shore plus the largest meeting room together) can actually seat their full ~100-guest target, or whether this fits better as a smaller-guest-list option. Starting wedding price of $5,000 is published directly by the resort.",
+      availabilityNotes: "Final pricing is customized by guest count, date and services; contact celebratelove@goldwynnresorts.com or +1 (305) 926-2127 to confirm full-guest-count capacity before booking.",
+      sourceUrls: [
+        "https://goldwynnresorts.com/nassau-bahamas-wedding/",
+        "https://goldwynnresorts.com/events/",
+        "https://www.cvent.com/venues/nassau/resort/goldwynn-resort-residences/venue-1e9927be-a462-433a-beb5-3dafc35361da",
+        "https://www.weddingwire.com/biz/goldwynn-resort-residence/2db1fa1fe9d8e650.html",
+      ],
     },
     {
       key: "bahamas-grand-hyatt-baha-mar-nassau",

@@ -49,6 +49,38 @@ export const washingtonDc: DestinationSeed = {
   ],
   venues: [
     {
+      key: "dc-anderson-house",
+      name: "Anderson House",
+      website: "https://www.societyofthecincinnati.org/weddings/",
+      capacity: 300,
+      rentalFee: 14500,
+      estimated: true,
+      styleNotes:
+        "A genuine in-city indoor/outdoor combo in Dupont Circle: a walled garden with a reflecting pool, a 300-year-old Japanese Buddha statue, and two of the city's oldest magnolia trees for a ceremony (up to 250 seated theater-style, tented or open-air), then the mansion's two floors for the reception (up to 170 seated, 300 standing, 450 with the garden tented). Built in 1905 for diplomat Larz Anderson as the Society of the Cincinnati's headquarters — a purpose-repurposed early-1900s building, not an antebellum-era estate, so it carries none of the plantation/enslaved-labor history that ruled out Dumbarton House and Tudor Place (both wealthy Georgetown estates from the 1790s-1800s with documented on-site slave quarters) as DC candidates. Saturday rental is $15,000 (April-June, August-October, December); Friday/Sunday runs $14,000 in the same windows — rentalFee above is that lower figure, marked estimated pending an exact date.",
+      availabilityNotes: "Contact the Society of the Cincinnati directly via societyofthecincinnati.org/weddings for a date-specific quote and outside-caterer policy.",
+      sourceUrls: [
+        "https://www.societyofthecincinnati.org/weddings/",
+        "https://hirespace.com/Spaces/Washington-DC/211399/Anderson-House/Outdoor-Garden/Events",
+        "https://petalsedge.com/anderson-house/",
+      ],
+    },
+    {
+      key: "dc-dar-constitution-hall",
+      name: "DAR Constitution Hall",
+      website: "https://www.dar.org/constitution-hall/private-events",
+      capacity: 300,
+      rentalFee: 12750,
+      estimated: true,
+      styleNotes:
+        "A purpose-built 1929 concert hall between the White House and the Washington Monument — no residential or plantation history to weigh, since it was constructed from the outset as an institutional auditorium. The covered Portico plus the Pennsylvania Avenue Foyer and O'Byrne Gallery give a genuine indoor/outdoor ceremony-and-reception flow without weather risk to the ceremony itself; the wood-paneled Library seats about 106 for a smaller ceremony, while the full building holds up to roughly 300 standing across combined spaces. Rental runs $11,500-$14,000 depending on day of week, with published package options in the $12,000-$18,000 range; rentalFee above is the rental-only range's midpoint, marked estimated.",
+      availabilityNotes: "Contact DAR's private events office via dar.org/constitution-hall for a date-specific quote and catering options.",
+      sourceUrls: [
+        "https://www.dar.org/constitution-hall/private-events",
+        "https://www.weddingwire.com/biz/dar-constitution-hall-washington/",
+        "https://www.theknot.com/marketplace/dar-constitution-hall-washington-dc-loc",
+      ],
+    },
+    {
       key: "dc-josephine-butler-parks-center",
       name: "Josephine Butler Parks Center",
       website: "https://www.washingtonparks.net/",

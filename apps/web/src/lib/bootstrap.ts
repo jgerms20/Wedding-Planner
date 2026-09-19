@@ -16,14 +16,16 @@ import {
   type WeddingRepo,
 } from "@bower/shared";
 
-/** A venue name a past research round shipped and then found to violate the couple's
- * no-plantations rule (see `.claude/skills/wedding-research/SKILL.md`) — removed from the seed
- * data itself, but `reconcileDestinations` only ever adds whole new destinations, so an existing
- * wedding that already synced New Orleans still has the bad venue sitting in its own data. This
- * is a narrow, one-time correction (remove this exact name if found), not a general "delete
- * venues no longer in the seed" mechanism — that would risk resurrecting or deleting venues the
- * couple has since edited by hand for unrelated reasons. */
-const RETRACTED_VENUE_NAMES = new Set(["Southern Oaks"]);
+/** Venue names a past research round shipped and then found to violate the couple's
+ * no-plantations-or-slavery-marketed-property rule (see `.claude/skills/wedding-research/SKILL.md`
+ * rule 7) — removed from the seed data itself, but `reconcileDestinations` only ever adds whole
+ * new destinations, so an existing wedding that already synced New Orleans still has these
+ * sitting in its own data. "Southern Oaks" self-described as a restored antebellum mansion;
+ * "Race & Religious" markets a preserved "slave quarter" building as part of the venue. This is a
+ * narrow, one-time correction (remove these exact names if found), not a general "delete venues
+ * no longer in the seed" mechanism — that would risk resurrecting or deleting venues the couple
+ * has since edited by hand for unrelated reasons. */
+const RETRACTED_VENUE_NAMES = new Set(["Southern Oaks", "Race & Religious"]);
 import { WEDDING_SLUG } from "./constants";
 
 /** True when the researched seed modules are registered and a full bundle can be built. */

@@ -63,6 +63,29 @@ export const brazil: DestinationSeed = {
       sourceUrls: ["https://travelinn.com.br/trancoso/eng/casamento"],
     },
     {
+      key: "brazil-uxua-casa-hotel-trancoso",
+      name: "UXUA Casa Hotel & Spa",
+      website: "https://uxua.com/",
+      capacity: 40,
+      estimated: true,
+      lodgingOnSite: true,
+      styleNotes:
+        "Real, well-documented boutique hotel right on Trancoso's historic Quadrado (town square) in Bahia, built by former Diesel creative director Wilbert Das out of a cluster of restored fishermen's houses — individually designed \"casas,\" a rustic-luxury beach lounge, and an organic spa. This is a strong match for the small, off-the-beaten-path, individually-distinct-rooms feel she described. " +
+          "Room count varies slightly by listing site (9-13), but the hotel's own site (uxua.com/en/casas) names 13 casas, ranging from 2-person casas up to larger multi-bedroom ones (Casa do Lago sleeps 8 across 3 king beds; Gulab Mahal and Zé e Zilda each sleep 5) — genuine variety in configuration, though nothing marketed in \"single/double\" hotel-room terms since these are freestanding houses, not standard rooms. " +
+          "Capacity is estimated at ~40 overnight guests (marked estimated: true) — derived by summing the published per-casa sleeping counts where known and assuming ~2-3 people for the remaining unlisted casas; UXUA does not publish a total property or wedding-guest capacity anywhere found, so this is a floor, not a confirmed number. It is a materially smaller property than Pousada do Sandi and would not comfortably sleep a ~100-guest wedding on-site; guests would need overflow lodging elsewhere in Trancoso town (walkable, since UXUA sits in the town center). " +
+          "The hotel does market itself for exclusive events (\"totally private and exclusive... amazingly simple\" for groups staying at the property) and sells wedding packages (welcome caipirinhas, a moonlight dinner at UXUA Quadrado restaurant with a tailor-made menu, couples' massages, custom flowers, horseback rides), but no published minimum-stay or full-buyout policy was found comparable to Sandi's explicit two-day whole-property rule — confirm directly with the hotel. " +
+          "Dining is a genuine, if partial, answer to the sushi/seafood complaint: UXUA Quadrado restaurant is run by chef Ju Pedrosa and serves Bahian/Brazilian farm-to-table food (moqueca of lobster and king prawns, escondidinho of dried shredded meat, onion, chives, creamed cassava and coconut milk) rather than a sushi-forward menu, plus homemade fruit ice creams — still seafood-featuring, but Brazilian-regional rather than Japanese, with a meat-based dish on record.",
+      availabilityNotes:
+        "No published rental fee or per-guest pricing; no published total capacity — contact the hotel directly for both. Geography note: Janel's \"the location right next to Uxua, in Santa Teresa\" does not check out — Santa Teresa is a real neighborhood, but it's in Rio de Janeiro, roughly 500 miles / a domestic flight away from Trancoso, Bahia, where UXUA actually is. No real property was found linking the two (the only overlap found was both appearing, unrelated, in the same boutique-hotel curator's portfolio, welcomebeyond.com — not a sister-property or ownership relationship). This is likely two separate memories/mishearings blending together in dictation; there is no venue actually next to UXUA that is also in Santa Teresa.",
+      sourceUrls: [
+        "https://uxua.com/",
+        "https://uxua.com/en/casas",
+        "https://uxua.com/en/cuisine",
+        "https://www.venuereport.com/venue/uxua-casa-hotel-spa-1/",
+        "https://en.wikipedia.org/wiki/UXUA_Casa_Hotel_%26_Spa",
+      ],
+    },
+    {
       key: "brazil-copacabana-palace-rio",
       name: "Copacabana Palace, A Belmond Hotel",
       website: "https://aisle.wedding/venues/copacabana-palace",
@@ -100,12 +123,20 @@ export const brazil: DestinationSeed = {
       key: "brazil-pousada-do-sandi-paraty",
       name: "Pousada do Sandi",
       website: "https://sandihotel.com.br/en/events/weddings/",
-      capacity: 65,
+      capacity: 120,
       lodgingOnSite: true,
       styleNotes:
-        "Colonial-era boutique hotel in Paraty's historic center; the venue's own wedding page caps weddings at 65 guests and requires the whole property booked for at least two days for privacy. That cap sits comfortably inside Joshua & Janel's ~60 estimated attendees at this destination (100 invited x 60% estimated attendance) but would not stretch to a higher-than-expected turnout.",
-      availabilityNotes: "No published rental fee; contact the hotel for a quote.",
-      sourceUrls: ["https://sandihotel.com.br/en/events/weddings/"],
+        "Colonial-era (300-year-old building) boutique hotel in Paraty's historic center, 26 rooms across Standard/Deluxe rooms up through Junior Suites and a Master Suite with its own living room — the mixed room grades (some sources describe it as 21 Deluxe, 4 Junior Suites, 1 Master Suite) do give the single/double/larger-suite variety this couple wants, though it's not literally advertised in \"singles vs. doubles\" terms. Whole property must be booked for at least two days for privacy for a wedding — no sharing with other hotel guests. " +
+          "Correction to a prior draft of this file: the venue's own wedding page states weddings run from a 25-guest minimum up to a 120-guest maximum (using the internal restaurant salon plus an external covered garden salon for the larger end) — this file previously listed capacity as 65, which is actually the on-site overnight lodging cap (26 rooms sleeping up to 65 people total), not the event/wedding capacity. Both numbers are real and published, they just answer different questions: up to 65 guests can sleep on property; up to 120 can attend the wedding itself, with the rest needing lodging elsewhere in Paraty. " +
+          "Dining: two on-site restaurants — Fugu (Japanese, sushi-focused) and Pupu's (regional Brazilian, seafood, parrilla/grilled meats, and \"non-conventional edible plants\"), plus a poolside bar (snacks, sandwiches, drinks) and the Miracolo ice cream parlor. So it is not *literally* sushi/seafood-only — Pupu's parrilla is a real grilled-meat option — but the on-site food is still weighted toward seafood and Japanese cuisine with no dedicated steakhouse or general international menu; worth calling the hotel directly to confirm a non-seafood plated option for the wedding dinner itself given her dad's preference.",
+      availabilityNotes:
+        "No published rental fee; contact the hotel for a quote. Minimum 25 / maximum 120 guests and the two-day whole-property requirement are both stated on the venue's own weddings page.",
+      sourceUrls: [
+        "https://sandihotel.com.br/en/events/weddings/",
+        "https://sandihotel.com.br/en/gastronomy/",
+        "https://sandihotel.com.br/en/accomodations/",
+        "https://www.casamentos.com.br/hotel-casamento/pousada-do-sandi--e145114",
+      ],
     },
   ],
   scenario: {

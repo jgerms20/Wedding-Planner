@@ -14,12 +14,13 @@ export const portlandOr: DestinationSeed = {
   name: "Portland, OR",
   country: "United States",
   countryCode: "US",
-  region: "Portland metro / Willamette Valley (with Columbia River Gorge and wine-country day trips)",
+  region:
+    "Portland metro, plus the Columbia River Gorge (Corbett/Hood River, ~25-60 miles east) and Mount Hood (Government Camp, ~60 miles SE) — both within a day-trip drive of PDX and now represented in the venue list below, not just as sightseeing day trips.",
   rank: 6,
   whyHere:
     "Portland is on the list as a possibility if one of Joshua or Janel has personal ties there — living there now, having lived there before, or having close friends or family in the area — which could make it the most personally meaningful of the three US finalists even though it's the farthest from most East Coast guests.",
   notes:
-    "Attendance is estimated at 0.80, the bottom of the 80-85% 'local wedding' attendance band, reflecting that Portland is domestic (no passport needed) but is the longest flight and biggest time-zone shift of the three US finalists for a guest list concentrated on the East Coast (pix.wedding; destify.com).",
+    "Attendance is estimated at 0.80, the bottom of the 80-85% 'local wedding' attendance band, reflecting that Portland is domestic (no passport needed) but is the longest flight and biggest time-zone shift of the three US finalists for a guest list concentrated on the East Coast (pix.wedding; destify.com). On the 'funky food' front Janel asked about: Portland's food-cart culture is a real, bookable wedding-catering option, not just a novelty — cart-catering companies run the reception itself (Korean-fusion, Hawaiian plate lunch, farm-to-table from an urban Cully-neighborhood farm, gourmet-fries and small-batch-popsicle dessert carts are all real, named options), which is a genuinely different reception personality than a standard plated dinner (foodcartsportland.com; oregonweddingday.com).",
   travelCostPerGuestEstimate: 970,
   lodgingPerNightEstimate: 170,
   attendanceRateEstimate: 0.8,
@@ -44,6 +45,8 @@ export const portlandOr: DestinationSeed = {
     "https://www.bts.gov/newsroom/second-quarter-2025-average-air-fare-decreases-38-first-quarter-2025",
     "https://destify.com/blog/what-percentage-of-invited-guests-attend-a-destination-wedding/",
     "https://www.pix.wedding/what-percentage-of-wedding-guests-actually-attend",
+    "https://www.foodcartsportland.com/food-truck-catering/wedding-catering",
+    "https://oregonweddingday.com/cart-culture",
   ],
   venues: [
     {
@@ -92,6 +95,40 @@ export const portlandOr: DestinationSeed = {
       sourceUrls: [
         "https://www.castawayportland.com/",
         "https://www.originalweddings.com/blog/venues/castaway-portland-wedding/",
+      ],
+    },
+    {
+      key: "portland-timberline-lodge",
+      name: "Timberline Lodge",
+      website: "https://timberlinelodge.com/discover/weddings/",
+      capacity: 180,
+      rentalFee: 4775,
+      perGuestCost: 153,
+      inHouseCatering: true,
+      estimated: true,
+      styleNotes:
+        "A National Historic Landmark on Mount Hood's south slope at 6,000ft elevation, built in 1937 — genuine mountain-lodge architecture (not a converted private estate) with both indoor and outdoor ceremony space and real alpine views, about 60 miles/90 minutes from PDX. The site fee for up to 180 guests is $4,500-$5,050 for a 4-hour reception window (excluding setup/breakdown); rentalFee above is the midpoint, marked estimated. In-house catering carries a published $153/guest package-price floor with a food & beverage minimum; full wedding packages (venue, catering, seating, coordination) run $7,000-$20,000 overall depending on guest count and season.",
+      availabilityNotes: "Contact weddings@timberlinelodge.com or 503-272-3251 for a date-specific quote.",
+      sourceUrls: [
+        "https://timberlinelodge.com/discover/weddings/",
+        "https://www.wedding-spot.com/venue/11161/timberline-lodge/",
+        "https://www.theknot.com/marketplace/timberline-lodge-government-camp-or-380841",
+      ],
+    },
+    {
+      key: "portland-cape-horn-estate",
+      name: "Cape Horn Estate",
+      website: "https://capehornestate.com/",
+      capacity: 350,
+      rentalFee: 8000,
+      estimated: true,
+      styleNotes:
+        "A Columbia River Gorge venue in Washougal, WA (Washington side of the Gorge, ~45 minutes from Portland) built around a century-old Grange hall — genuine community-building history, not a private residence — with real indoor/outdoor flexibility: The Grange seats up to 150 indoors, while the park-like grounds with string lighting and gorge views handle up to 300-350 outdoors. Published weddings run $5,500-$10,500 (elopements from $1,500; a full weekend buyout runs $25,000); rentalFee above is the standard-wedding range's midpoint, marked estimated.",
+      availabilityNotes: "Contact the venue directly via capehornestate.com for a date-specific quote.",
+      sourceUrls: [
+        "https://capehornestate.com/",
+        "https://www.herecomestheguide.com/wedding-venues/washington/cape-horn-estate",
+        "https://www.weddingwire.com/biz/cape-horn-estate-llc-stevenson/9368c99920b305c9.html",
       ],
     },
   ],
