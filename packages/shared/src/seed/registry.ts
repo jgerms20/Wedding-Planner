@@ -1,13 +1,18 @@
 import { benchmarks } from "./benchmarks";
+import { ashevilleNc } from "./destinations/asheville-nc";
 import { austinTx } from "./destinations/austin-tx";
 import { bahamas } from "./destinations/bahamas";
 import { brazil } from "./destinations/brazil";
 import { charlestonSc } from "./destinations/charleston-sc";
+import { chattanoogaTn } from "./destinations/chattanooga-tn";
 import { columbiaSc } from "./destinations/columbia-sc";
 import { fredericksburgTx } from "./destinations/fredericksburg-tx";
+import { galvestonTx } from "./destinations/galveston-tx";
 import { gulfShoresOrangeBeachAl } from "./destinations/gulf-shores-orange-beach-al";
+import { highlandsCashiersNc } from "./destinations/highlands-cashiers-nc";
 import { jamaica } from "./destinations/jamaica";
 import { newOrleans } from "./destinations/new-orleans";
+import { pensacolaFl } from "./destinations/pensacola-fl";
 import { portlandOr } from "./destinations/portland-or";
 import { sanAntonioTx } from "./destinations/san-antonio-tx";
 import { santaFeNm } from "./destinations/santa-fe-nm";
@@ -39,5 +44,10 @@ export const SEED_DESTINATIONS: DestinationSeed[] = [
   sanAntonioTx,
   gulfShoresOrangeBeachAl,
   thirtyARosemaryBeachFl,
+  pensacolaFl,
+  galvestonTx,
+  ashevilleNc,
+  highlandsCashiersNc,
+  chattanoogaTn,
 ];
 export const SEED_BENCHMARKS: CostBenchmarks | null = benchmarks;
