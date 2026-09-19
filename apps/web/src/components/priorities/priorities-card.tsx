@@ -6,6 +6,7 @@ import { useState } from "react";
 import { Button } from "@/components/ui/button";
 import { Checkbox } from "@/components/ui/checkbox";
 import { Input } from "@/components/ui/input";
+import { PRESET_PRIORITIES } from "@/lib/priority-presets";
 import { cn } from "@/lib/utils";
 
 /** A must-haves checklist scoped to one area (e.g. "Venue", "Budget", "Overall"). Reused across
@@ -28,10 +29,32 @@ export function PrioritiesCard({
 }) {
   const [draft, setDraft] = useState("");
   const items = priorities.filter((p) => p.area === area);
+  const presets = PRESET_PRIORITIES[area] ?? [];
 
   return (
     <div className="postcard p-5">
       <p className="eyebrow">{title}</p>
+      {presets.length > 0 && (
+        <div className="mt-3 flex flex-wrap gap-1.5">
+          {presets.map((label) => {
+            const existing = items.find((p) => p.label === label);
+            return (
+              <button
+                key={label}
+                type="button"
+                onClick={() => (existing ? onRemove(existing) : onAdd(area, label))}
+                aria-pressed={Boolean(existing)}
+                className={cn(
+                  "rounded-full border px-3 py-1 text-xs transition-colors",
+                  existing ? "border-coral bg-coral-soft text-coral" : "border-line text-ink-soft hover:bg-paper-deep",
+                )}
+              >
+                {label}
+              </button>
+            );
+          })}
+        </div>
+      )}
       {items.length === 0 ? (
         <p className="mt-3 text-sm text-ink-mute">Nothing marked yet.</p>
       ) : (

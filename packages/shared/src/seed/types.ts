@@ -44,6 +44,10 @@ export interface DestinationSeed {
   /** One or two sentences on why this is on Joshua & Janel's list. */
   whyHere: string;
   notes?: string;
+  /** A real, stable, freely-licensed photo URL (e.g. Wikimedia Commons) and its credit line.
+   * Both or neither — a photo without attribution isn't usable. */
+  imageUrl?: string;
+  imageCredit?: string;
   /** Round-trip airfare from major US hubs plus three nights of lodging, per guest. */
   travelCostPerGuestEstimate: number;
   lodgingPerNightEstimate: number;
@@ -98,6 +102,9 @@ export interface SubEventEstimate {
 export interface Tip {
   text: string;
   sourceUrl: string;
+  /** One of a small fixed set shown as filter chips on the Tips page — added after the initial
+   * research, so optional for anything written before this field existed. */
+  category?: "Timeline" | "Budget" | "Guests & travel" | "Legal" | "Vendors";
 }
 
 export interface CostBenchmarks {

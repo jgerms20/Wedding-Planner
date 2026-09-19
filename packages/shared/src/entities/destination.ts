@@ -22,6 +22,12 @@ export const destinationSchema = z.object({
    * postcard's up/down arrows. Optional so destinations created before this field existed still
    * read back fine — `reconcileDestinations` backfills it once on load. */
   sortOrder: z.number().optional(),
+  /** A real, stable, freely-licensed photo for the postcard/detail dialog. Seed-only for now —
+   * research-sourced destinations don't get one (see `imageCredit`). */
+  imageUrl: z.string().optional(),
+  /** Attribution shown under `imageUrl`, e.g. "Photo: Jane Doe / Wikimedia Commons". Required
+   * whenever `imageUrl` is set. */
+  imageCredit: z.string().optional(),
   createdAt: z.string(),
   updatedAt: z.string(),
 });

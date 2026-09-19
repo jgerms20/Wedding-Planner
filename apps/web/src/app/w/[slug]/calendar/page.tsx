@@ -1,5 +1,6 @@
 "use client";
 
+import type { Event } from "@bower/shared";
 import { addMonths, eachDayOfInterval, format, isValid, parseISO, subMonths } from "date-fns";
 import { ChevronLeft, ChevronRight, Download, Plus } from "lucide-react";
 import { useCallback, useEffect, useMemo, useState } from "react";
@@ -23,7 +24,7 @@ export default function CalendarPage() {
   const loadEvents = useCallback(async () => (repo && weddingId ? repo.events.list(weddingId) : undefined), [repo, weddingId]);
   const { items: events, loading: loadingEvents, reload: reloadEvents } = useEntityList(loadEvents);
 
-  const [eventDialogOpen, setEventDialogOpen] = useState(false);
+  const [eventDialog, setEventDialog] = useState<{ open: boolean; event?: Event }>({ open: false });
 
   const loadTasks = useCallback(async () => (repo && weddingId ? repo.tasks.list(weddingId) : undefined), [repo, weddingId]);
   const { items: tasks, loading: loadingTasks } = useEntityList(loadTasks);
@@ -31,12 +32,17 @@ export default function CalendarPage() {
   const travelWindows = useMemo(() => settings?.planConfig.travelWindows ?? [], [settings]);
 
   const calendarItems = useMemo<CalendarItem[]>(() => {
-    const fromEvents: CalendarItem[] = events.map((e) => ({ id: e.id, date: e.startsAt, title: e.title, kind: e.kind }));
+    const fromEvents: CalendarItem[] = events.map((e) => ({ id: e.id, date: e.startsAt, title: e.title, kind: e.kind, linkedType: e.linkedType }));
     const fromTasks: CalendarItem[] = tasks
       .filter((t) => t.dueDate && t.status !== "done" && t.status !== "skipped")
       .map((t) => ({ id: t.id, date: t.dueDate as string, title: t.title, kind: "task" as const }));
     return [...fromEvents, ...fromTasks].sort((a, b) => (a.date < b.date ? -1 : 1));
   }, [events, tasks]);
+
+  function editEvent(item: CalendarItem) {
+    const event = events.find((e) => e.id === item.id);
+    if (event) setEventDialog({ open: true, event });
+  }
 
   const itemsByDate = useMemo(() => {
     const map = new Map<string, CalendarItem[]>();
@@ -102,7 +108,7 @@ export default function CalendarPage() {
         title="Calendar"
         description="Every anchor, satellite event, task due date, and travel window in one line-up."
         action={
-          <Button size="sm" onClick={() => setEventDialogOpen(true)}>
+          <Button size="sm" onClick={() => setEventDialog({ open: true })}>
             <Plus className="size-4 stroke-[1.5]" /> Add event
           </Button>
         }
@@ -144,7 +150,7 @@ export default function CalendarPage() {
           />
         </div>
 
-        <DayPanel selectedDate={selectedDate} items={selectedDate ? (itemsByDate.get(selectedDate) ?? []) : []} />
+        <DayPanel selectedDate={selectedDate} items={selectedDate ? (itemsByDate.get(selectedDate) ?? []) : []} onEditEvent={editEvent} />
       </div>
 
       <div className="hairline my-10" />
@@ -153,7 +159,7 @@ export default function CalendarPage() {
         <p className="eyebrow">Coming up</p>
         <h2 className="mt-1 text-3xl">Everything ahead</h2>
         <div className="mt-5">
-          <AgendaList items={upcoming} />
+          <AgendaList items={upcoming} onEditEvent={editEvent} />
         </div>
       </section>
 
@@ -169,9 +175,10 @@ export default function CalendarPage() {
       </section>
 
       <EventEditorDialog
-        open={eventDialogOpen}
-        onOpenChange={setEventDialogOpen}
+        open={eventDialog.open}
+        onOpenChange={(open) => setEventDialog((d) => ({ ...d, open }))}
         weddingId={weddingId}
+        event={eventDialog.event}
         onSave={async (event) => {
           await repo.events.upsert(event);
           await reloadEvents();

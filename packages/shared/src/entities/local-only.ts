@@ -77,3 +77,14 @@ export const watchItemSchema = z.object({
   createdAt: z.string(),
 });
 export type WatchItem = z.infer<typeof watchItemSchema>;
+
+/** One deposit toward the wedding fund. `date` is when it was set aside, not a due date. */
+export const savingsEntrySchema = z.object({
+  id: z.string(),
+  weddingId: z.string(),
+  date: z.string(),
+  amount: z.number(),
+  note: z.string().optional(),
+  createdAt: z.string(),
+});
+export type SavingsEntry = z.infer<typeof savingsEntrySchema>;

@@ -138,6 +138,8 @@ export function buildDestinationFromSeed(
     legalNotes: seed.legalNotes,
     seasonNotes: seed.seasonNotes,
     sourceUrls: seed.sourceUrls,
+    imageUrl: seed.imageUrl,
+    imageCredit: seed.imageCredit,
     sortOrder: options.sortOrder,
     createdAt: now,
     updatedAt: now,
@@ -398,6 +400,7 @@ export function buildSeedBundle(input: SeedInput): ExportBundle {
     notes: [],
     priorities: [],
     watchItems: buildStarterWatchList(weddingId),
+    savingsEntries: [],
   };
 }
 

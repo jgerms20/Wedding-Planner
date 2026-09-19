@@ -18,6 +18,7 @@ import { useCallback, useMemo, useState } from "react";
 import { PageHeader } from "@/components/page-header";
 import { AnchorsCard, TravelWindowsCard } from "@/components/plan/plan-sidebar";
 import { PlanMenu, PlanMenuItem } from "@/components/plan/plan-menu";
+import { PlanPhaseTimeline } from "@/components/plan/plan-phase-timeline";
 import { TaskRow } from "@/components/plan/task-row";
 import { PlanSettingsDialog } from "@/components/plan-settings-dialog";
 import { PrioritiesCard } from "@/components/priorities/priorities-card";
@@ -189,6 +190,7 @@ export default function PlanPage() {
           </div>
 
           <div className="order-1 flex flex-col gap-6 lg:order-2">
+            <PlanPhaseTimeline byPhase={byPhase} />
             <PrioritiesCard
               title="Wedding must-haves"
               area="Overall"

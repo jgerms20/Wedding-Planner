@@ -3,7 +3,9 @@ import { bahamas } from "./destinations/bahamas";
 import { brazil } from "./destinations/brazil";
 import { columbiaSc } from "./destinations/columbia-sc";
 import { jamaica } from "./destinations/jamaica";
+import { newOrleans } from "./destinations/new-orleans";
 import { portlandOr } from "./destinations/portland-or";
+import { santaFeNm } from "./destinations/santa-fe-nm";
 import { charlottesvilleVa } from "./destinations/virginia";
 import { washingtonDc } from "./destinations/washington-dc";
 import type { CostBenchmarks, DestinationSeed } from "./types";
@@ -15,5 +17,15 @@ import type { CostBenchmarks, DestinationSeed } from "./types";
  * here after a wedding's first seed reaches existing couples non-destructively
  * via `reconcileDestinations` (apps/web/src/lib/bootstrap.ts), not a reseed.
  */
-export const SEED_DESTINATIONS: DestinationSeed[] = [brazil, jamaica, bahamas, washingtonDc, columbiaSc, portlandOr, charlottesvilleVa];
+export const SEED_DESTINATIONS: DestinationSeed[] = [
+  brazil,
+  jamaica,
+  bahamas,
+  washingtonDc,
+  columbiaSc,
+  portlandOr,
+  charlottesvilleVa,
+  newOrleans,
+  santaFeNm,
+];
 export const SEED_BENCHMARKS: CostBenchmarks | null = benchmarks;

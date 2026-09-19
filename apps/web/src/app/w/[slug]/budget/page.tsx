@@ -4,6 +4,7 @@ import {
   DEFAULT_BUDGET_CATEGORIES,
   newId,
   nowIso,
+  pinScenario,
   reestimateBudgetFromScenario,
   scenarioMath,
   SEED_BENCHMARKS,
@@ -15,15 +16,18 @@ import { RefreshCw } from "lucide-react";
 import { useCallback, useEffect, useMemo, useState } from "react";
 import { BudgetItemEditorDialog } from "@/components/budget-item-editor-dialog";
 import { CategoryRow } from "@/components/budget/category-row";
+import { SavingsPanel } from "@/components/budget/savings-panel";
 import { SourcesDrawer } from "@/components/budget/sources-drawer";
 import { PageHeader } from "@/components/page-header";
 import { PrioritiesCard } from "@/components/priorities/priorities-card";
 import { Button } from "@/components/ui/button";
+import { Select } from "@/components/ui/select";
 import { Slider } from "@/components/ui/slider";
 import { formatMoney } from "@/lib/format";
 import { LoadingState } from "@/components/loading-state";
 import { cn } from "@/lib/utils";
 import { usePriorities } from "@/lib/use-priorities";
+import { useSavings } from "@/lib/use-savings";
 import { useRepoContext } from "@/lib/repo-context";
 import { useEntityList } from "@/lib/use-entity-list";
 
@@ -54,6 +58,26 @@ export default function BudgetPage() {
   }, [repo, weddingId]);
   const { items: scenarios, reload: reloadScenarios } = useEntityList(loadScenarios);
   const pinned = scenarios.find((s) => s.pinned);
+
+  const loadDestinations = useCallback(async () => {
+    if (!repo || !weddingId) return undefined;
+    return repo.destinations.list(weddingId);
+  }, [repo, weddingId]);
+  const { items: destinations } = useEntityList(loadDestinations);
+
+  const { entries: savingsEntries, total: savingsTotal, add: addSaving, remove: removeSaving } = useSavings();
+
+  const [tab, setTab] = useState<"categories" | "savings">("categories");
+
+  // Scenarios whose destination has been favorited on Atlas — the "shortlist" the couple is
+  // actually weighing, so this is the pool the target-location picker offers.
+  const favoriteScenarioOptions = useMemo(
+    () =>
+      scenarios
+        .map((s) => ({ scenario: s, destination: destinations.find((d) => d.id === s.destinationId) }))
+        .filter((s): s is { scenario: Scenario; destination: (typeof destinations)[number] } => Boolean(s.destination && (s.destination.favoritedBy ?? []).length > 0)),
+    [scenarios, destinations],
+  );
 
   // Seed the typical category split only for a wedding that genuinely has none,
   // and tidy the empty duplicates an earlier build could create. Both read the
@@ -134,6 +158,20 @@ export default function BudgetPage() {
     setReestimating(false);
   }
 
+  async function handleChangeTarget(scenarioId: string) {
+    if (!repo || !weddingId || !scenarioId) return;
+    await pinScenario(repo, weddingId, scenarioId);
+    const scenario = scenarios.find((s) => s.id === scenarioId);
+    if (scenario) await reestimateBudgetFromScenario(repo, weddingId, scenario);
+    await Promise.all([reloadScenarios(), reloadItems()]);
+  }
+
+  async function patchCategory(category: BudgetCategory, patch: Partial<BudgetCategory>) {
+    if (!repo) return;
+    await repo.budgetCategories.upsert({ ...category, ...patch });
+    await reloadCategories();
+  }
+
   if (!repo || !weddingId) return <LoadingState />;
 
   return (
@@ -150,11 +188,31 @@ export default function BudgetPage() {
 
       <div className="postcard rise grid gap-8 p-6 lg:grid-cols-[1.2fr_1fr] lg:items-center">
         <div>
-          <p className="eyebrow">{pinned ? `Target · ${pinned.name}` : "Target"}</p>
+          <div className="flex items-baseline justify-between gap-2">
+            <p className="eyebrow">{pinned ? `Target · ${pinned.name}` : "Target"}</p>
+            {favoriteScenarioOptions.length > 0 && (
+              <Select
+                value={pinned?.id ?? ""}
+                onChange={(e) => void handleChangeTarget(e.target.value)}
+                className="h-7 w-auto max-w-[10rem] py-0 pr-7 text-xs"
+                aria-label="Target location"
+              >
+                {!pinned && <option value="">Choose…</option>}
+                {favoriteScenarioOptions.map(({ scenario, destination }) => (
+                  <option key={scenario.id} value={scenario.id}>
+                    {destination!.name} — {scenario.name}
+                  </option>
+                ))}
+              </Select>
+            )}
+          </div>
           <p className="numeral mt-1 text-5xl text-coral">{target !== undefined ? formatMoney(target) : "—"}</p>
           <p className="mt-2 text-sm text-ink-soft">
             Sum of estimates so far: <span className="tabular text-foreground">{formatMoney(totals.estimate)}</span>
           </p>
+          {favoriteScenarioOptions.length === 0 && (
+            <p className="mt-2 text-xs text-ink-mute">Heart a destination on Atlas → Favorites to pick your target here.</p>
+          )}
         </div>
         <div>
           <div className="flex items-baseline justify-between">
@@ -188,56 +246,85 @@ export default function BudgetPage() {
         onRemove={(p) => void removePriority(p)}
       />
 
-      <div className="flex items-center justify-between gap-2">
-        <p className="eyebrow">Category lines</p>
-        <div className="inline-flex rounded-full border border-line p-0.5 text-xs">
-          {(["estimate", "actuals"] as const).map((m) => (
+      <div className="flex flex-wrap items-center justify-between gap-2">
+        <div className="inline-flex rounded-full border border-line p-0.5 text-sm">
+          {([
+            { key: "categories", label: "Categories" },
+            { key: "savings", label: "Savings" },
+          ] as const).map((t) => (
             <button
-              key={m}
+              key={t.key}
               type="button"
-              onClick={() => setMode(m)}
-              aria-pressed={mode === m}
-              className={cn(
-                "rounded-full px-3 py-1 capitalize transition-colors",
-                mode === m ? "bg-ink text-rail-foreground" : "text-ink-soft hover:text-foreground",
-              )}
+              onClick={() => setTab(t.key)}
+              aria-pressed={tab === t.key}
+              className={cn("rounded-full px-4 py-1.5 transition-colors", tab === t.key ? "bg-ink text-rail-foreground" : "text-ink-soft hover:text-foreground")}
             >
-              {m}
+              {t.label}
             </button>
           ))}
         </div>
+        {tab === "categories" && (
+          <div className="inline-flex rounded-full border border-line p-0.5 text-xs">
+            {(["estimate", "actuals"] as const).map((m) => (
+              <button
+                key={m}
+                type="button"
+                onClick={() => setMode(m)}
+                aria-pressed={mode === m}
+                className={cn(
+                  "rounded-full px-3 py-1 capitalize transition-colors",
+                  mode === m ? "bg-ink text-rail-foreground" : "text-ink-soft hover:text-foreground",
+                )}
+              >
+                {m}
+              </button>
+            ))}
+          </div>
+        )}
       </div>
 
-      <div className="flex flex-col gap-3">
-        {categories
-          .slice()
-          .sort((a, b) => a.sortOrder - b.sortOrder)
-          .map((category) => {
-            const categoryItems = items.filter((i) => i.categoryId === category.id);
-            const categoryTarget = target !== undefined && category.targetPercent !== undefined ? (target * category.targetPercent) / 100 : undefined;
-            const benchmark = benchmarkFor(category);
-            return (
-              <CategoryRow
-                key={category.id}
-                category={category}
-                items={categoryItems}
-                target={categoryTarget}
-                percentLow={benchmark?.percentLow}
-                percentHigh={benchmark?.percentHigh}
-                mode={mode}
-                onAddItem={() => setItemDialog({ open: true, categoryId: category.id })}
-                onPatchItem={async (item, patch) => {
-                  await repo.budgetItems.upsert({ ...item, ...patch, updatedAt: nowIso() });
-                  await reloadItems();
-                }}
-                onEditItem={(item) => setItemDialog({ open: true, item })}
-                onSourcesItem={(item) => setSourcesItem(item)}
-                onInfo={() => setInfoCategory(category)}
-              />
-            );
-          })}
-        {categories.length === 0 && <p className="text-sm text-ink-soft">Categories are loading…</p>}
-      </div>
+      {tab === "savings" ? (
+        <SavingsPanel
+          entries={savingsEntries}
+          total={savingsTotal}
+          target={target}
+          targetDate={wedding.targetDate}
+          onAdd={(date, amount, note) => void addSaving(date, amount, note)}
+          onRemove={(entry) => void removeSaving(entry)}
+        />
+      ) : (
+        <div className="flex flex-col gap-3">
+          {categories
+            .slice()
+            .sort((a, b) => a.sortOrder - b.sortOrder)
+            .map((category) => {
+              const categoryItems = items.filter((i) => i.categoryId === category.id);
+              const categoryTarget = target !== undefined && category.targetPercent !== undefined ? (target * category.targetPercent) / 100 : undefined;
+              const benchmark = benchmarkFor(category);
+              return (
+                <CategoryRow
+                  key={category.id}
+                  category={category}
+                  items={categoryItems}
+                  target={categoryTarget}
+                  percentLow={benchmark?.percentLow}
+                  percentHigh={benchmark?.percentHigh}
+                  mode={mode}
+                  onAddItem={() => setItemDialog({ open: true, categoryId: category.id })}
+                  onPatchItem={async (item, patch) => {
+                    await repo.budgetItems.upsert({ ...item, ...patch, updatedAt: nowIso() });
+                    await reloadItems();
+                  }}
+                  onEditItem={(item) => setItemDialog({ open: true, item })}
+                  onSourcesItem={(item) => setSourcesItem(item)}
+                  onInfo={() => setInfoCategory(category)}
+                  onPatchCategory={(patch) => void patchCategory(category, patch)}
+                />
+              );
+            })}
+          {categories.length === 0 && <p className="text-sm text-ink-soft">Categories are loading…</p>}
+        </div>
+      )}
 
       <BudgetItemEditorDialog
         open={itemDialog.open}

@@ -1,7 +1,7 @@
 "use client";
 
 import type { Task } from "@bower/shared";
-import { Check, Info } from "lucide-react";
+import { Check, Info, Pencil } from "lucide-react";
 import { useState } from "react";
 import { formatDate } from "@/lib/format";
 import { cn } from "@/lib/utils";
@@ -119,8 +119,14 @@ export function TaskRow({
         />
       ) : (
         <div className="flex shrink-0 items-center gap-1">
-          <button type="button" onClick={() => setEditingDate(true)} className="tabular text-xs text-ink-soft hover:text-coral">
+          <button
+            type="button"
+            onClick={() => setEditingDate(true)}
+            title="Click to change the date"
+            className="tabular inline-flex items-center gap-1 text-xs text-ink-soft hover:text-coral"
+          >
             {task.dueDate ? formatDate(task.dueDate, "EEE, MMM d") : "Set date"}
+            <Pencil className="size-2.5 text-ink-mute" />
           </button>
           {task.dueDateReason && (
             <button

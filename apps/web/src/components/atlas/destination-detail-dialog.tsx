@@ -3,7 +3,7 @@
 import { ResearchVenuesButton } from "@/components/ai/research-venues-button";
 import { venueStatusSchema, type Destination, type Venue, type VenueStatus } from "@bower/shared";
 import { ExternalLink, Pencil, Plus } from "lucide-react";
-import { EstimateChip, NeutralChip, SourceChips } from "@/components/atlas/chips";
+import { EstimateChip, NeutralChip, SourceChips, SourceList } from "@/components/atlas/chips";
 import { Button } from "@/components/ui/button";
 import { Dialog, DialogBody, DialogCloseButton, DialogHeader, DialogTitle } from "@/components/ui/dialog";
 import { Select } from "@/components/ui/select";
@@ -64,6 +64,13 @@ export function DestinationDetailDialog({
         <DialogCloseButton onClose={() => onOpenChange(false)} />
       </DialogHeader>
       <DialogBody className="flex flex-col gap-4">
+        {destination.imageUrl && (
+          <figure>
+            <img src={destination.imageUrl} alt="" className="h-48 w-full rounded-md object-cover" />
+            {destination.imageCredit && <figcaption className="mt-1 text-right text-xs text-ink-mute">{destination.imageCredit}</figcaption>}
+          </figure>
+        )}
+
         {whyHere && (
           <div>
             <p className="eyebrow">Why here</p>
@@ -80,7 +87,7 @@ export function DestinationDetailDialog({
 
         <div>
           <p className="eyebrow mb-1.5">Sources</p>
-          <SourceChips urls={destination.sourceUrls} />
+          <SourceList urls={destination.sourceUrls} />
           {destination.sourceUrls.length === 0 && <p className="text-sm text-ink-mute">No sources logged yet.</p>}
         </div>
 

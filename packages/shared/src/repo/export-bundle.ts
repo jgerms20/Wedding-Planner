@@ -9,6 +9,7 @@ import {
   householdSchema,
   noteSchema,
   prioritySchema,
+  savingsEntrySchema,
   scenarioSchema,
   settingsSchema,
   subEventSchema,
@@ -42,5 +43,6 @@ export const exportBundleSchema = z.object({
   notes: z.array(noteSchema).default([]),
   priorities: z.array(prioritySchema).default([]),
   watchItems: z.array(watchItemSchema).default([]),
+  savingsEntries: z.array(savingsEntrySchema).default([]),
 });
 export type ExportBundle = z.infer<typeof exportBundleSchema>;

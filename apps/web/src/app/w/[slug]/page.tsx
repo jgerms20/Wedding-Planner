@@ -42,10 +42,14 @@ export default function HomePage() {
     for (const s of scenarios) if (s.destinationId) map.set(s.destinationId, s);
     return map;
   }, [scenarios]);
-  // Same ranking the Atlas page uses (the couple's own sortOrder, not cost or whatever's
-  // pinned) so "Front-runner" means the same thing everywhere it's shown.
+  // Same ranking the Atlas page's Favorites tab uses (the couple's own sortOrder among
+  // destinations either partner has hearted, not cost or whatever's pinned) so "Front-runner"
+  // means the same thing everywhere it's shown.
   const orderedDestinations = useMemo(
-    () => [...destinations].sort((a, b) => (a.sortOrder ?? Number.MAX_SAFE_INTEGER) - (b.sortOrder ?? Number.MAX_SAFE_INTEGER)),
+    () =>
+      [...destinations]
+        .filter((d) => (d.favoritedBy ?? []).length > 0)
+        .sort((a, b) => (a.sortOrder ?? Number.MAX_SAFE_INTEGER) - (b.sortOrder ?? Number.MAX_SAFE_INTEGER)),
     [destinations],
   );
   const frontRunnerId = orderedDestinations[0]?.id;

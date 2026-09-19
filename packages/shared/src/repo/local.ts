@@ -12,6 +12,7 @@ import {
   householdSchema,
   noteSchema,
   prioritySchema,
+  savingsEntrySchema,
   scenarioSchema,
   settingsSchema,
   subEventSchema,
@@ -31,6 +32,7 @@ import {
   type Household,
   type Note,
   type Priority,
+  type SavingsEntry,
   type Scenario,
   type Settings,
   type SubEvent,
@@ -40,8 +42,18 @@ import {
   type WeddingPartyMember,
   type WatchItem,
 } from "../entities/index";
+import { newId } from "../util";
 import { EXPORT_BUNDLE_VERSION, exportBundleSchema } from "./export-bundle";
-import type { EntityRepo, WeddingRepo } from "./types";
+import type { EntityRepo, FileAttachment, FilesRepo, WeddingRepo } from "./types";
+
+/** A file's blob lives only in this row — never in the JSON export bundle (blobs don't
+ * round-trip through JSON, and this app has no server to hold them yet). */
+interface FileBlobRow extends FileAttachment {
+  blob: Blob;
+}
+
+/** IndexedDB is generous but not infinite; keep individual uploads sane in a browser-only store. */
+const MAX_FILE_BYTES = 20 * 1024 * 1024;
 
 /** The local Dexie (IndexedDB) database. One table per entity, database name "bower". */
 class BowerDatabase extends Dexie {
@@ -64,6 +76,8 @@ class BowerDatabase extends Dexie {
   aiUsage!: Table<AiUsage, string>;
   priorities!: Table<Priority, string>;
   watchItems!: Table<WatchItem, string>;
+  savingsEntries!: Table<SavingsEntry, string>;
+  fileBlobs!: Table<FileBlobRow, string>;
 
   constructor(name = "bower") {
     super(name);
@@ -93,6 +107,11 @@ class BowerDatabase extends Dexie {
     this.version(3).stores({
       priorities: "id, weddingId, area",
       watchItems: "id, weddingId, kind",
+    });
+    // v4: the wedding-fund savings log, and uploaded files (blob stays out of the JSON bundle).
+    this.version(4).stores({
+      savingsEntries: "id, weddingId, date",
+      fileBlobs: "id, weddingId, createdAt",
     });
   }
 }
@@ -140,6 +159,38 @@ export function createLocalRepo(databaseName = "bower"): WeddingRepo {
   const aiUsage = entityRepo(db.aiUsage, aiUsageSchema);
   const priorities = entityRepo(db.priorities, prioritySchema);
   const watchItems = entityRepo(db.watchItems, watchItemSchema);
+  const savingsEntries = entityRepo(db.savingsEntries, savingsEntrySchema);
+
+  const files: FilesRepo = {
+    async list(weddingId) {
+      const rows = await db.fileBlobs.where("weddingId").equals(weddingId).toArray();
+      return rows.map(({ blob: _blob, ...meta }) => meta).sort((a, b) => b.createdAt.localeCompare(a.createdAt));
+    },
+    async upload(weddingId, file) {
+      if (file.size > MAX_FILE_BYTES) {
+        throw new Error(`${file.name} is larger than 20MB — this browser-only storage can't hold it yet.`);
+      }
+      const row: FileBlobRow = {
+        id: newId(),
+        weddingId,
+        name: file.name,
+        mimeType: file.type || "application/octet-stream",
+        size: file.size,
+        blob: file,
+        createdAt: new Date().toISOString(),
+      };
+      await db.fileBlobs.put(row);
+      const { blob: _blob, ...meta } = row;
+      return meta;
+    },
+    async remove(id) {
+      await db.fileBlobs.delete(id);
+    },
+    async getObjectUrl(id) {
+      const row = await db.fileBlobs.get(id);
+      return row ? URL.createObjectURL(row.blob) : undefined;
+    },
+  };
 
   const bundleTables = [
     db.weddings,
@@ -159,6 +210,7 @@ export function createLocalRepo(databaseName = "bower"): WeddingRepo {
     db.notes,
     db.priorities,
     db.watchItems,
+    db.savingsEntries,
   ];
 
   return {
@@ -179,6 +231,8 @@ export function createLocalRepo(databaseName = "bower"): WeddingRepo {
     aiUsage,
     priorities,
     watchItems,
+    savingsEntries,
+    files,
 
     async getWedding(slug) {
       return db.weddings.where("slug").equals(slug).first();
@@ -222,6 +276,7 @@ export function createLocalRepo(databaseName = "bower"): WeddingRepo {
         notes: await notes.list(weddingId),
         priorities: await priorities.list(weddingId),
         watchItems: await watchItems.list(weddingId),
+        savingsEntries: await savingsEntries.list(weddingId),
       };
       const parsed = exportBundleSchema.parse(bundle);
       return JSON.stringify(parsed, null, 2);
@@ -254,6 +309,7 @@ export function createLocalRepo(databaseName = "bower"): WeddingRepo {
         await db.notes.bulkPut(bundle.notes);
         await db.priorities.bulkPut(bundle.priorities);
         await db.watchItems.bulkPut(bundle.watchItems);
+        await db.savingsEntries.bulkPut(bundle.savingsEntries);
       });
     },
   };

@@ -4,6 +4,7 @@ import type { BudgetCategory, BudgetItem } from "@bower/shared";
 import { ChevronDown, Info, Plus } from "lucide-react";
 import { useState } from "react";
 import { BudgetItemRow } from "@/components/budget/budget-item-row";
+import { InlinePercent } from "@/components/budget/inline-fields";
 import { Button } from "@/components/ui/button";
 import { formatMoney } from "@/lib/format";
 import { cn } from "@/lib/utils";
@@ -20,6 +21,7 @@ export function CategoryRow({
   onEditItem,
   onSourcesItem,
   onInfo,
+  onPatchCategory,
 }: {
   category: BudgetCategory;
   items: BudgetItem[];
@@ -36,6 +38,8 @@ export function CategoryRow({
   onSourcesItem: (item: BudgetItem) => void;
   /** Opens an explainer for what this category covers and where its target percent comes from. */
   onInfo: () => void;
+  /** Lets the couple adjust this category's own share of the budget, independent of the others. */
+  onPatchCategory: (patch: Partial<BudgetCategory>) => void;
 }) {
   const [expanded, setExpanded] = useState(false);
 
@@ -55,11 +59,10 @@ export function CategoryRow({
         <div className="min-w-48 flex-1">
           <div className="flex items-baseline gap-2">
             <span className="font-display text-lg">{category.name}</span>
-            {category.targetPercent !== undefined && (
-              <span className="text-xs text-ink-mute">
-                target {category.targetPercent}%{percentLow !== undefined && percentHigh !== undefined && ` (${percentLow}-${percentHigh}%)`}
-              </span>
-            )}
+            <span className="flex items-center gap-1 text-xs text-ink-mute" onClick={(e) => e.stopPropagation()}>
+              target <InlinePercent value={category.targetPercent} onCommit={(targetPercent) => onPatchCategory({ targetPercent })} />
+              {percentLow !== undefined && percentHigh !== undefined && ` (${percentLow}-${percentHigh}%)`}
+            </span>
             <button
               type="button"
               onClick={(e) => {

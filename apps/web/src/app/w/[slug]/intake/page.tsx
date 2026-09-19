@@ -23,27 +23,9 @@ import { Select } from "@/components/ui/select";
 import { Textarea } from "@/components/ui/textarea";
 import { useRepoContext } from "@/lib/repo-context";
 import { useEntityList } from "@/lib/use-entity-list";
+import { SUB_EVENT_LABELS } from "@/lib/sub-event-catalog";
 
 const PRIORITY_OPTIONS = ["Food", "Photo & video", "Music", "Venue", "Flowers", "Attire", "Guest experience"];
-
-const SUB_EVENT_LABELS: Record<SubEventKind, string> = {
-  engagement_party: "Engagement party",
-  bridal_shower: "Bridal shower",
-  couples_shower: "Couples shower",
-  groom_shower: "Groom's shower",
-  bachelor: "Bachelor party",
-  bachelorette: "Bachelorette party",
-  joint_bachelor_bachelorette: "Joint bachelor/bachelorette trip",
-  premarital_counseling: "Premarital counseling",
-  rehearsal_dinner: "Rehearsal dinner",
-  welcome_party: "Welcome party",
-  after_party: "After-party",
-  brunch: "Morning-after brunch",
-  second_reception: "Second reception (for those who couldn't travel)",
-  sangeet: "Sangeet",
-  honeymoon: "Honeymoon",
-  other: "Something else",
-};
 
 interface SatelliteState {
   selected: boolean;

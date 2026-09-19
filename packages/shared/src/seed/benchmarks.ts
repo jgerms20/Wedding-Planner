@@ -294,74 +294,92 @@ export const benchmarks: CostBenchmarks = {
     {
       text: "Send save-the-dates 10-12 months out for a destination wedding (longer for an international or long-haul destination) so guests can lock in flights and request time off before prices climb.",
       sourceUrl: "https://paperlust.co/blog/when-to-send-save-the-dates/",
+      category: "Timeline",
     },
     {
       text: "Negotiate a hotel room block 9-12 months ahead for roughly 20-30% of the expected guest count — hotels typically discount 10-25% off the standard rate for a committed block, but unfilled blocks get released back to the public, so early guest commitment matters.",
       sourceUrl: "https://withjoy.com/blog/how-to-book-a-hotel-room-block-for-your-wedding-2026-guide/",
+      category: "Guests & travel",
     },
     {
       text: "Budget the guest list around a realistic RSVP-yes-and-show rate, not the invite count: local weddings run 80-85% attendance, but travel weddings see decline rates of 30-40% versus 15-20% for a local wedding, and even confirmed 'yes' guests have a 5-10% last-minute drop-off.",
       sourceUrl: "https://www.pix.wedding/what-percentage-of-wedding-guests-actually-attend",
+      category: "Guests & travel",
     },
     {
       text: "For a wedding abroad, get legally married at the courthouse at home before or after the trip and treat the destination ceremony as symbolic — this is what most US couples marrying overseas actually do, since it sidesteps foreign residency waits, translated-document requirements, and paperwork most people don't discover until they're deep into planning.",
       sourceUrl: "https://www.sincerelypete.com/sincerelypeteblog/get-legally-married-in-the-us-before-or-after-your-destination-wedding",
+      category: "Legal",
     },
     {
       text: "Consider a welcome party open to every out-of-town guest instead of a rehearsal dinner limited to the wedding party — it spreads a similar total budget across more people at a lower per-head format (e.g. a $40/head appetizer reception for 80 versus an $85/head plated dinner for 35).",
       sourceUrl: "https://www.greatevent.com/wedding-venue-cost-2026-guide/",
+      category: "Budget",
     },
     {
       text: "Rehearsal dinner cost scales hard with guest count — couples hosting 50 or fewer guests spend about $1,630 on average, while those with 100+ guests average $3,139 — so decide that guest list deliberately rather than defaulting to 'everyone from the wedding.'",
       sourceUrl: "https://www.theknot.com/content/average-cost-rehearsal-dinner",
+      category: "Budget",
     },
     {
       text: "Budget postage as its own line item: figure at least $1.50 per outgoing wedding invitation once the outer envelope, inserts, and a stamped RSVP card are all accounted for, and expect more for an oversized or international mailing.",
       sourceUrl: "https://www.bridalguide.com/planning/getting-started/budget/wedding-budget-mistakes",
+      category: "Budget",
     },
     {
       text: "Give any vendor quote over $5,000 a full month of 'cooling off' between the meeting and the signature — decisions made in the first weeks of planning, in the excitement of getting engaged, often look different a month later.",
       sourceUrl: "https://www.bridalguide.com/planning/getting-started/budget/wedding-budget-mistakes",
+      category: "Vendors",
     },
     {
       text: "Flowers are the single most common post-wedding budget regret among real brides — they look incredible for a few hours and are gone (torn down, composted) by the next morning — so couples who keep florals modest and splurge elsewhere tend not to regret it.",
       sourceUrl: "https://www.womangettingmarried.com/brides-wedding-budget-regrets/",
+      category: "Budget",
     },
     {
       text: "Book and secure venues and key vendors early for a spring date: Washington DC-area venues alone book about 454 days (roughly 15 months) out on average for popular spring dates, and that lead time only gets longer for a destination wedding.",
       sourceUrl: "https://www.jennaleighphotography.net/blog/top-25-dc-wedding-venues-cost-comparison-september-2025/",
+      category: "Timeline",
     },
     {
       text: "Before assuming guests will just 'figure out' travel, know what you're actually asking: one groomsman's real account described nearly $4,000 in flights and hotel costs to attend a single destination wedding — a useful gut-check for how a smaller travel ask (or a travel subsidy) changes who can say yes.",
       sourceUrl: "https://www.aol.com/groomsman-struggles-tell-friend-cant-210531761.html",
+      category: "Guests & travel",
     },
     {
       text: "If guests are also expected to pay to attend wedding-weekend events (a welcome party, an activity day), expect real pushback — wedding-forum consensus is that this reads as 'tacky' on top of the travel cost guests are already covering, and it's worth budgeting those events as hosted, not ticketed.",
       sourceUrl: "https://www.aol.com/lifestyle/bride-groom-charging-guests-attend-095000039.html",
+      category: "Guests & travel",
     },
     {
       text: "Set fare alerts and encourage guests to book flights the moment save-the-dates go out: domestic round-trip fares average $470-520 nationally, but that number swings by hundreds of dollars depending on how far in advance guests book.",
       sourceUrl: "https://www.bts.gov/newsroom/first-quarter-2026-average-air-fare-increases-47-fourth-quarter-2025",
+      category: "Guests & travel",
     },
     {
       text: "A day-of coordinator is one of the cheapest ways to buy back stress on the wedding day: the blended national average across all planning-service tiers is about $2,100, well below the $3,800-5,500 a full-service planner runs, but it still means someone besides the couple or their parents is managing the timeline.",
       sourceUrl: "https://www.theknot.com/content/how-much-do-wedding-planners-charge",
+      category: "Vendors",
     },
     {
       text: "Flag expected wedding-party costs (travel, attire, a bachelor/bachelorette trip) when asking someone to be in the wedding, not after — bridesmaid dresses alone average $128-140 each in the Northeast/Mid-Atlantic, on top of any destination travel.",
       sourceUrl: "https://www.theknot.com/content/average-bridesmaid-dress-cost",
+      category: "Budget",
     },
     {
       text: "Around Washington DC's Cherry Blossom Festival (typically late March into early April), the event draws over 1.5 million visitors and pushes hotel packages well above normal spring rates — worth avoiding that exact window unless the blossoms themselves are the point, since venues also need to be booked roughly a year ahead to guarantee it.",
       sourceUrl: "https://washingtonian.com/2026/03/13/15-dc-hotel-packages-for-cherry-blossom-season/",
+      category: "Timeline",
     },
     {
       text: "A lunch or brunch reception instead of an evening dinner event runs roughly 30% cheaper per person for the same guest list — worth considering for a welcome event or a next-day send-off brunch.",
       sourceUrl: "https://www.zola.com/expert-advice/how-much-does-a-rehearsal-dinner-cost",
+      category: "Budget",
     },
     {
       text: "Publish flight, hotel-block and local-transportation details on the wedding website as soon as save-the-dates go out — guests weighing whether they can make a destination trip decide early, based on exactly those three answers, well before a formal invitation with an RSVP date exists.",
       sourceUrl: "https://zola.com/expert-advice/invites-paper/save-the-dates/what-to-expect-after-sending-save-the-dates",
+      category: "Guests & travel",
     },
   ],
   sourceUrls: [

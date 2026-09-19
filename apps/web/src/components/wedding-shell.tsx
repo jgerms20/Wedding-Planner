@@ -2,7 +2,6 @@
 
 import {
   CalendarDays,
-  Crown,
   FolderOpen,
   Home,
   Lightbulb,
@@ -33,7 +32,6 @@ const NAV_ITEMS = [
   { href: "/guests", label: "Guests", icon: Users },
   { href: "/budget", label: "Budget", icon: Wallet },
   { href: "/events", label: "Events", icon: PartyPopper },
-  { href: "/party", label: "Party", icon: Crown },
   { href: "/calendar", label: "Calendar", icon: CalendarDays },
   { href: "/files", label: "Files", icon: FolderOpen },
   { href: "/tips", label: "Tips", icon: Lightbulb },

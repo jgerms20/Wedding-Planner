@@ -50,6 +50,41 @@ export function InlineMoney({
   );
 }
 
+/** A category's target-percent assumption, editable the same way as `InlineMoney`. Categories
+ * are adjusted independently — changing one doesn't rebalance the others — so "play around with
+ * the split" is the couple's own call, not something the app second-guesses for them. */
+export function InlinePercent({ value, onCommit }: { value: number | undefined; onCommit: (value: number | undefined) => void }) {
+  const [editing, setEditing] = useState(false);
+
+  if (editing) {
+    return (
+      <input
+        type="number"
+        autoFocus
+        min={0}
+        max={100}
+        defaultValue={value ?? ""}
+        onBlur={(e) => {
+          setEditing(false);
+          const raw = e.target.value.trim();
+          onCommit(raw === "" ? undefined : Number(raw));
+        }}
+        onKeyDown={(e) => {
+          if (e.key === "Enter") e.currentTarget.blur();
+          if (e.key === "Escape") setEditing(false);
+        }}
+        className="tabular h-6 w-14 rounded-md border border-line-strong bg-transparent px-1.5 text-xs outline-none focus:border-coral"
+      />
+    );
+  }
+
+  return (
+    <button type="button" onClick={() => setEditing(true)} className="text-xs text-ink-mute underline decoration-dotted hover:text-coral">
+      {value ?? "—"}%
+    </button>
+  );
+}
+
 /** A due date that becomes a date input on click. */
 export function InlineDate({ value, onCommit }: { value: string | undefined; onCommit: (value: string | undefined) => void }) {
   const [editing, setEditing] = useState(false);

@@ -1,3 +1,4 @@
+import { ExternalLink } from "lucide-react";
 import type { ReactNode } from "react";
 import { cn } from "@/lib/utils";
 
@@ -50,6 +51,32 @@ export function SourceChips({ urls, className }: { urls: string[]; className?: s
         </a>
       ))}
     </div>
+  );
+}
+
+/**
+ * A "how we got these" list — linked rows (domain + external-link icon), not bare pills. Used
+ * for a destination's own top-level Sources section, where a wrapped row of tiny chips read as
+ * unfinished; `SourceChips` stays as-is for tighter contexts like a single venue row.
+ */
+export function SourceList({ urls, className }: { urls: string[]; className?: string }) {
+  if (urls.length === 0) return null;
+  return (
+    <ul className={cn("flex flex-col gap-1.5", className)}>
+      {urls.map((url) => (
+        <li key={url}>
+          <a
+            href={url}
+            target="_blank"
+            rel="noreferrer"
+            className="flex items-center gap-2 rounded-md border border-line px-3 py-2 text-sm text-ink-soft transition-colors hover:border-coral hover:text-coral"
+          >
+            <ExternalLink className="size-3.5 shrink-0 text-ink-mute" />
+            <span className="min-w-0 flex-1 truncate">{hostnameOf(url)}</span>
+          </a>
+        </li>
+      ))}
+    </ul>
   );
 }
 
