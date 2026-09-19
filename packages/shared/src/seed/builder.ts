@@ -4,6 +4,7 @@ import type {
   Decision,
   Destination,
   Event,
+  Guest,
   Scenario,
   Settings,
   SubEvent,
@@ -17,7 +18,7 @@ import { defaultSettings, scenarioMath } from "../entities/index";
 import type { ExportBundle } from "../repo/export-bundle";
 import { generateAnchorEvents, generatePlan } from "../timeline/index";
 import { newId, nowIso } from "../util";
-import type { CostBenchmarks, DestinationSeed } from "./types";
+import type { CostBenchmarks, DestinationSeed, VenueSeed } from "./types";
 
 export interface SeedInput {
   destinations: DestinationSeed[];
@@ -117,6 +118,35 @@ function round(n: number): number {
  * context (seed rank vs. "append after what's already there"; "the initial pick" vs. "never
  * auto-pin something the couple hasn't looked at yet").
  */
+/** Builds one runtime `Venue` from a researched `VenueSeed`. Shared by `buildDestinationFromSeed`
+ * (a brand-new destination) and `reconcileVenues` (adding/swapping a venue on a destination that
+ * already exists in the couple's data). */
+export function buildVenueFromSeed(seed: VenueSeed, weddingId: string, destinationId: string, now: string): Venue {
+  return {
+    id: newId(),
+    weddingId,
+    destinationId,
+    name: seed.name,
+    website: seed.website,
+    email: seed.email,
+    phone: seed.phone,
+    capacity: seed.capacity,
+    rentalFee: seed.rentalFee,
+    fbMinimum: seed.fbMinimum,
+    perGuestCost: seed.perGuestCost,
+    inHouseCatering: seed.inHouseCatering,
+    lodgingOnSite: seed.lodgingOnSite,
+    styleNotes: [seed.styleNotes, seed.estimated ? "Figures are estimates, not published prices." : undefined]
+      .filter(Boolean)
+      .join(" "),
+    availabilityNotes: seed.availabilityNotes,
+    status: seed.status ?? "idea",
+    sourceUrls: seed.sourceUrls,
+    createdAt: now,
+    updatedAt: now,
+  };
+}
+
 export function buildDestinationFromSeed(
   seed: DestinationSeed,
   weddingId: string,
@@ -145,29 +175,7 @@ export function buildDestinationFromSeed(
     updatedAt: now,
   };
 
-  const venues: Venue[] = seed.venues.map((v) => ({
-    id: newId(),
-    weddingId,
-    destinationId,
-    name: v.name,
-    website: v.website,
-    email: v.email,
-    phone: v.phone,
-    capacity: v.capacity,
-    rentalFee: v.rentalFee,
-    fbMinimum: v.fbMinimum,
-    perGuestCost: v.perGuestCost,
-    inHouseCatering: v.inHouseCatering,
-    lodgingOnSite: v.lodgingOnSite,
-    styleNotes: [v.styleNotes, v.estimated ? "Figures are estimates, not published prices." : undefined]
-      .filter(Boolean)
-      .join(" "),
-    availabilityNotes: v.availabilityNotes,
-    status: v.status ?? "idea",
-    sourceUrls: v.sourceUrls,
-    createdAt: now,
-    updatedAt: now,
-  }));
+  const venues: Venue[] = seed.venues.map((v) => buildVenueFromSeed(v, weddingId, destinationId, now));
 
   const scenario: Scenario = {
     id: newId(),
@@ -422,6 +430,78 @@ function buildStarterWatchList(weddingId: string): WatchItem[] {
     createdAt: now,
   }));
 }
+
+/**
+ * One entry from the couple's own dictated guest-list conversation — real personal data, not
+ * researched content, so there's no `sourceUrls`/citation requirement here the way there is for
+ * destinations. `relationship` doubles as a plain-language note for anything hedged ("maybe",
+ * "respectful invite") so a lower-tier entry reads honestly rather than as a firm invite.
+ *
+ * `side` is a stated guess, not a determination: the recording reads as one person walking
+ * through their whole family tree while the other listens, but nothing in it says whose tree it
+ * is. Everyone here defaults to "a" (Joshua's side, since he's the one who relayed the notes) —
+ * a single bulk edit on the Guests page fixes this if it's actually Janel's family.
+ */
+export const STARTER_GUEST_LIST: Array<{
+  firstName: string;
+  lastName?: string;
+  relationship: string;
+  tier: Guest["tier"];
+  side: Guest["side"];
+}> = [
+  // Confirmed, closest circle (tier: must)
+  { firstName: "Mom", relationship: "Mother", tier: "must", side: "a" },
+  { firstName: "Dad", relationship: "Father", tier: "must", side: "a" },
+  { firstName: "Reagan", relationship: "Sister", tier: "must", side: "a" },
+  { firstName: "Eddie", relationship: "Reagan's partner", tier: "must", side: "a" },
+  { firstName: "RJ", relationship: "Brother", tier: "must", side: "a" },
+  { firstName: "Tori", relationship: "RJ's partner", tier: "must", side: "a" },
+  { firstName: "Renee", relationship: "Aunt", tier: "must", side: "a" },
+  { firstName: "Amos", relationship: "Uncle", tier: "must", side: "a" },
+  { firstName: "Amos", relationship: "Cousin (a different Amos than the uncle, same first name)", tier: "must", side: "a" },
+  { firstName: "Elena", relationship: "Cousin (also called Lena)", tier: "must", side: "a" },
+  { firstName: "Darren", relationship: "Uncle", tier: "must", side: "a" },
+  { firstName: "Lori", relationship: "Aunt (also spelled Lorie)", tier: "must", side: "a" },
+  { firstName: "Lauren", relationship: "Cousin", tier: "must", side: "a" },
+  { firstName: "Ben", relationship: "Lauren's husband", tier: "must", side: "a" },
+  { firstName: "Danielle", relationship: "Cousin", tier: "must", side: "a" },
+  { firstName: "DJ", relationship: "Family friend (exact relation not stated in the notes)", tier: "must", side: "a" },
+  { firstName: "Jackie", relationship: "Cousin", tier: "must", side: "a" },
+  { firstName: "Ryan", relationship: "Cousin", tier: "must", side: "a" },
+  { firstName: "Jasmine", relationship: "Cousin", tier: "must", side: "a" },
+  { firstName: "Melissa", relationship: "Cousin", tier: "must", side: "a" },
+  { firstName: "April", relationship: "Godmother", tier: "must", side: "a" },
+  { firstName: "Bobo", relationship: "Godfather", tier: "must", side: "a" },
+  { firstName: "Marissa", relationship: "Family friend (\"Miss Marissa\")", tier: "must", side: "a" },
+  { firstName: "Deja", relationship: "Family friend", tier: "must", side: "a" },
+  { firstName: "Clint", relationship: "Family friend", tier: "must", side: "a" },
+  { firstName: "Tasha", relationship: "Family friend", tier: "must", side: "a" },
+  { firstName: "Barbara", relationship: "Cousin", tier: "must", side: "a" },
+  { firstName: "Nathaniel", relationship: "Cousin", tier: "must", side: "a" },
+
+  // Confirmed, real invite but stated more plainly than the closest circle (tier: should)
+  { firstName: "Carol", relationship: "Cousin — invited, though not expected to attend", tier: "should", side: "a" },
+  { firstName: "Wanita", relationship: "Mom's friend, a childhood \"play aunt\"", tier: "should", side: "a" },
+  { firstName: "Sandra", relationship: "Family friend (\"Miss Sandra\"), a childhood babysitter", tier: "should", side: "a" },
+  { firstName: "Jason", relationship: "Family friend — invited along with his wife (her name wasn't given in the notes)", tier: "should", side: "a" },
+  { firstName: "Jessica", relationship: "Family friend", tier: "should", side: "a" },
+  { firstName: "Tony", relationship: "Family friend", tier: "should", side: "a" },
+  { firstName: "Evelyn", relationship: "Aunt", tier: "should", side: "a" },
+  { firstName: "Arlene", relationship: "Cousin", tier: "should", side: "a" },
+  { firstName: "Marcus", relationship: "Uncle", tier: "should", side: "a" },
+  { firstName: "Regina", relationship: "Possibly Uncle Marcus's wife — unclear from the notes", tier: "should", side: "a" },
+
+  // Hedged in the notes (tier: nice — the hedge is kept in `relationship` so it reads honestly)
+  { firstName: "Kenny", relationship: "Family friend — hedged (\"why not, that's a possibility\")", tier: "nice", side: "a" },
+  { firstName: "Manar", relationship: "Family friend — hedged (\"why not, that's a possibility\")", tier: "nice", side: "a" },
+  { firstName: "Jerome", relationship: "Cousin — hedged (\"it's on the line\")", tier: "nice", side: "a" },
+  { firstName: "Sheniqua", relationship: "Hedged alongside cousin Jerome (\"it's on the line\")", tier: "nice", side: "a" },
+  { firstName: "Javon", relationship: "Cousin — hedged (\"maybe a respectful invite, let them know\")", tier: "nice", side: "a" },
+  { firstName: "JJ", relationship: "Cousin's family — hedged (\"maybe a respectful invite, let them know\")", tier: "nice", side: "a" },
+  { firstName: "Dion", relationship: "Cousin — hedged (\"maybe, low-key\")", tier: "nice", side: "a" },
+  { firstName: "Mark", relationship: "Uncle Marcus & Regina's child — hedged (\"if they wanted to\")", tier: "nice", side: "a" },
+  { firstName: "Anna", relationship: "Uncle Marcus & Regina's child — hedged (\"if they wanted to\")", tier: "nice", side: "a" },
+];
 
 function midpoint(benchmarks: CostBenchmarks, kind: SubEventKind): number | undefined {
   const est = benchmarks.subEventEstimates.find((e) => e.kind === kind);

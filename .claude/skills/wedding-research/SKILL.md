@@ -13,6 +13,7 @@ description: How Bower researches destinations, venues, vendors, and costs with 
 4. **Legal notes end with** "Verify with the local authority or an attorney."
 5. **Write for the couple:** Joshua & Janel, spring 2028, ~100 guests, most on the US East Coast, Brazil is the front-runner. `whyHere` is specific to them.
 6. **Never invent a venue.** If a place cannot be found on the web, it does not go in.
+7. **Never a plantation, full stop.** The couple has stated this in the clearest possible terms and it is not negotiable. A former plantation marketed today as a "historic estate," "manor," "antebellum home," or "historic Southern venue" is excluded regardless of how tastefully it's branded — "restored," "charming," "live-oak-lined" is exactly the marketing language a plantation-turned-event-venue uses. Any venue built roughly 1700s-1890s at or near a Southern port or river gets its actual history checked (who built it, what it operated as) before it goes in a seed file — don't assume it's safe just because the listing doesn't say the word. When history is genuinely unclear after a real check, leave the venue out rather than guess. This applies to every Southern US destination researched (Charleston, New Orleans, Savannah-adjacent options, etc.), not just the ones the couple has already flagged.
 
 ## Shapes
 

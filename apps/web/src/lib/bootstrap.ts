@@ -1,6 +1,7 @@
 import {
   buildDestinationFromSeed,
   buildSeedBundle,
+  buildVenueFromSeed,
   COUPLE,
   defaultSettings,
   generateAnchorEvents,
@@ -10,9 +11,19 @@ import {
   scenarioMath,
   SEED_BENCHMARKS,
   SEED_DESTINATIONS,
+  STARTER_GUEST_LIST,
   type Wedding,
   type WeddingRepo,
 } from "@bower/shared";
+
+/** A venue name a past research round shipped and then found to violate the couple's
+ * no-plantations rule (see `.claude/skills/wedding-research/SKILL.md`) — removed from the seed
+ * data itself, but `reconcileDestinations` only ever adds whole new destinations, so an existing
+ * wedding that already synced New Orleans still has the bad venue sitting in its own data. This
+ * is a narrow, one-time correction (remove this exact name if found), not a general "delete
+ * venues no longer in the seed" mechanism — that would risk resurrecting or deleting venues the
+ * couple has since edited by hand for unrelated reasons. */
+const RETRACTED_VENUE_NAMES = new Set(["Southern Oaks"]);
 import { WEDDING_SLUG } from "./constants";
 
 /** True when the researched seed modules are registered and a full bundle can be built. */
@@ -77,6 +88,73 @@ export async function reconcileDestinations(repo: WeddingRepo, weddingId: string
     await repo.destinations.upsert(destination);
     for (const venue of venues) await repo.venues.upsert(venue);
     await repo.scenarios.upsert(scenario);
+  }
+}
+
+/**
+ * Adds the couple's own dictated guest list to an *existing* wedding, run once per load
+ * alongside `reconcileDestinations`. Purely additive and idempotent: diffs by lowercased
+ * first+last name against guests already on file, so re-running never double-inserts and a
+ * guest the couple has since edited or removed by hand is never recreated.
+ */
+export async function reconcileGuests(repo: WeddingRepo, weddingId: string): Promise<void> {
+  const existing = await repo.guests.list(weddingId);
+  const existingNames = new Set(existing.map((g) => `${g.firstName} ${g.lastName ?? ""}`.trim().toLowerCase()));
+  const now = nowIso();
+  for (const note of STARTER_GUEST_LIST) {
+    const key = `${note.firstName} ${note.lastName ?? ""}`.trim().toLowerCase();
+    if (existingNames.has(key)) continue;
+    await repo.guests.upsert({
+      id: newId(),
+      weddingId,
+      firstName: note.firstName,
+      lastName: note.lastName,
+      side: note.side,
+      tier: note.tier,
+      relationship: note.relationship,
+      plusOne: false,
+      isChild: false,
+      tags: [],
+      rsvp: {},
+      createdAt: now,
+      updatedAt: now,
+    });
+  }
+}
+
+/**
+ * Reaches an *existing* destination's venue list, run once per load alongside
+ * `reconcileDestinations` (which only ever adds whole new destinations, never touches venues on
+ * one already present). Two things happen here, both safe to re-run:
+ * 1. Any venue named in `RETRACTED_VENUE_NAMES` is removed outright — a narrow, explicit
+ *    correction for a specific bad venue a past round shipped, not a general sync.
+ * 2. Any venue in a registered seed's `venues` list, matched by name, that isn't already present
+ *    under the corresponding existing destination gets added — the same additive-by-name
+ *    approach `reconcileDestinations` already uses for whole destinations, applied one level
+ *    down so a researched venue *addition* to an already-synced destination (e.g. a couple more
+ *    Portland or DC options) reaches existing wedding data too.
+ */
+export async function reconcileVenues(repo: WeddingRepo, weddingId: string): Promise<void> {
+  const [destinations, venues] = await Promise.all([repo.destinations.list(weddingId), repo.venues.list(weddingId)]);
+  const now = nowIso();
+
+  for (const venue of venues) {
+    if (RETRACTED_VENUE_NAMES.has(venue.name)) {
+      await repo.venues.remove(venue.id);
+    }
+  }
+
+  const destinationByName = new Map(destinations.map((d) => [d.name.trim().toLowerCase(), d]));
+  const remainingVenues = venues.filter((v) => !RETRACTED_VENUE_NAMES.has(v.name));
+
+  for (const seed of SEED_DESTINATIONS) {
+    const destination = destinationByName.get(seed.name.trim().toLowerCase());
+    if (!destination) continue; // not yet synced to this wedding — reconcileDestinations handles that case
+    const existingNames = new Set(remainingVenues.filter((v) => v.destinationId === destination.id).map((v) => v.name.trim().toLowerCase()));
+    for (const venueSeed of seed.venues) {
+      if (existingNames.has(venueSeed.name.trim().toLowerCase())) continue;
+      await repo.venues.upsert(buildVenueFromSeed(venueSeed, weddingId, destination.id, now));
+    }
   }
 }
 
