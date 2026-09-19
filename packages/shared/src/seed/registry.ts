@@ -1,6 +1,7 @@
 import { benchmarks } from "./benchmarks";
 import { bahamas } from "./destinations/bahamas";
 import { brazil } from "./destinations/brazil";
+import { charlestonSc } from "./destinations/charleston-sc";
 import { columbiaSc } from "./destinations/columbia-sc";
 import { jamaica } from "./destinations/jamaica";
 import { newOrleans } from "./destinations/new-orleans";
@@ -27,5 +28,6 @@ export const SEED_DESTINATIONS: DestinationSeed[] = [
   charlottesvilleVa,
   newOrleans,
   santaFeNm,
+  charlestonSc,
 ];
 export const SEED_BENCHMARKS: CostBenchmarks | null = benchmarks;
