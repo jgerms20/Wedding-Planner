@@ -1,7 +1,7 @@
 "use client";
 
 import { newId, nowIso, SEED_BENCHMARKS, watchItemKindSchema, type Tip, type WatchItem, type WatchItemKind } from "@bower/shared";
-import { CalendarClock, ExternalLink, Gavel, Handshake, Plane, Plus, Wallet, X } from "lucide-react";
+import { CalendarClock, Camera, ExternalLink, Gavel, Handshake, MessageCircleHeart, Plane, Plus, Shirt, UtensilsCrossed, Wallet, X } from "lucide-react";
 import { useCallback, useMemo, useState } from "react";
 import { PageHeader } from "@/components/page-header";
 import { Button } from "@/components/ui/button";
@@ -22,6 +22,10 @@ const CATEGORY_ICONS: Record<TipCategory, typeof CalendarClock> = {
   "Guests & travel": Plane,
   Legal: Gavel,
   Vendors: Handshake,
+  Attire: Shirt,
+  "Photography & video": Camera,
+  "Food & drink": UtensilsCrossed,
+  Etiquette: MessageCircleHeart,
 };
 const CATEGORIES = Object.keys(CATEGORY_ICONS) as TipCategory[];
 

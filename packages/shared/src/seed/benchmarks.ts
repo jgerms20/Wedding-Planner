@@ -381,6 +381,46 @@ export const benchmarks: CostBenchmarks = {
       sourceUrl: "https://zola.com/expert-advice/invites-paper/save-the-dates/what-to-expect-after-sending-save-the-dates",
       category: "Guests & travel",
     },
+    {
+      text: "Set aside 10-20% of a gown's purchase price for alterations, rising to 30% for a heavily embellished or structurally complex fabric — a $2,000 dress means budgeting $200-400 for fit, not treating alterations as a rounding error after the big purchase.",
+      sourceUrl: "https://www.zola.com/expert-advice/how-much-do-wedding-dress-alterations-cost",
+      category: "Attire",
+    },
+    {
+      text: "Book the first alteration fitting 3-4 months before the wedding: a typical gown needs 2-3 fittings over 2-3 months to get the hem, bustle and bodice right, and a heavily structured or embellished dress needs even more lead time than that.",
+      sourceUrl: "https://www.zola.com/expert-advice/how-much-do-wedding-dress-alterations-cost",
+      category: "Attire",
+    },
+    {
+      text: "Book 8 hours of wedding-day photography as the default for a mid-size (100-150 guest) wedding — enough for the tail end of getting ready, the ceremony, and the first part of the reception. Scale down to 4-5 hours for a micro wedding, or 2-4 for an elopement.",
+      sourceUrl: "https://www.stephpowellcreative.com/blog/how-many-hours-should-you-book-your-wedding-photographer",
+      category: "Photography & video",
+    },
+    {
+      text: "How many photography hours you actually need depends more on the day's logistics than the guest count — count the separate locations (getting-ready spot, ceremony site, reception venue) and budget real travel time between each, since more locations quietly eats into coverage time.",
+      sourceUrl: "https://www.forthelovedphotography.com/blog/howmanyhoursofphotographyyoureallyneed",
+      category: "Photography & video",
+    },
+    {
+      text: "Plated dinner service runs $70-150+ per person versus $40-80 for a buffet — mostly a staffing difference (roughly one server per 8-10 guests for plated, one per 20-25 for buffet) rather than a difference in the food itself.",
+      sourceUrl: "https://weddingtipcalculator.com/blog/buffet-vs-plated-wedding-cost/",
+      category: "Food & drink",
+    },
+    {
+      text: "Budget bar service as its own line, not an afterthought: a full open bar runs $40-90 per person nationally (beer-and-wine-only versions run $25-45), which for 100 guests can mean $4,000-9,000 before the typical 20-25% service charge and tax on top of the quoted subtotal.",
+      sourceUrl: "https://www.theknot.com/content/open-bar-wedding-cost",
+      category: "Food & drink",
+    },
+    {
+      text: "For a destination wedding specifically, lean toward extending a plus-one even where local-wedding etiquette wouldn't strictly require one — asking someone to travel internationally or cross-country alone is a bigger ask than a local plus-one — and apply whatever rule is set to every guest equally to avoid the appearance of favoritism.",
+      sourceUrl: "https://www.archweddingstudio.com/blog/2026/1/3/how-to-handle-the-plus-one-conversation-for-destination-weddings",
+      category: "Etiquette",
+    },
+    {
+      text: "Send thank-you notes within three months of the wedding (or within three months of receiving any gift that arrives after), not the old one-year guideline — modern etiquette has compressed the traditional window considerably.",
+      sourceUrl: "https://www.theknot.com/content/canthank-you-notes-ever-be-overdue",
+      category: "Etiquette",
+    },
   ],
   sourceUrls: [
     "https://www.businesswire.com/news/home/20260218045442/en/The-Knot-Worldwide-Unveils-2026-Real-Weddings-Study",

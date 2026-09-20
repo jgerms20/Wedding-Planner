@@ -106,7 +106,7 @@ export interface Tip {
   sourceUrl: string;
   /** One of a small fixed set shown as filter chips on the Tips page — added after the initial
    * research, so optional for anything written before this field existed. */
-  category?: "Timeline" | "Budget" | "Guests & travel" | "Legal" | "Vendors";
+  category?: "Timeline" | "Budget" | "Guests & travel" | "Legal" | "Vendors" | "Attire" | "Photography & video" | "Food & drink" | "Etiquette";
 }
 
 export interface CostBenchmarks {
