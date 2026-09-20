@@ -26,10 +26,19 @@ test("first load lands on the pre-seeded Home, and the redesigned pages hold up"
   await page.keyboard.press("Escape");
   await expect(page.getByRole("heading", { name: "How we estimated this" })).toBeHidden();
 
-  // Guests: the cut-at-N slider renders even with an empty list (no guests in the seed).
+  // Destinations: the Round 4 expansion (Charleston plus 40 new Explore destinations) actually
+  // reaches the live app, not just the seed data — Explore is the default tab.
+  await page.getByRole("link", { name: "Destinations", exact: true }).click();
+  await page.waitForURL(/\/w\/our-wedding\/destinations\/?$/);
+  await expect(page.getByText("Charleston, SC")).toBeVisible();
+  await expect(page.getByText("Tulum", { exact: true })).toBeVisible();
+
+  // Guests: the cut-at-N slider renders, and the couple's real dictated guest list (imported via
+  // reconcileGuests, not empty as in earlier rounds) actually shows up.
   await page.getByRole("link", { name: "Guests", exact: true }).click();
   await page.waitForURL(/\/w\/our-wedding\/guests\/?$/);
   await expect(page.getByTestId("guests-cut-slider")).toBeVisible();
+  await expect(page.getByText("Reagan").first()).toBeVisible();
 
   // Settings: the seed-restore action is there, ready if the couple wants to start over.
   await page.getByRole("link", { name: "Settings", exact: true }).click();
