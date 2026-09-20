@@ -16,7 +16,10 @@ import { pensacolaFl } from "./destinations/pensacola-fl";
 import { portlandOr } from "./destinations/portland-or";
 import { sanAntonioTx } from "./destinations/san-antonio-tx";
 import { santaFeNm } from "./destinations/santa-fe-nm";
+import { sedonaAz } from "./destinations/sedona-az";
+import { taosNm } from "./destinations/taos-nm";
 import { thirtyARosemaryBeachFl } from "./destinations/30a-rosemary-beach-fl";
+import { tucsonAz } from "./destinations/tucson-az";
 import { charlottesvilleVa } from "./destinations/virginia";
 import { washingtonDc } from "./destinations/washington-dc";
 import type { CostBenchmarks, DestinationSeed } from "./types";
@@ -49,5 +52,8 @@ export const SEED_DESTINATIONS: DestinationSeed[] = [
   ashevilleNc,
   highlandsCashiersNc,
   chattanoogaTn,
+  sedonaAz,
+  taosNm,
+  tucsonAz,
 ];
 export const SEED_BENCHMARKS: CostBenchmarks | null = benchmarks;
