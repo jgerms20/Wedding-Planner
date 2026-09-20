@@ -24,6 +24,13 @@ import { useRepoContext } from "@/lib/repo-context";
 import { useEntityList } from "@/lib/use-entity-list";
 
 type DestinationTab = "explore" | "favorites";
+type RegionFilter = "all" | "domestic" | "international";
+
+const REGION_FILTERS: { key: RegionFilter; label: string }[] = [
+  { key: "all", label: "All" },
+  { key: "domestic", label: "Domestic" },
+  { key: "international", label: "International" },
+];
 
 export default function DestinationsPage() {
   const { repo, wedding, touch } = useRepoContext();
@@ -42,6 +49,7 @@ export default function DestinationsPage() {
   const { priorities, add: addPriority, toggle: togglePriority, remove: removePriority } = usePriorities();
 
   const [tab, setTab] = useState<DestinationTab>("explore");
+  const [region, setRegion] = useState<RegionFilter>("all");
   const [detailId, setDetailId] = useState<string | null>(null);
   const [destinationDialog, setDestinationDialog] = useState<{ open: boolean; destination?: Destination }>({ open: false });
   const [venueDialog, setVenueDialog] = useState<{ open: boolean; destinationId: string; venue?: Venue } | null>(null);
@@ -67,12 +75,24 @@ export default function DestinationsPage() {
   // partner has hearted — this is the "actually comparing" subset, versus Explore's "just browsing."
   const favoriteDestinations = useMemo(() => orderedDestinations.filter((d) => (d.favoritedBy ?? []).length > 0), [orderedDestinations]);
   const favoriteFrontRunnerId = favoriteDestinations[0]?.id;
-  const favoriteDomestic = useMemo(() => favoriteDestinations.filter((d) => isDomesticCountry(d.country)), [favoriteDestinations]);
-  const favoriteInternational = useMemo(() => favoriteDestinations.filter((d) => !isDomesticCountry(d.country)), [favoriteDestinations]);
+  const favoriteDomesticCount = useMemo(() => favoriteDestinations.filter((d) => isDomesticCountry(d.country)).length, [favoriteDestinations]);
+  const favoriteInternationalCount = favoriteDestinations.length - favoriteDomesticCount;
+  const visibleFavorites = useMemo(
+    () =>
+      region === "all"
+        ? favoriteDestinations
+        : favoriteDestinations.filter((d) => isDomesticCountry(d.country) === (region === "domestic")),
+    [favoriteDestinations, region],
+  );
 
   const explorePool = useMemo(() => [...destinations].sort((a, b) => a.name.localeCompare(b.name)), [destinations]);
-  const exploreDomestic = useMemo(() => explorePool.filter((d) => isDomesticCountry(d.country)), [explorePool]);
-  const exploreInternational = useMemo(() => explorePool.filter((d) => !isDomesticCountry(d.country)), [explorePool]);
+  const exploreDomesticCount = useMemo(() => explorePool.filter((d) => isDomesticCountry(d.country)).length, [explorePool]);
+  const exploreInternationalCount = explorePool.length - exploreDomesticCount;
+  const visibleExplore = useMemo(
+    () =>
+      region === "all" ? explorePool : explorePool.filter((d) => isDomesticCountry(d.country) === (region === "domestic")),
+    [explorePool, region],
+  );
 
   const detailDestination = detailId ? destinations.find((d) => d.id === detailId) : undefined;
 
@@ -210,21 +230,42 @@ export default function DestinationsPage() {
         </div>
       ) : (
         <>
-          <div className="mt-6 inline-flex w-fit rounded-full border border-line p-0.5 text-sm">
-            {([
-              { key: "explore", label: "Explore" },
-              { key: "favorites", label: `Favorites${favoriteDestinations.length > 0 ? ` (${favoriteDestinations.length})` : ""}` },
-            ] as const).map((t) => (
-              <button
-                key={t.key}
-                type="button"
-                onClick={() => setTab(t.key)}
-                aria-pressed={tab === t.key}
-                className={cn("rounded-full px-4 py-1.5 transition-colors", tab === t.key ? "bg-ink text-rail-foreground" : "text-ink-soft hover:text-foreground")}
-              >
-                {t.label}
-              </button>
-            ))}
+          <div className="mt-6 flex flex-wrap items-center justify-between gap-3">
+            <div className="inline-flex w-fit rounded-full border border-line p-0.5 text-sm">
+              {([
+                { key: "explore", label: "Explore" },
+                { key: "favorites", label: `Favorites${favoriteDestinations.length > 0 ? ` (${favoriteDestinations.length})` : ""}` },
+              ] as const).map((t) => (
+                <button
+                  key={t.key}
+                  type="button"
+                  onClick={() => setTab(t.key)}
+                  aria-pressed={tab === t.key}
+                  className={cn("rounded-full px-4 py-1.5 transition-colors", tab === t.key ? "bg-ink text-rail-foreground" : "text-ink-soft hover:text-foreground")}
+                >
+                  {t.label}
+                </button>
+              ))}
+            </div>
+            <div className="inline-flex w-fit rounded-full border border-line p-0.5 text-xs">
+              {REGION_FILTERS.map((r) => {
+                const count = tab === "explore" ? (r.key === "domestic" ? exploreDomesticCount : r.key === "international" ? exploreInternationalCount : explorePool.length) : r.key === "domestic" ? favoriteDomesticCount : r.key === "international" ? favoriteInternationalCount : favoriteDestinations.length;
+                return (
+                  <button
+                    key={r.key}
+                    type="button"
+                    onClick={() => setRegion(r.key)}
+                    aria-pressed={region === r.key}
+                    className={cn(
+                      "rounded-full px-3 py-1 transition-colors",
+                      region === r.key ? "bg-ink text-rail-foreground" : "text-ink-soft hover:text-foreground",
+                    )}
+                  >
+                    {r.label} {count > 0 && `(${count})`}
+                  </button>
+                );
+              })}
+            </div>
           </div>
 
           {tab === "explore" ? (
@@ -233,71 +274,53 @@ export default function DestinationsPage() {
                 <p className="eyebrow mb-3">Add a destination</p>
                 <ResearchDestinationBox />
               </div>
-              {[
-                { label: "Domestic", items: exploreDomestic },
-                { label: "International", items: exploreInternational },
-              ].map(
-                (group) =>
-                  group.items.length > 0 && (
-                    <div key={group.label}>
-                      <p className="eyebrow mb-3">{group.label}</p>
-                      <div className="grid gap-4 sm:grid-cols-2 xl:grid-cols-3">
-                        {group.items.map((destination, i) => (
-                          <DestinationExploreCard
-                            key={destination.id}
-                            className={`rise rise-${Math.min(i + 1, 8)}`}
-                            destination={destination}
-                            partnerAName={wedding.partnerA.name}
-                            partnerBName={wedding.partnerB.name}
-                            onToggleFavorite={(partner) => void handleToggleFavorite(destination, partner)}
-                            onViewDetails={() => setDetailId(destination.id)}
-                            onRemove={() => void handleRemoveDestination(destination)}
-                          />
-                        ))}
-                      </div>
-                    </div>
-                  ),
+              {visibleExplore.length === 0 ? (
+                <p className="text-sm text-ink-soft">Nothing in this group yet.</p>
+              ) : (
+                <div className="grid gap-4 sm:grid-cols-2 xl:grid-cols-3">
+                  {visibleExplore.map((destination, i) => (
+                    <DestinationExploreCard
+                      key={destination.id}
+                      className={`rise rise-${Math.min(i + 1, 8)}`}
+                      destination={destination}
+                      partnerAName={wedding.partnerA.name}
+                      partnerBName={wedding.partnerB.name}
+                      onToggleFavorite={(partner) => void handleToggleFavorite(destination, partner)}
+                      onViewDetails={() => setDetailId(destination.id)}
+                      onRemove={() => void handleRemoveDestination(destination)}
+                    />
+                  ))}
+                </div>
               )}
             </div>
           ) : favoriteDestinations.length === 0 ? (
             <p className="mt-6 rounded-lg border border-dashed border-line-strong p-4 text-sm text-ink-soft">
               Heart a destination on Explore and it&apos;ll show up here, ready to rank and compare.
             </p>
+          ) : visibleFavorites.length === 0 ? (
+            <p className="mt-6 text-sm text-ink-soft">Nothing in this group yet.</p>
           ) : (
-            <div className="mt-6 flex flex-col gap-8">
-              {[
-                { label: "Domestic", items: favoriteDomestic },
-                { label: "International", items: favoriteInternational },
-              ].map(
-                (group) =>
-                  group.items.length > 0 && (
-                    <div key={group.label}>
-                      <p className="eyebrow mb-3">{group.label}</p>
-                      <div className="grid gap-4 sm:grid-cols-2 xl:grid-cols-3">
-                        {group.items.map((destination, i) => (
-                          <DestinationPostcard
-                            key={destination.id}
-                            className={`rise rise-${Math.min(i + 1, 8)}`}
-                            destination={destination}
-                            venueCount={venues.filter((v) => v.destinationId === destination.id).length}
-                            scenario={scenarioByDestination.get(destination.id)}
-                            isFrontRunner={destination.id === favoriteFrontRunnerId}
-                            guestTarget={guestTarget}
-                            onViewDetails={() => setDetailId(destination.id)}
-                            canMoveUp={i > 0}
-                            canMoveDown={i < group.items.length - 1}
-                            onMoveUp={() => void handleReorder(group.items, destination, -1)}
-                            onMoveDown={() => void handleReorder(group.items, destination, 1)}
-                            partnerAName={wedding.partnerA.name}
-                            partnerBName={wedding.partnerB.name}
-                            onToggleFavorite={(partner) => void handleToggleFavorite(destination, partner)}
-                            onRemove={() => void handleRemoveDestination(destination)}
-                          />
-                        ))}
-                      </div>
-                    </div>
-                  ),
-              )}
+            <div className="mt-6 grid gap-4 sm:grid-cols-2 xl:grid-cols-3">
+              {visibleFavorites.map((destination, i) => (
+                <DestinationPostcard
+                  key={destination.id}
+                  className={`rise rise-${Math.min(i + 1, 8)}`}
+                  destination={destination}
+                  venueCount={venues.filter((v) => v.destinationId === destination.id).length}
+                  scenario={scenarioByDestination.get(destination.id)}
+                  isFrontRunner={destination.id === favoriteFrontRunnerId}
+                  guestTarget={guestTarget}
+                  onViewDetails={() => setDetailId(destination.id)}
+                  canMoveUp={i > 0}
+                  canMoveDown={i < visibleFavorites.length - 1}
+                  onMoveUp={() => void handleReorder(visibleFavorites, destination, -1)}
+                  onMoveDown={() => void handleReorder(visibleFavorites, destination, 1)}
+                  partnerAName={wedding.partnerA.name}
+                  partnerBName={wedding.partnerB.name}
+                  onToggleFavorite={(partner) => void handleToggleFavorite(destination, partner)}
+                  onRemove={() => void handleRemoveDestination(destination)}
+                />
+              ))}
             </div>
           )}
         </>
