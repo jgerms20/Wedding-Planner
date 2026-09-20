@@ -1,7 +1,7 @@
 "use client";
 
 import { ResearchVenuesButton } from "@/components/ai/research-venues-button";
-import { venueStatusSchema, type Destination, type Venue, type VenueStatus } from "@bower/shared";
+import { scenarioMath, venueStatusSchema, type Destination, type Scenario, type Venue, type VenueStatus } from "@bower/shared";
 import { ExternalLink, Pencil, Plus } from "lucide-react";
 import { EstimateChip, NeutralChip, SourceChips, SourceList } from "@/components/atlas/chips";
 import { Button } from "@/components/ui/button";
@@ -22,6 +22,8 @@ export function DestinationDetailDialog({
   open,
   onOpenChange,
   destination,
+  scenario,
+  guestTarget,
   venues,
   onEditDestination,
   onAddVenue,
@@ -32,6 +34,8 @@ export function DestinationDetailDialog({
   open: boolean;
   onOpenChange: (open: boolean) => void;
   destination: Destination | undefined;
+  scenario?: Scenario;
+  guestTarget: number;
   venues: Venue[];
   onEditDestination: () => void;
   onAddVenue: () => void;
@@ -70,6 +74,22 @@ export function DestinationDetailDialog({
             {destination.imageCredit && <figcaption className="mt-1 text-right text-xs text-ink-mute">{destination.imageCredit}</figcaption>}
           </figure>
         )}
+
+        <div>
+          <p className="eyebrow">Price</p>
+          <p className="numeral mt-1 text-3xl text-coral">{scenario ? formatMoney(scenarioMath(scenario).totalCost) : "—"}</p>
+          <p className="text-xs text-ink-mute">estimated total for ~{guestTarget} invited</p>
+          <dl className="mt-2.5 flex flex-wrap gap-x-5 gap-y-1 text-sm">
+            <div className="flex items-center gap-1.5">
+              <dt className="text-ink-soft">Travel/guest</dt>
+              <dd className="tabular font-medium">{formatMoney(destination.travelCostPerGuestEstimate)}</dd>
+            </div>
+            <div className="flex items-center gap-1.5">
+              <dt className="text-ink-soft">Lodging/night</dt>
+              <dd className="tabular font-medium">{formatMoney(destination.lodgingPerNightEstimate)}</dd>
+            </div>
+          </dl>
+        </div>
 
         {whyHere && (
           <div>

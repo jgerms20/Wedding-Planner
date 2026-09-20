@@ -4,6 +4,7 @@ import type { Destination } from "@bower/shared";
 import { Heart, X } from "lucide-react";
 import { Button } from "@/components/ui/button";
 import { countryCode } from "@/lib/country-code";
+import { formatMoney } from "@/lib/format";
 import { cn } from "@/lib/utils";
 
 /**
@@ -38,15 +39,20 @@ export function DestinationExploreCard({
       <div className="flex flex-1 flex-col p-4">
         <div className="flex items-start justify-between gap-2">
           <span className="stamp stamp-sm">{countryCode(destination.country, destination.name)}</span>
-          <button
-            type="button"
-            onClick={onRemove}
-            aria-label={`Remove ${destination.name}`}
-            title="Remove"
-            className="rounded-full p-1 text-ink-mute transition-colors hover:bg-muted hover:text-destructive"
-          >
-            <X className="size-3.5" />
-          </button>
+          <div className="flex items-center gap-2">
+            {destination.travelCostPerGuestEstimate !== undefined && (
+              <span className="tabular text-sm font-medium text-coral">~{formatMoney(destination.travelCostPerGuestEstimate)}/guest</span>
+            )}
+            <button
+              type="button"
+              onClick={onRemove}
+              aria-label={`Remove ${destination.name}`}
+              title="Remove"
+              className="rounded-full p-1 text-ink-mute transition-colors hover:bg-muted hover:text-destructive"
+            >
+              <X className="size-3.5" />
+            </button>
+          </div>
         </div>
 
         <p className="mt-2 font-display text-xl leading-tight">{destination.name}</p>

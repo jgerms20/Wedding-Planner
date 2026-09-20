@@ -72,6 +72,8 @@ export function DestinationPostcard({
           <div className="min-w-0">
             <p className="font-display text-2xl leading-tight">{destination.name}</p>
             <p className="mt-0.5 line-clamp-1 text-xs text-ink-mute">{destination.region ?? destination.country}</p>
+            <p className="numeral mt-2 text-3xl text-coral">{math ? formatMoney(math.totalCost) : "—"}</p>
+            <p className="text-xs text-ink-mute">estimated total</p>
           </div>
           <div className="flex shrink-0 flex-col rounded-full border border-line">
             <button
@@ -98,10 +100,6 @@ export function DestinationPostcard({
         </div>
 
         <dl className="mt-4 space-y-1.5 text-sm">
-          <div className="flex justify-between gap-2">
-            <dt className="text-ink-soft">Total</dt>
-            <dd className="tabular font-medium">{math ? formatMoney(math.totalCost) : "—"}</dd>
-          </div>
           <div className="flex justify-between gap-2">
             <dt className="text-ink-soft">Per guest to get there</dt>
             <dd className="tabular font-medium">{formatMoney(destination.travelCostPerGuestEstimate)}</dd>

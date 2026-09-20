@@ -319,6 +319,8 @@ export default function DestinationsPage() {
         open={detailId !== null}
         onOpenChange={(open) => !open && setDetailId(null)}
         destination={detailDestination}
+        scenario={detailDestination ? scenarioByDestination.get(detailDestination.id) : undefined}
+        guestTarget={guestTarget}
         venues={detailDestination ? venues.filter((v) => v.destinationId === detailDestination.id) : []}
         onEditDestination={() => detailDestination && setDestinationDialog({ open: true, destination: detailDestination })}
         onAddVenue={() => detailDestination && setVenueDialog({ open: true, destinationId: detailDestination.id })}
