@@ -26,6 +26,7 @@ export const algarvePortugal: DestinationSeed = {
   notes:
     "Attendance is estimated at 0.52, matching Amalfi's figure, reflecting that the Algarve still requires a long-haul flight and, outside the mid-May-to-early-October nonstop window, a connection through Lisbon — real travel friction even though the Algarve is the cheapest of the five European destinations researched on a per-guest basis.",
   travelCostPerGuestEstimate: 1140,
+  flightCostEstimate: 750,
   lodgingPerNightEstimate: 130,
   attendanceRateEstimate: 0.52,
   weatherNotes:

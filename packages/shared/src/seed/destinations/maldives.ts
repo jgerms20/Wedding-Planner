@@ -25,6 +25,7 @@ export const maldives: DestinationSeed = {
   notes:
     "Attendance is estimated at 0.40, at the very bottom of (and well below) the 60-70% typical destination-wedding range reported by Destify's guest-attendance analysis (destify.com). This is the most logistically demanding destination researched for the couple's East Coast guests: a 20+ hour door-to-door trip with a mandatory long connection, followed by a further speedboat or seaplane transfer that can add hours and hundreds of dollars per person on top of the international flight, at some of the highest resort nightly rates of any destination on the list. Realistically, the Maldives works far better as an elopement or small-inner-circle destination (family and closest friends only) than as a venue for the couple's full ~100-guest wedding, and the couple should plan around that smaller in-person count if they choose it.",
   travelCostPerGuestEstimate: 2500,
+  flightCostEstimate: 1100,
   lodgingPerNightEstimate: 400,
   attendanceRateEstimate: 0.4,
   weatherNotes:

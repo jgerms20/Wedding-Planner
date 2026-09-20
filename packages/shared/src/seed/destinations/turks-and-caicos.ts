@@ -27,6 +27,7 @@ export const turksAndCaicos: DestinationSeed = {
   notes:
     "Attendance is estimated at 0.63, near the middle of the 60-70% typical destination-wedding range reported by Destify's guest-attendance analysis (destify.com) — short nonstop flights and visa-free entry support turnout, but Turks and Caicos' resort rates (average nightly rates cited around $400-600 for a mid-range room, well above Jamaica's or the Bahamas') are a real drag on how many of the couple's ~100 invited guests would commit to the trip.",
   travelCostPerGuestEstimate: 1750,
+  flightCostEstimate: 400,
   lodgingPerNightEstimate: 450,
   attendanceRateEstimate: 0.63,
   weatherNotes:

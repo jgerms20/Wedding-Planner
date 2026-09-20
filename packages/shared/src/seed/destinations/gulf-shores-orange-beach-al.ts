@@ -34,6 +34,7 @@ export const gulfShoresOrangeBeachAl: DestinationSeed = {
   notes:
     "Attendance is estimated at 0.81, in the lower half of the 80-85% 'local wedding' attendance band (pix.wedding; destify.com) — domestic and no passport, but Pensacola International's ~20 nonstop destinations is a noticeably smaller network than any of the Texas finalists, and it still requires an additional ~1-hour drive from the airport to the beach, which together push it below the Texas cities on this list.",
   travelCostPerGuestEstimate: 1010,
+  flightCostEstimate: 470,
   lodgingPerNightEstimate: 180,
   attendanceRateEstimate: 0.81,
   weatherNotes:

@@ -40,6 +40,7 @@ export const galvestonTx: DestinationSeed = {
   notes:
     "Attendance is estimated at 0.80, at the bottom of the 80-85% 'local wedding' attendance band (pix.wedding; destify.com) — domestic and no passport, but Galveston has no commercial airport of its own: every guest flies into Houston (Hobby or Bush Intercontinental) and then drives or shuttles 40-70 miles to the island, adding a real second leg most other US finalists on this list don't require.",
   travelCostPerGuestEstimate: 1055,
+  flightCostEstimate: 470,
   lodgingPerNightEstimate: 195,
   attendanceRateEstimate: 0.80,
   weatherNotes:

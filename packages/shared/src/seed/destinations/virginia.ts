@@ -23,6 +23,7 @@ export const charlottesvilleVa: DestinationSeed = {
   notes:
     "Attendance is estimated at 0.82 — in the same 80-85% 'local wedding' band DC uses (pix.wedding; destify.com), toward the lower end of that band since Charlottesville's own airport (CHO) is small and a longer haul than DC for guests outside the Mid-Atlantic.",
   travelCostPerGuestEstimate: 1130,
+  flightCostEstimate: 470,
   lodgingPerNightEstimate: 220,
   attendanceRateEstimate: 0.82,
   weatherNotes:

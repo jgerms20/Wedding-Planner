@@ -26,6 +26,7 @@ export const lakeComoItaly: DestinationSeed = {
   notes:
     "Attendance is estimated at 0.55, matching Tuscany's figure and at the low end of (and below) the 60-70% typical destination-wedding range reported by Destify's guest-attendance analysis (destify.com). Como's nonstop Milan flight is easier than Tuscany's connection-only routing or Amalfi's seasonal nonstop, which argues for a higher rate than the other two Italian finalists — but the marquee villas' price tier and the added boat-transfer logistics argue for holding the line at Tuscany's number rather than exceeding it.",
   travelCostPerGuestEstimate: 1250,
+  flightCostEstimate: 650,
   lodgingPerNightEstimate: 200,
   attendanceRateEstimate: 0.55,
   weatherNotes:

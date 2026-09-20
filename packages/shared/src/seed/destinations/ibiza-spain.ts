@@ -27,6 +27,7 @@ export const ibizaSpain: DestinationSeed = {
   notes:
     "Attendance is estimated at 0.50, below Amalfi's 0.52 figure and the second-lowest of the five European destinations researched (after Santorini's 0.48), reflecting that Ibiza requires a mandatory one-stop connection through Madrid or Barcelona with no nonstop alternative, combined with a hotel-lodging market that runs unusually high for the island's size even in the spring shoulder season.",
   travelCostPerGuestEstimate: 1450,
+  flightCostEstimate: 850,
   lodgingPerNightEstimate: 200,
   attendanceRateEstimate: 0.5,
   weatherNotes:

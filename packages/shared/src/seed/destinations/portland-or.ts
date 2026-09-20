@@ -22,6 +22,7 @@ export const portlandOr: DestinationSeed = {
   notes:
     "Attendance is estimated at 0.80, the bottom of the 80-85% 'local wedding' attendance band, reflecting that Portland is domestic (no passport needed) but is the longest flight and biggest time-zone shift of the three US finalists for a guest list concentrated on the East Coast (pix.wedding; destify.com). On the 'funky food' front Janel asked about: Portland's food-cart culture is a real, bookable wedding-catering option, not just a novelty — cart-catering companies run the reception itself (Korean-fusion, Hawaiian plate lunch, farm-to-table from an urban Cully-neighborhood farm, gourmet-fries and small-batch-popsicle dessert carts are all real, named options), which is a genuinely different reception personality than a standard plated dinner (foodcartsportland.com; oregonweddingday.com).",
   travelCostPerGuestEstimate: 970,
+  flightCostEstimate: 470,
   lodgingPerNightEstimate: 170,
   attendanceRateEstimate: 0.8,
   weatherNotes:

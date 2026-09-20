@@ -30,6 +30,7 @@ export const pensacolaFl: DestinationSeed = {
   notes:
     "Attendance is estimated at 0.81, in the middle of the 80-85% 'local wedding' attendance band (pix.wedding; destify.com) — domestic and no passport, but Pensacola International's 27 nonstop destinations is the thinnest route network of the Gulf Coast/Southeast finalists, with only two Northeast nonstops (LaGuardia via Delta, Washington-DCA via American), so more of the East Coast list would need a one-stop connection than at New Orleans or Charleston.",
   travelCostPerGuestEstimate: 890,
+  flightCostEstimate: 470,
   lodgingPerNightEstimate: 140,
   attendanceRateEstimate: 0.81,
   weatherNotes:

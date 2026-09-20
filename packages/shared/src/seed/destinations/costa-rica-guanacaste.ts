@@ -24,6 +24,7 @@ export const costaRicaGuanacaste: DestinationSeed = {
   notes:
     "Attendance is estimated at 0.65, near the middle of the 60-70% typical destination-wedding range reported by Destify's guest-attendance analysis (destify.com) — nonstop flights, no visa requirement and a lower average resort cost than Turks and Caicos or St. Lucia support a solid turnout among the couple's ~100 East Coast guests.",
   travelCostPerGuestEstimate: 1060,
+  flightCostEstimate: 400,
   lodgingPerNightEstimate: 220,
   attendanceRateEstimate: 0.65,
   weatherNotes:

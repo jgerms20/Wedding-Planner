@@ -25,6 +25,7 @@ export const tuscanyItaly: DestinationSeed = {
   notes:
     "Attendance is estimated at 0.55, at the low end of (and below) the 60-70% typical destination-wedding range reported by Destify's guest-attendance analysis (destify.com), reflecting that Tuscany requires a genuine transatlantic flight with no nonstop option from any East Coast hub, on top of Italy's higher per-night lodging and villa-wedding costs relative to the Caribbean and Costa Rica finalists.",
   travelCostPerGuestEstimate: 1150,
+  flightCostEstimate: 700,
   lodgingPerNightEstimate: 150,
   attendanceRateEstimate: 0.55,
   weatherNotes:

@@ -25,6 +25,7 @@ export const santoriniGreece: DestinationSeed = {
   notes:
     "Attendance is estimated at 0.48, the lowest of the five European destinations researched and below Amalfi's 0.52 figure, reflecting that Santorini requires a full transatlantic flight to Athens plus a separate domestic Greek leg (flight or ferry) to reach the island — the only finalist where getting to the wedding is a three-leg journey rather than two — on top of the added cost that extra leg adds per guest.",
   travelCostPerGuestEstimate: 1600,
+  flightCostEstimate: 1000,
   lodgingPerNightEstimate: 200,
   attendanceRateEstimate: 0.48,
   weatherNotes:

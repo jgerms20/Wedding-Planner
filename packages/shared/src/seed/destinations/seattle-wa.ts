@@ -25,6 +25,7 @@ export const seattleWa: DestinationSeed = {
   notes:
     "Attendance is estimated at 0.79, just below Portland's 0.80: Sea-Tac's much larger route network (140 nonstop destinations vs. Portland's 60+) is a real edge, but Seattle is still the longest flight and biggest time-zone shift among the Southern/Mid-Atlantic-leaning finalists, and its higher hotel costs than Portland offset some of the airport advantage (pix.wedding; destify.com).",
   travelCostPerGuestEstimate: 1022,
+  flightCostEstimate: 470,
   lodgingPerNightEstimate: 184,
   attendanceRateEstimate: 0.79,
   weatherNotes:

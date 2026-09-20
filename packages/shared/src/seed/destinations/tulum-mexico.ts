@@ -21,6 +21,7 @@ export const tulumMexico: DestinationSeed = {
   notes:
     "Attendance is estimated at 0.65, the middle of the 60-70% typical destination-wedding range reported by Destify's guest-attendance analysis — nonstop flights and no visa requirement pull it up from Brazil's 0.60, but March-May overlaps hard with US spring break and Semana Santa, which raises both cost and hassle enough to keep it below the top of the band (destify.com; mexicodave.com).",
   travelCostPerGuestEstimate: 1380,
+  flightCostEstimate: 480,
   lodgingPerNightEstimate: 300,
   attendanceRateEstimate: 0.65,
   weatherNotes:

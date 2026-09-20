@@ -21,6 +21,7 @@ export const puntaCanaDominicanRepublic: DestinationSeed = {
   notes:
     "Attendance is estimated at 0.68 — near the top of the 60-70% typical destination-wedding range reported by Destify's guest-attendance analysis — reflecting Punta Cana's unusually dense nonstop flight network from the US East Coast, no visa requirement, and the deepest resort-price-tier variety of any option in this set, which makes it easier for cost-sensitive guests to find a room they can afford (destify.com).",
   travelCostPerGuestEstimate: 1250,
+  flightCostEstimate: 350,
   lodgingPerNightEstimate: 300,
   attendanceRateEstimate: 0.68,
   weatherNotes:

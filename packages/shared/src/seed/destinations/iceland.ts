@@ -23,6 +23,7 @@ export const iceland: DestinationSeed = {
   notes:
     "Attendance is estimated at 0.50, below the 60-70% typical destination-wedding range reported by Destify's guest-attendance analysis (destify.com). Unlike the other long-haul finalists, Iceland's flight time itself isn't the barrier — JFK to Reykjavík is under 6 hours nonstop, the shortest of any international destination researched. The lower estimate instead reflects Iceland's own specific friction: genuinely cold, wet and unpredictable spring weather that makes an outdoor ceremony a real gamble, the country's high cost of lodging, food and transport relative to guests' expectations for a 'quick' trip, and a wedding-venue market built mostly around small farms, boutique hotels and elopement photographers rather than 100-guest-scale properties — several venues researched cap out well under that number, again pointing toward this working better as a smaller-group wedding than a full ~100-guest one.",
   travelCostPerGuestEstimate: 890,
+  flightCostEstimate: 400,
   lodgingPerNightEstimate: 160,
   attendanceRateEstimate: 0.5,
   weatherNotes:

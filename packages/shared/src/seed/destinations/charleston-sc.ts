@@ -38,6 +38,7 @@ export const charlestonSc: DestinationSeed = {
   notes:
     "Attendance is estimated at 0.83, near the top of the 80-85% 'local wedding' attendance band (pix.wedding; destify.com) — domestic, no passport, with a real regional airport, though slightly below DC/New Orleans because Charleston International has fewer nonstop routes (50-56 depending on the source) than either of those hubs.",
   travelCostPerGuestEstimate: 1130,
+  flightCostEstimate: 470,
   lodgingPerNightEstimate: 220,
   attendanceRateEstimate: 0.83,
   weatherNotes:

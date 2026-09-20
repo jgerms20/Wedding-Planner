@@ -164,6 +164,7 @@ export function buildDestinationFromSeed(
     region: seed.region,
     notes: [seed.whyHere, seed.notes, seed.travelNotes].filter(Boolean).join("\n\n"),
     travelCostPerGuestEstimate: seed.travelCostPerGuestEstimate,
+    flightCostEstimate: seed.flightCostEstimate,
     lodgingPerNightEstimate: seed.lodgingPerNightEstimate,
     attendanceRateEstimate: seed.attendanceRateEstimate,
     weatherNotes: seed.weatherNotes,

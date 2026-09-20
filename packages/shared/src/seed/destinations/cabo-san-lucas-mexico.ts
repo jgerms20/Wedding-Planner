@@ -21,6 +21,7 @@ export const caboSanLucasMexico: DestinationSeed = {
   notes:
     "Attendance is estimated at 0.62 — near the middle of the 60-70% typical destination-wedding range reported by Destify's guest-attendance analysis, but below Tulum/Riviera Maya's 0.65 because Cabo has fewer nonstop East Coast routes (concentrated on NYC and Atlanta rather than spread across many hubs) and resort lodging runs noticeably pricier than the Caribbean coast of Mexico (destify.com; thecabosun.com).",
   travelCostPerGuestEstimate: 1470,
+  flightCostEstimate: 606,
   lodgingPerNightEstimate: 290,
   attendanceRateEstimate: 0.62,
   weatherNotes:

@@ -28,6 +28,7 @@ export const marrakechMorocco: DestinationSeed = {
   notes:
     "Attendance is estimated at 0.52, below the 60-70% typical destination-wedding range reported by Destify's guest-attendance analysis (destify.com), reflecting the long-haul flight with a required connection and the unfamiliarity of Morocco as a wedding destination for most US guests, offset somewhat by Marrakech's comparatively affordable luxury pricing and reliably good spring weather relative to some of the other long-haul finalists.",
   travelCostPerGuestEstimate: 1350,
+  flightCostEstimate: 750,
   lodgingPerNightEstimate: 200,
   attendanceRateEstimate: 0.52,
   weatherNotes:

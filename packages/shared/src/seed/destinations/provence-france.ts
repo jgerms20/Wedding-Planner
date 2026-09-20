@@ -26,6 +26,7 @@ export const provenceFrance: DestinationSeed = {
   notes:
     "Attendance is estimated at 0.53, below Tuscany's 0.55 and just above Amalfi's 0.52, reflecting that Provence requires a connecting flight to Marseille (the practical gateway for the region's château country) even though nonstop service exists to nearby Nice, combined with Provence's status as the most expensive French region researched for a destination wedding.",
   travelCostPerGuestEstimate: 1225,
+  flightCostEstimate: 670,
   lodgingPerNightEstimate: 185,
   attendanceRateEstimate: 0.53,
   weatherNotes:

@@ -34,6 +34,7 @@ export const austinTx: DestinationSeed = {
   notes:
     "Attendance is estimated at 0.85, the top of the 80-85% 'local wedding' attendance band (pix.wedding; destify.com) — domestic, no passport, and Austin-Bergstrom's 87+ nonstop destinations in 2026 (more than New Orleans' 54-56) make it the best-connected of the Texas/Gulf Coast finalists, so it sits at the top of the band alongside DC.",
   travelCostPerGuestEstimate: 1070,
+  flightCostEstimate: 470,
   lodgingPerNightEstimate: 200,
   attendanceRateEstimate: 0.85,
   weatherNotes:

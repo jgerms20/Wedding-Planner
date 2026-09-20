@@ -9,6 +9,9 @@ export const destinationSchema = z.object({
   region: z.string().optional(),
   notes: z.string().optional(),
   travelCostPerGuestEstimate: z.number().optional(),
+  /** The airfare portion of `travelCostPerGuestEstimate` — the rest is lodging. Optional so
+   * destinations created before this field existed still read back fine. */
+  flightCostEstimate: z.number().optional(),
   lodgingPerNightEstimate: z.number().optional(),
   attendanceRateEstimate: z.number().min(0).max(1).optional(),
   weatherNotes: z.string().optional(),

@@ -81,12 +81,16 @@ export function DestinationDetailDialog({
           <p className="text-xs text-ink-mute">estimated total for ~{guestTarget} invited</p>
           <dl className="mt-2.5 flex flex-wrap gap-x-5 gap-y-1 text-sm">
             <div className="flex items-center gap-1.5">
-              <dt className="text-ink-soft">Travel/guest</dt>
-              <dd className="tabular font-medium">{formatMoney(destination.travelCostPerGuestEstimate)}</dd>
+              <dt className="text-ink-soft">Flight</dt>
+              <dd className="tabular font-medium">{formatMoney(destination.flightCostEstimate ?? destination.travelCostPerGuestEstimate)}</dd>
             </div>
             <div className="flex items-center gap-1.5">
               <dt className="text-ink-soft">Lodging/night</dt>
               <dd className="tabular font-medium">{formatMoney(destination.lodgingPerNightEstimate)}</dd>
+            </div>
+            <div className="flex items-center gap-1.5">
+              <dt className="text-ink-soft">Travel/guest total</dt>
+              <dd className="tabular font-medium">{formatMoney(destination.travelCostPerGuestEstimate)}</dd>
             </div>
           </dl>
         </div>

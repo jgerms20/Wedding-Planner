@@ -38,6 +38,7 @@ export const mobileAl: DestinationSeed = {
   notes:
     "Attendance is estimated at 0.79, at the bottom of the 80-85% 'local wedding' attendance band (pix.wedding; destify.com): Mobile Regional Airport's modest route network (26 nonstop destinations, mostly regional hubs) means most East Coast guests will need a connection, and New Orleans (about 2.5 hours away) is a real fallback for guests willing to fly into the bigger airport and drive.",
   travelCostPerGuestEstimate: 1046,
+  flightCostEstimate: 470,
   lodgingPerNightEstimate: 178,
   attendanceRateEstimate: 0.79,
   weatherNotes:

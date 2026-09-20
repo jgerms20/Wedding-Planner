@@ -21,6 +21,7 @@ export const bahamas: DestinationSeed = {
   notes:
     "Attendance is estimated at 0.70, the top of the 60-70% typical destination-wedding range reported by Destify's guest-attendance analysis — reflecting the shortest flights and no US-citizen visa requirement of the three finalist destinations (destify.com; immigration.gov.bs).",
   travelCostPerGuestEstimate: 1250,
+  flightCostEstimate: 350,
   lodgingPerNightEstimate: 300,
   attendanceRateEstimate: 0.7,
   weatherNotes:

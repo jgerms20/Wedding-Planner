@@ -28,6 +28,7 @@ export const memphisTn: DestinationSeed = {
   notes:
     "Attendance is estimated at 0.83, in the middle of the 80-85% 'local wedding' attendance band (pix.wedding; destify.com) — domestic, no passport, and Memphis International's real nonstop network (38 domestic destinations) is stronger than Baton Rouge's or Wilmington's, though still below New Orleans or DC.",
   travelCostPerGuestEstimate: 833,
+  flightCostEstimate: 470,
   lodgingPerNightEstimate: 121,
   attendanceRateEstimate: 0.83,
   weatherNotes:

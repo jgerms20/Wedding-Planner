@@ -23,6 +23,7 @@ export const santaFeNm: DestinationSeed = {
   notes:
     "Attendance is estimated at 0.80, the same figure used for Portland — domestic and no passport, but the smallest, least-connected airport of the US finalists, since almost every guest will actually fly into Albuquerque and drive about an hour rather than land in Santa Fe itself (pix.wedding; destify.com).",
   travelCostPerGuestEstimate: 1200,
+  flightCostEstimate: 421,
   lodgingPerNightEstimate: 260,
   attendanceRateEstimate: 0.8,
   weatherNotes:

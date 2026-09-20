@@ -34,6 +34,7 @@ export const scottishHighlandsScotland: DestinationSeed = {
   notes:
     "Attendance is estimated at 0.50, below the 60-70% typical destination-wedding range reported by Destify's guest-attendance analysis (destify.com). The flight itself is the shortest of any non-North-American finalist (under 7 hours nonstop from JFK to Edinburgh), but every Highlands castle venue researched caps out between 36 and roughly 160 guests including on-site lodging for only a fraction of that, meaning the couple's full ~100-guest list would need to lean heavily on nearby hotel overflow and day-guests rather than a single exclusive-use property — a real logistical ceiling distinct from the long-haul fatigue driving down attendance elsewhere on this list.",
   travelCostPerGuestEstimate: 1160,
+  flightCostEstimate: 650,
   lodgingPerNightEstimate: 140,
   attendanceRateEstimate: 0.5,
   weatherNotes:

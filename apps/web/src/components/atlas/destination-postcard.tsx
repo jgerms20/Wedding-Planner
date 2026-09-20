@@ -101,8 +101,8 @@ export function DestinationPostcard({
 
         <dl className="mt-4 space-y-1.5 text-sm">
           <div className="flex justify-between gap-2">
-            <dt className="text-ink-soft">Per guest to get there</dt>
-            <dd className="tabular font-medium">{formatMoney(destination.travelCostPerGuestEstimate)}</dd>
+            <dt className="text-ink-soft">Flight, roughly</dt>
+            <dd className="tabular font-medium">{formatMoney(destination.flightCostEstimate ?? destination.travelCostPerGuestEstimate)}</dd>
           </div>
           <div className="flex justify-between gap-2">
             <dt className="text-ink-soft">Likely to come</dt>

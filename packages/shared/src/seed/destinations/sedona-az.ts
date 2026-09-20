@@ -24,6 +24,7 @@ export const sedonaAz: DestinationSeed = {
   notes:
     "Attendance is estimated at 0.78, a touch below Portland's 0.80 baseline for a domestic, no-passport wedding: Sedona has no commercial airport of its own, so nearly every guest faces either a 1.5-2 hour drive from Phoenix Sky Harbor or a shorter but much-more-limited connection through Flagstaff, which is more transfer friction than Santa Fe's roughly one-hour hop from Albuquerque (pix.wedding; destify.com; shakaguide.com).",
   travelCostPerGuestEstimate: 1154,
+  flightCostEstimate: 470,
   lodgingPerNightEstimate: 228,
   attendanceRateEstimate: 0.78,
   weatherNotes:

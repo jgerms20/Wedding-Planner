@@ -21,6 +21,7 @@ export const jamaica: DestinationSeed = {
   notes:
     "Attendance is estimated at 0.65, the middle of the 60-70% typical destination-wedding range reported by Destify's guest-attendance analysis — reflecting Jamaica's short nonstop flights and visa-free entry for US citizens, offset by the real cost of a multi-night Caribbean resort stay (destify.com).",
   travelCostPerGuestEstimate: 1110,
+  flightCostEstimate: 360,
   lodgingPerNightEstimate: 250,
   attendanceRateEstimate: 0.65,
   weatherNotes:

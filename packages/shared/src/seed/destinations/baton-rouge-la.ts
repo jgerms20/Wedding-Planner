@@ -31,6 +31,7 @@ export const batonRougeLa: DestinationSeed = {
   notes:
     "Attendance is estimated at 0.80, at the bottom of the 80-85% 'local wedding' attendance band (pix.wedding; destify.com): Baton Rouge Metropolitan Airport has a much smaller route network (about 11 nonstop destinations) than New Orleans' 54+, so most East Coast guests will need a connection through Atlanta, Dallas, Houston or Charlotte.",
   travelCostPerGuestEstimate: 926,
+  flightCostEstimate: 470,
   lodgingPerNightEstimate: 152,
   attendanceRateEstimate: 0.8,
   weatherNotes:

@@ -31,6 +31,7 @@ export const fredericksburgTx: DestinationSeed = {
   notes:
     "Attendance is estimated at 0.80, the bottom of the 80-85% 'local wedding' attendance band (pix.wedding; destify.com) — domestic and no passport, but Fredericksburg has no commercial airport of its own, so every flying guest adds a 1-1.5 hour drive from San Antonio or Austin on top of the flight, the extra travel friction that puts it below Austin and San Antonio on this list.",
   travelCostPerGuestEstimate: 1250,
+  flightCostEstimate: 470,
   lodgingPerNightEstimate: 260,
   attendanceRateEstimate: 0.80,
   weatherNotes:

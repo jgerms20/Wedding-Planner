@@ -32,6 +32,7 @@ export const chattanoogaTn: DestinationSeed = {
   notes:
     "Attendance is estimated at 0.82, in the middle of the 80-85% 'local wedding' attendance band (pix.wedding; destify.com) — domestic and no passport, and Chattanooga's small airport still manages nonstop service to both Washington-DCA and New York (helpful for the couple's East Coast-heavy list), which offsets its otherwise thin 15-destination network relative to the bigger hubs on this list.",
   travelCostPerGuestEstimate: 845,
+  flightCostEstimate: 470,
   lodgingPerNightEstimate: 125,
   attendanceRateEstimate: 0.82,
   weatherNotes:

@@ -26,6 +26,7 @@ export const amalfiCoastItaly: DestinationSeed = {
   notes:
     "Attendance is estimated at 0.52, below the low end of the 60-70% typical destination-wedding range reported by Destify's guest-attendance analysis (destify.com) — a long-haul flight with no reliable nonstop option, the highest per-guest cost of any destination researched, and real ground-logistics friction (narrow, congested coastal roads between the airport and cliffside towns) combine to push expected turnout below even Tuscany's already-below-band estimate.",
   travelCostPerGuestEstimate: 1350,
+  flightCostEstimate: 750,
   lodgingPerNightEstimate: 200,
   attendanceRateEstimate: 0.52,
   weatherNotes:

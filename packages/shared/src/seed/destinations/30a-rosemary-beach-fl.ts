@@ -31,6 +31,7 @@ export const thirtyARosemaryBeachFl: DestinationSeed = {
   notes:
     "Attendance is estimated at 0.80, the bottom of the 80-85% 'local wedding' attendance band (pix.wedding; destify.com) — domestic and no passport, but 30A's nearest airport (Northwest Florida Beaches International) has a smaller nonstop network than any other US finalist and this is the single most expensive lodging market of the group, both of which weigh against attendance relative to the Texas and Alabama options.",
   travelCostPerGuestEstimate: 1550,
+  flightCostEstimate: 470,
   lodgingPerNightEstimate: 360,
   attendanceRateEstimate: 0.80,
   weatherNotes:

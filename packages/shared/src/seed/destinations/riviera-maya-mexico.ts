@@ -21,6 +21,7 @@ export const rivieraMayaMexico: DestinationSeed = {
   notes:
     "Attendance is estimated at 0.66 — the upper-middle of the 60-70% typical destination-wedding range reported by Destify's guest-attendance analysis — reflecting the same easy Cancún-airport nonstop access as Tulum, plus a wedding market so large and price-tiered that a guest can usually find a room in their budget on-site (destify.com).",
   travelCostPerGuestEstimate: 1360,
+  flightCostEstimate: 480,
   lodgingPerNightEstimate: 290,
   attendanceRateEstimate: 0.66,
   weatherNotes:

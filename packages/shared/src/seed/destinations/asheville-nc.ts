@@ -33,6 +33,7 @@ export const ashevilleNc: DestinationSeed = {
   notes:
     "Attendance is estimated at 0.83, in the upper-middle of the 80-85% 'local wedding' attendance band (pix.wedding; destify.com) — domestic, no passport, and Asheville is a genuinely popular tourist draw that guests are likely to be enthusiastic about, but Asheville Regional's 26 nonstop destinations is a mid-sized network (fewer one-hop options than New Orleans or DC) and the region's post-Hurricane-Helene rebuilding is worth a status check closer to the date.",
   travelCostPerGuestEstimate: 1010,
+  flightCostEstimate: 470,
   lodgingPerNightEstimate: 180,
   attendanceRateEstimate: 0.83,
   weatherNotes:

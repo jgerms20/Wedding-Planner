@@ -24,6 +24,7 @@ export const taosNm: DestinationSeed = {
   notes:
     "Attendance is estimated at 0.75, below both Santa Fe's and Portland's 0.80: Taos has no commercial air service at all, so every guest faces a roughly 2.5-hour drive from Albuquerque (about twice Santa Fe's one-hour hop), which is meaningfully more friction for a guest list concentrated on the East Coast (pix.wedding; destify.com; trippy.com).",
   travelCostPerGuestEstimate: 1115,
+  flightCostEstimate: 470,
   lodgingPerNightEstimate: 215,
   attendanceRateEstimate: 0.75,
   weatherNotes:

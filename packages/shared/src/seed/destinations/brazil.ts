@@ -21,6 +21,7 @@ export const brazil: DestinationSeed = {
   notes:
     "Attendance is estimated at 0.60 (the low end of the 60-70% typical destination-wedding range reported by Destify's guest-attendance analysis) because Brazil is the longest and priciest trip of the three finalists for East Coast guests, and — unlike Jamaica or the Bahamas — the US reinstated a visa requirement for US citizens in April 2025, adding a mandatory paperwork step for every invitee (br.usembassy.gov; vanguardattache.com).",
   travelCostPerGuestEstimate: 1100,
+  flightCostEstimate: 650,
   lodgingPerNightEstimate: 150,
   attendanceRateEstimate: 0.6,
   weatherNotes:

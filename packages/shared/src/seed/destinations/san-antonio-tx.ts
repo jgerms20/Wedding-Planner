@@ -30,6 +30,7 @@ export const sanAntonioTx: DestinationSeed = {
   notes:
     "Attendance is estimated at 0.84, near the top of the 80-85% 'local wedding' attendance band (pix.wedding; destify.com) — domestic, no passport, and San Antonio International's 46-50 nonstop destinations make it a real regional airport, just short of Austin-Bergstrom's larger network, so it's placed just below Austin on this list.",
   travelCostPerGuestEstimate: 995,
+  flightCostEstimate: 470,
   lodgingPerNightEstimate: 175,
   attendanceRateEstimate: 0.84,
   weatherNotes:

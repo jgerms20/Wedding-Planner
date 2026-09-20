@@ -43,6 +43,7 @@ export const highlandsCashiersNc: DestinationSeed = {
   notes:
     "Attendance is estimated at 0.80, at the bottom of the 80-85% 'local wedding' attendance band (pix.wedding; destify.com) — domestic and no passport, but Highlands and Cashiers have no airport of their own: every guest flies into Asheville (45-48 miles away) or Greenville-Spartanburg (72-83 miles away) and then drives 1-1.75 hours on two-lane mountain roads, a combined fly-plus-long-drive itinerary that's more demanding than any other US finalist on this list.",
   travelCostPerGuestEstimate: 1025,
+  flightCostEstimate: 470,
   lodgingPerNightEstimate: 185,
   attendanceRateEstimate: 0.80,
   weatherNotes:

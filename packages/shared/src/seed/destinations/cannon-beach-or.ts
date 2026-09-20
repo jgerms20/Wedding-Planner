@@ -25,6 +25,7 @@ export const cannonBeachOr: DestinationSeed = {
   notes:
     "Attendance is estimated at 0.78, slightly below Portland's 0.80: Cannon Beach has no airport of its own, so every guest connects through Portland (PDX) and then drives about 90 minutes, adding real friction on top of Portland's own East Coast flight time (pix.wedding; destify.com).",
   travelCostPerGuestEstimate: 1080,
+  flightCostEstimate: 470,
   lodgingPerNightEstimate: 200,
   attendanceRateEstimate: 0.78,
   weatherNotes:

@@ -25,6 +25,7 @@ export const tucsonAz: DestinationSeed = {
   notes:
     "Attendance is estimated at 0.78, matching Sedona rather than Portland's 0.80: Tucson International has its own commercial service, which is a real advantage over Sedona, but only one East Coast nonstop (Atlanta), so most East Coast guests will still connect through a hub, offsetting some of that advantage (pix.wedding; destify.com; flightsfrom.com).",
   travelCostPerGuestEstimate: 848,
+  flightCostEstimate: 470,
   lodgingPerNightEstimate: 126,
   attendanceRateEstimate: 0.78,
   weatherNotes:

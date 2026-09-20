@@ -25,6 +25,7 @@ export const baliIndonesia: DestinationSeed = {
   notes:
     "Attendance is estimated at 0.45, well below the 60-70% typical destination-wedding range reported by Destify's guest-attendance analysis (destify.com). A Bali wedding means a 20+ hour door-to-door trip with at least one long connection, a full day lost each way to time-zone shift and jet lag, and a much higher bar to clear than a same-hemisphere destination — realistically this functions as a smaller-group or elopement-style destination for this couple rather than a full ~100-guest wedding, and the couple should plan around a meaningfully smaller in-person guest list if they choose it.",
   travelCostPerGuestEstimate: 1550,
+  flightCostEstimate: 1000,
   lodgingPerNightEstimate: 150,
   attendanceRateEstimate: 0.45,
   weatherNotes:

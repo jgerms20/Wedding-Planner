@@ -26,6 +26,7 @@ export const stLucia: DestinationSeed = {
   notes:
     "Attendance is estimated at 0.62, near the middle of the 60-70% typical destination-wedding range reported by Destify's guest-attendance analysis (destify.com) — nonstop flights and no US-citizen visa requirement help turnout, offset by St. Lucia's resort rates running above Jamaica's and the Bahamas' (per-person nightly rates cited at $250-600, per stluciataxi.com-adjacent market sources).",
   travelCostPerGuestEstimate: 1350,
+  flightCostEstimate: 450,
   lodgingPerNightEstimate: 300,
   attendanceRateEstimate: 0.62,
   weatherNotes:

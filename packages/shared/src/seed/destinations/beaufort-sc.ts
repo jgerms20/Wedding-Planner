@@ -43,6 +43,7 @@ export const beaufortSc: DestinationSeed = {
   notes:
     "Attendance is estimated at 0.80, at the bottom of the 80-85% 'local wedding' attendance band (pix.wedding; destify.com): Beaufort has no full-service airport of its own, so every guest routes through Savannah/Hilton Head International (SAV, about 40 minutes away) or Charleston, adding real friction versus Charleston itself.",
   travelCostPerGuestEstimate: 1070,
+  flightCostEstimate: 470,
   lodgingPerNightEstimate: 200,
   attendanceRateEstimate: 0.8,
   weatherNotes:

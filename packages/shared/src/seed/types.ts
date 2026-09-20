@@ -50,6 +50,8 @@ export interface DestinationSeed {
   imageCredit?: string;
   /** Round-trip airfare from major US hubs plus three nights of lodging, per guest. */
   travelCostPerGuestEstimate: number;
+  /** The airfare portion of travelCostPerGuestEstimate, as cited in travelNotes' "Travel-cost math". */
+  flightCostEstimate: number;
   lodgingPerNightEstimate: number;
   /** Share of invited guests likely to attend, 0..1. */
   attendanceRateEstimate: number;

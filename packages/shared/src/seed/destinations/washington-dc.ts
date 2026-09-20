@@ -21,6 +21,7 @@ export const washingtonDc: DestinationSeed = {
   notes:
     "Attendance is estimated at 0.85, the top of the 80-85% 'local wedding' attendance band reported by wedding-industry guest-attendance analyses, rather than the 60-70% destination-wedding band — because DC is domestic, requires no passport, and is drivable for much of a Northeast/Mid-Atlantic-heavy guest list (pix.wedding; destify.com).",
   travelCostPerGuestEstimate: 1370,
+  flightCostEstimate: 470,
   lodgingPerNightEstimate: 300,
   attendanceRateEstimate: 0.85,
   weatherNotes:

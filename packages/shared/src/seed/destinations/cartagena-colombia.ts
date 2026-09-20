@@ -36,6 +36,7 @@ export const cartagenaColombia: DestinationSeed = {
   notes:
     "Attendance is estimated at 0.60 — the low end of the 60-70% typical destination-wedding range reported by Destify's guest-attendance analysis — because Cartagena has meaningfully thinner nonstop air service from the US East Coast than the Mexican or Caribbean-island options (seasonal-only JFK service, Miami as the more reliable nonstop hub) and is a less familiar, more city-and-culture-oriented trip for guests used to beach-resort destination weddings (destify.com; flightconnections.com).",
   travelCostPerGuestEstimate: 1290,
+  flightCostEstimate: 540,
   lodgingPerNightEstimate: 250,
   attendanceRateEstimate: 0.6,
   weatherNotes:

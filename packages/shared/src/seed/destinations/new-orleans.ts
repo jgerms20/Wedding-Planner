@@ -25,6 +25,7 @@ export const newOrleans: DestinationSeed = {
   notes:
     "Attendance is estimated at 0.84, near the top of the 80-85% 'local wedding' attendance band (pix.wedding; destify.com) — domestic and no passport, with one of the densest nonstop flight networks of any US finalist (54+ nonstop destinations from Louis Armstrong International), but placed just below DC's 0.85 because, unlike DC, there's no realistic drive-or-train fallback for Northeast guests if a flight falls through.",
   travelCostPerGuestEstimate: 1010,
+  flightCostEstimate: 470,
   lodgingPerNightEstimate: 180,
   attendanceRateEstimate: 0.84,
   weatherNotes:

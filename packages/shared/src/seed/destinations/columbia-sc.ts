@@ -21,6 +21,7 @@ export const columbiaSc: DestinationSeed = {
   notes:
     "Attendance is estimated at 0.82, the middle of the 80-85% 'local wedding' attendance band rather than the 60-70% destination-wedding band, reflecting that Columbia is domestic and drivable from much of the Southeast even though most Northeast/Mid-Atlantic guests would need a flight with a connection (pix.wedding; destify.com).",
   travelCostPerGuestEstimate: 920,
+  flightCostEstimate: 470,
   lodgingPerNightEstimate: 150,
   attendanceRateEstimate: 0.82,
   weatherNotes:

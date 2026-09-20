@@ -29,6 +29,7 @@ export const wilmingtonNc: DestinationSeed = {
   notes:
     "Attendance is estimated at 0.82, in the middle of the 80-85% 'local wedding' attendance band (pix.wedding; destify.com) — domestic and no passport, but Wilmington International's much smaller route network (about 9-24 nonstop destinations depending on the source) than DC, New Orleans, or Charleston means more East Coast guests will need a connection.",
   travelCostPerGuestEstimate: 1042,
+  flightCostEstimate: 470,
   lodgingPerNightEstimate: 184,
   attendanceRateEstimate: 0.82,
   weatherNotes:
