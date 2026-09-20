@@ -2,6 +2,7 @@ import { benchmarks } from "./benchmarks";
 import { ashevilleNc } from "./destinations/asheville-nc";
 import { austinTx } from "./destinations/austin-tx";
 import { bahamas } from "./destinations/bahamas";
+import { batonRougeLa } from "./destinations/baton-rouge-la";
 import { beaufortSc } from "./destinations/beaufort-sc";
 import { brazil } from "./destinations/brazil";
 import { cannonBeachOr } from "./destinations/cannon-beach-or";
@@ -13,6 +14,8 @@ import { galvestonTx } from "./destinations/galveston-tx";
 import { gulfShoresOrangeBeachAl } from "./destinations/gulf-shores-orange-beach-al";
 import { highlandsCashiersNc } from "./destinations/highlands-cashiers-nc";
 import { jamaica } from "./destinations/jamaica";
+import { memphisTn } from "./destinations/memphis-tn";
+import { mobileAl } from "./destinations/mobile-al";
 import { newOrleans } from "./destinations/new-orleans";
 import { pensacolaFl } from "./destinations/pensacola-fl";
 import { portlandOr } from "./destinations/portland-or";
@@ -63,5 +66,8 @@ export const SEED_DESTINATIONS: DestinationSeed[] = [
   cannonBeachOr,
   wilmingtonNc,
   beaufortSc,
+  batonRougeLa,
+  memphisTn,
+  mobileAl,
 ];
 export const SEED_BENCHMARKS: CostBenchmarks | null = benchmarks;
