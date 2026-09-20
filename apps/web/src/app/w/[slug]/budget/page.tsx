@@ -126,7 +126,7 @@ export default function BudgetPage() {
 
   const pinnedId = pinned?.id;
   const pinnedGuestAssumption = pinned?.guestAssumption;
-  const [previewGuests, setPreviewGuests] = useState<number>(pinnedGuestAssumption ?? 100);
+  const [previewGuests, setPreviewGuests] = useState<number>(pinnedGuestAssumption ?? 150);
   useEffect(() => {
     if (pinnedGuestAssumption !== undefined) setPreviewGuests(pinnedGuestAssumption);
   }, [pinnedId, pinnedGuestAssumption]);

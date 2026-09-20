@@ -37,9 +37,11 @@ export const COUPLE = {
   engagedOn: "2026-09-10",
   engagedWhere: "Brazil",
   targetSeason: "spring 2028",
-  /** Mid-spring stand-in used only to derive satellite-event dates until a real date is chosen. */
+  /** A specific mid-spring date the couple can still change from Settings — used both to derive
+   * satellite-event dates and as `wedding.targetDate`'s seeded value, so the app doesn't leave the
+   * date unset by default. */
   nominalWeddingDate: "2028-04-15",
-  guestTarget: 100,
+  guestTarget: 150,
   engagementParty: {
     /** A Saturday about a year before the wedding; a placeholder until they pick one. */
     date: "2027-04-17",
@@ -216,14 +218,16 @@ export function buildSeedBundle(input: SeedInput): ExportBundle {
     const built = buildDestinationFromSeed(seed, weddingId, now, {
       guestTarget: COUPLE.guestTarget,
       sortOrder: seed.rank,
-      pinned: seed.rank === 1,
+      // Nothing is pinned by default: "our plan" is a deliberate choice the couple makes by
+      // clicking "Make this our plan," never a system default they never asked for.
+      pinned: false,
     });
     destinations.push(built.destination);
     venues.push(...built.venues);
     scenarios.push(built.scenario);
   }
 
-  const pinned = scenarios.find((s) => s.pinned) ?? scenarios[0];
+  const pinnedScenario = scenarios.find((s) => s.pinned);
 
   const wedding: Wedding = {
     id: weddingId,
@@ -233,11 +237,12 @@ export function buildSeedBundle(input: SeedInput): ExportBundle {
     partnerB: { ...COUPLE.partnerB },
     dateFlexibility: "season",
     targetSeason: COUPLE.targetSeason,
+    targetDate: COUPLE.nominalWeddingDate,
     locationText: `Deciding between ${sortedDestinations.map((d) => d.name).join(", ")}. ${sortedDestinations[0]?.name ?? ""} is the front-runner.`,
     styleNotes: `Engaged ${COUPLE.engagedOn} in ${COUPLE.engagedWhere}. Destination wedding likely. Guest target of ${COUPLE.guestTarget} is a placeholder until the list is built.`,
     guestTarget: COUPLE.guestTarget,
     isDestination: true,
-    activeScenarioId: pinned?.id,
+    activeScenarioId: pinnedScenario?.id,
     createdAt: now,
     updatedAt: now,
   };
@@ -265,8 +270,9 @@ export function buildSeedBundle(input: SeedInput): ExportBundle {
     },
   };
 
-  // Budget: categories from benchmarks, estimates as a share of the pinned scenario's total.
-  const scenarioTotal = pinned ? scenarioMath(pinned).totalCost : input.benchmarks.averageDestinationWeddingCost;
+  // Budget: categories from benchmarks, estimates as a share of the pinned scenario's total
+  // (or, since nothing is pinned by default at seed time, the benchmark average).
+  const scenarioTotal = pinnedScenario ? scenarioMath(pinnedScenario).totalCost : input.benchmarks.averageDestinationWeddingCost;
   const budgetCategories: BudgetCategory[] = [];
   const budgetItems: BudgetItem[] = [];
   for (const bench of [...input.benchmarks.categories].sort((a, b) => a.sortOrder - b.sortOrder)) {
@@ -284,7 +290,7 @@ export function buildSeedBundle(input: SeedInput): ExportBundle {
       categoryId,
       name: bench.category,
       estimate: round((scenarioTotal * bench.percent) / 100),
-      notes: `Estimated as ${bench.percent}% of the pinned scenario total (${pinned?.name ?? "benchmark"}). ${bench.note} Sources: ${bench.sourceUrls.join(" ")}`,
+      notes: `Estimated as ${bench.percent}% of the pinned scenario total (${pinnedScenario?.name ?? "benchmark"}). ${bench.note} Sources: ${bench.sourceUrls.join(" ")}`,
       createdAt: now,
       updatedAt: now,
     });
@@ -450,57 +456,57 @@ export const STARTER_GUEST_LIST: Array<{
   side: Guest["side"];
 }> = [
   // Confirmed, closest circle (tier: must)
-  { firstName: "Mom", relationship: "Mother", tier: "must", side: "a" },
-  { firstName: "Dad", relationship: "Father", tier: "must", side: "a" },
-  { firstName: "Reagan", relationship: "Sister", tier: "must", side: "a" },
-  { firstName: "Eddie", relationship: "Reagan's partner", tier: "must", side: "a" },
-  { firstName: "RJ", relationship: "Brother", tier: "must", side: "a" },
-  { firstName: "Tori", relationship: "RJ's partner", tier: "must", side: "a" },
-  { firstName: "Renee", relationship: "Aunt", tier: "must", side: "a" },
-  { firstName: "Amos", relationship: "Uncle", tier: "must", side: "a" },
-  { firstName: "Amos", relationship: "Cousin (a different Amos than the uncle, same first name)", tier: "must", side: "a" },
-  { firstName: "Elena", relationship: "Cousin (also called Lena)", tier: "must", side: "a" },
-  { firstName: "Darren", relationship: "Uncle", tier: "must", side: "a" },
-  { firstName: "Lori", relationship: "Aunt (also spelled Lorie)", tier: "must", side: "a" },
-  { firstName: "Lauren", relationship: "Cousin", tier: "must", side: "a" },
-  { firstName: "Ben", relationship: "Lauren's husband", tier: "must", side: "a" },
-  { firstName: "Danielle", relationship: "Cousin", tier: "must", side: "a" },
-  { firstName: "DJ", relationship: "Family friend (exact relation not stated in the notes)", tier: "must", side: "a" },
-  { firstName: "Jackie", relationship: "Cousin", tier: "must", side: "a" },
-  { firstName: "Ryan", relationship: "Cousin", tier: "must", side: "a" },
-  { firstName: "Jasmine", relationship: "Cousin", tier: "must", side: "a" },
-  { firstName: "Melissa", relationship: "Cousin", tier: "must", side: "a" },
-  { firstName: "April", relationship: "Godmother", tier: "must", side: "a" },
-  { firstName: "Bobo", relationship: "Godfather", tier: "must", side: "a" },
-  { firstName: "Marissa", relationship: "Family friend (\"Miss Marissa\")", tier: "must", side: "a" },
-  { firstName: "Deja", relationship: "Family friend", tier: "must", side: "a" },
-  { firstName: "Clint", relationship: "Family friend", tier: "must", side: "a" },
-  { firstName: "Tasha", relationship: "Family friend", tier: "must", side: "a" },
-  { firstName: "Barbara", relationship: "Cousin", tier: "must", side: "a" },
-  { firstName: "Nathaniel", relationship: "Cousin", tier: "must", side: "a" },
+  { firstName: "Mom", relationship: "Mother", tier: "must", side: "b" },
+  { firstName: "Dad", relationship: "Father", tier: "must", side: "b" },
+  { firstName: "Reagan", relationship: "Sister", tier: "must", side: "b" },
+  { firstName: "Eddie", relationship: "Reagan's partner", tier: "must", side: "b" },
+  { firstName: "RJ", relationship: "Brother", tier: "must", side: "b" },
+  { firstName: "Tori", relationship: "RJ's partner", tier: "must", side: "b" },
+  { firstName: "Renee", relationship: "Aunt", tier: "must", side: "b" },
+  { firstName: "Amos", relationship: "Uncle", tier: "must", side: "b" },
+  { firstName: "Amos", relationship: "Cousin (a different Amos than the uncle, same first name)", tier: "must", side: "b" },
+  { firstName: "Elena", relationship: "Cousin (also called Lena)", tier: "must", side: "b" },
+  { firstName: "Darren", relationship: "Uncle", tier: "must", side: "b" },
+  { firstName: "Lori", relationship: "Aunt (also spelled Lorie)", tier: "must", side: "b" },
+  { firstName: "Lauren", relationship: "Cousin", tier: "must", side: "b" },
+  { firstName: "Ben", relationship: "Lauren's husband", tier: "must", side: "b" },
+  { firstName: "Danielle", relationship: "Cousin", tier: "must", side: "b" },
+  { firstName: "DJ", relationship: "Family friend (exact relation not stated in the notes)", tier: "must", side: "b" },
+  { firstName: "Jackie", relationship: "Cousin", tier: "must", side: "b" },
+  { firstName: "Ryan", relationship: "Cousin", tier: "must", side: "b" },
+  { firstName: "Jasmine", relationship: "Cousin", tier: "must", side: "b" },
+  { firstName: "Melissa", relationship: "Cousin", tier: "must", side: "b" },
+  { firstName: "April", relationship: "Godmother", tier: "must", side: "b" },
+  { firstName: "Bobo", relationship: "Godfather", tier: "must", side: "b" },
+  { firstName: "Marissa", relationship: "Family friend (\"Miss Marissa\")", tier: "must", side: "b" },
+  { firstName: "Deja", relationship: "Family friend", tier: "must", side: "b" },
+  { firstName: "Clint", relationship: "Family friend", tier: "must", side: "b" },
+  { firstName: "Tasha", relationship: "Family friend", tier: "must", side: "b" },
+  { firstName: "Barbara", relationship: "Cousin", tier: "must", side: "b" },
+  { firstName: "Nathaniel", relationship: "Cousin", tier: "must", side: "b" },
 
   // Confirmed, real invite but stated more plainly than the closest circle (tier: should)
-  { firstName: "Carol", relationship: "Cousin — invited, though not expected to attend", tier: "should", side: "a" },
-  { firstName: "Wanita", relationship: "Mom's friend, a childhood \"play aunt\"", tier: "should", side: "a" },
-  { firstName: "Sandra", relationship: "Family friend (\"Miss Sandra\"), a childhood babysitter", tier: "should", side: "a" },
-  { firstName: "Jason", relationship: "Family friend — invited along with his wife (her name wasn't given in the notes)", tier: "should", side: "a" },
-  { firstName: "Jessica", relationship: "Family friend", tier: "should", side: "a" },
-  { firstName: "Tony", relationship: "Family friend", tier: "should", side: "a" },
-  { firstName: "Evelyn", relationship: "Aunt", tier: "should", side: "a" },
-  { firstName: "Arlene", relationship: "Cousin", tier: "should", side: "a" },
-  { firstName: "Marcus", relationship: "Uncle", tier: "should", side: "a" },
-  { firstName: "Regina", relationship: "Possibly Uncle Marcus's wife — unclear from the notes", tier: "should", side: "a" },
+  { firstName: "Carol", relationship: "Cousin — invited, though not expected to attend", tier: "should", side: "b" },
+  { firstName: "Wanita", relationship: "Mom's friend, a childhood \"play aunt\"", tier: "should", side: "b" },
+  { firstName: "Sandra", relationship: "Family friend (\"Miss Sandra\"), a childhood babysitter", tier: "should", side: "b" },
+  { firstName: "Jason", relationship: "Family friend — invited along with his wife (her name wasn't given in the notes)", tier: "should", side: "b" },
+  { firstName: "Jessica", relationship: "Family friend", tier: "should", side: "b" },
+  { firstName: "Tony", relationship: "Family friend", tier: "should", side: "b" },
+  { firstName: "Evelyn", relationship: "Aunt", tier: "should", side: "b" },
+  { firstName: "Arlene", relationship: "Cousin", tier: "should", side: "b" },
+  { firstName: "Marcus", relationship: "Uncle", tier: "should", side: "b" },
+  { firstName: "Regina", relationship: "Possibly Uncle Marcus's wife — unclear from the notes", tier: "should", side: "b" },
 
   // Hedged in the notes (tier: nice — the hedge is kept in `relationship` so it reads honestly)
-  { firstName: "Kenny", relationship: "Family friend — hedged (\"why not, that's a possibility\")", tier: "nice", side: "a" },
-  { firstName: "Manar", relationship: "Family friend — hedged (\"why not, that's a possibility\")", tier: "nice", side: "a" },
-  { firstName: "Jerome", relationship: "Cousin — hedged (\"it's on the line\")", tier: "nice", side: "a" },
-  { firstName: "Sheniqua", relationship: "Hedged alongside cousin Jerome (\"it's on the line\")", tier: "nice", side: "a" },
-  { firstName: "Javon", relationship: "Cousin — hedged (\"maybe a respectful invite, let them know\")", tier: "nice", side: "a" },
-  { firstName: "JJ", relationship: "Cousin's family — hedged (\"maybe a respectful invite, let them know\")", tier: "nice", side: "a" },
-  { firstName: "Dion", relationship: "Cousin — hedged (\"maybe, low-key\")", tier: "nice", side: "a" },
-  { firstName: "Mark", relationship: "Uncle Marcus & Regina's child — hedged (\"if they wanted to\")", tier: "nice", side: "a" },
-  { firstName: "Anna", relationship: "Uncle Marcus & Regina's child — hedged (\"if they wanted to\")", tier: "nice", side: "a" },
+  { firstName: "Kenny", relationship: "Family friend — hedged (\"why not, that's a possibility\")", tier: "nice", side: "b" },
+  { firstName: "Manar", relationship: "Family friend — hedged (\"why not, that's a possibility\")", tier: "nice", side: "b" },
+  { firstName: "Jerome", relationship: "Cousin — hedged (\"it's on the line\")", tier: "nice", side: "b" },
+  { firstName: "Sheniqua", relationship: "Hedged alongside cousin Jerome (\"it's on the line\")", tier: "nice", side: "b" },
+  { firstName: "Javon", relationship: "Cousin — hedged (\"maybe a respectful invite, let them know\")", tier: "nice", side: "b" },
+  { firstName: "JJ", relationship: "Cousin's family — hedged (\"maybe a respectful invite, let them know\")", tier: "nice", side: "b" },
+  { firstName: "Dion", relationship: "Cousin — hedged (\"maybe, low-key\")", tier: "nice", side: "b" },
+  { firstName: "Mark", relationship: "Uncle Marcus & Regina's child — hedged (\"if they wanted to\")", tier: "nice", side: "b" },
+  { firstName: "Anna", relationship: "Uncle Marcus & Regina's child — hedged (\"if they wanted to\")", tier: "nice", side: "b" },
 ];
 
 function midpoint(benchmarks: CostBenchmarks, kind: SubEventKind): number | undefined {

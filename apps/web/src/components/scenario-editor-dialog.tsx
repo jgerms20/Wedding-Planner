@@ -149,7 +149,7 @@ function emptyForm(initialDestinationId?: string) {
     venueId: "",
     dateStart: "",
     dateEnd: "",
-    guestAssumption: "100",
+    guestAssumption: "150",
     attendanceRate: "0.6",
     fixedCosts: "",
     perGuestCost: "",

@@ -1,6 +1,5 @@
 import "fake-indexeddb/auto";
 import { describe, expect, it } from "vitest";
-import { scenarioMath } from "../src/entities/index";
 import { createLocalRepo } from "../src/repo/local";
 import { buildSeedBundle, COUPLE } from "../src/seed/builder";
 import type { CostBenchmarks, DestinationSeed } from "../src/seed/types";
@@ -45,7 +44,7 @@ function destination(key: string, rank: number): DestinationSeed {
 }
 
 describe("buildSeedBundle", () => {
-  it("builds a bespoke, importable bundle with the top destination pinned", async () => {
+  it("builds a bespoke, importable bundle with nothing pinned by default", async () => {
     const bundle = buildSeedBundle({
       destinations: [destination("second", 2), destination("first", 1)],
       benchmarks,
@@ -55,13 +54,14 @@ describe("buildSeedBundle", () => {
     expect(bundle.wedding.name).toBe(COUPLE.name);
     expect(bundle.wedding.targetSeason).toBe("spring 2028");
     expect(bundle.destinations.map((d) => d.name)).toEqual(["first", "second"]);
+    // "Our plan" is a deliberate choice the couple makes, never a system default.
     const pinned = bundle.scenarios.find((s) => s.pinned);
-    expect(pinned?.name).toBe("first");
-    expect(bundle.wedding.activeScenarioId).toBe(pinned?.id);
+    expect(pinned).toBeUndefined();
+    expect(bundle.wedding.activeScenarioId).toBeUndefined();
     expect(bundle.venues).toHaveLength(2);
 
-    // Budget estimates split the pinned scenario total by benchmark percentages.
-    const total = scenarioMath(pinned!).totalCost;
+    // With nothing pinned, budget estimates split the benchmark average by category percentages.
+    const total = benchmarks.averageDestinationWeddingCost;
     expect(bundle.budgetItems.map((i) => i.estimate)).toEqual([Math.round(total / 2), Math.round(total / 2)]);
     expect(bundle.budgetItems[0].notes).toContain("https://example.com/a");
 
@@ -99,7 +99,8 @@ describe("registered seed", () => {
     const percentTotal = SEED_BENCHMARKS!.categories.reduce((s, c) => s + c.percent, 0);
     expect(Math.round(percentTotal)).toBe(100);
     const bundle = buildSeedBundle({ destinations: SEED_DESTINATIONS, benchmarks: SEED_BENCHMARKS! });
-    expect(bundle.scenarios.filter((s) => s.pinned)).toHaveLength(1);
+    // Nothing is pinned by default — "our plan" is only ever set by an explicit couple action.
+    expect(bundle.scenarios.filter((s) => s.pinned)).toHaveLength(0);
     expect(bundle.budgetItems).toHaveLength(12);
     expect(bundle.venues.length).toBeGreaterThanOrEqual(18);
   });

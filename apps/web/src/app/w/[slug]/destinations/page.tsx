@@ -78,7 +78,7 @@ export default function DestinationsPage() {
 
   if (!repo || !wedding) return <LoadingState label="Opening the atlas…" />;
 
-  const guestTarget = wedding.guestTarget ?? 100;
+  const guestTarget = wedding.guestTarget ?? 150;
 
   const updateGuestTarget = async (next: number) => {
     const oldTarget = guestTarget;

@@ -197,7 +197,7 @@ export async function researchDestination({ name, wedding, port }: ResearchDesti
 }
 
 function destinationResearchPrompt(name: string, wedding: Wedding): string {
-  const guests = wedding.guestTarget ?? 100;
+  const guests = wedding.guestTarget ?? 150;
   const when = wedding.targetDate ?? wedding.targetSeason ?? "spring 2028";
   return [
     `The couple is considering "${name}" as a wedding destination. Confirm it's a real place and research it as one.`,
@@ -208,7 +208,7 @@ function destinationResearchPrompt(name: string, wedding: Wedding): string {
 }
 
 function researchPrompt(destination: Destination, wedding: Wedding): string {
-  const guests = wedding.guestTarget ?? 100;
+  const guests = wedding.guestTarget ?? 150;
   const when = wedding.targetDate ?? wedding.targetSeason ?? "spring 2028";
   const region = destination.region ? `${destination.region}, ` : "";
   return [

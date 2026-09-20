@@ -166,7 +166,7 @@ export default function HomePage() {
                 destination={d}
                 scenario={scenarioByDestination.get(d.id)}
                 pinned={d.id === frontRunnerId}
-                guestTarget={wedding.guestTarget ?? 100}
+                guestTarget={wedding.guestTarget ?? 150}
                 className={`rise rise-${Math.min(i + 1, 8)}`}
               />
             ))}
