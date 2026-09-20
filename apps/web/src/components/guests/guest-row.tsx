@@ -1,6 +1,7 @@
 "use client";
 
 import { sideSchema, tierSchema, type Guest, type Side, type Tier } from "@bower/shared";
+import { sideLabel } from "@/lib/side-label";
 import { cn } from "@/lib/utils";
 
 const TIER_CLASS: Record<Tier, string> = {
@@ -9,7 +10,19 @@ const TIER_CLASS: Record<Tier, string> = {
   nice: "text-ink-soft border-line bg-transparent",
 };
 
-export function GuestRow({ guest, onOpen, onPatch }: { guest: Guest; onOpen: () => void; onPatch: (patch: Partial<Guest>) => void }) {
+export function GuestRow({
+  guest,
+  partnerAName,
+  partnerBName,
+  onOpen,
+  onPatch,
+}: {
+  guest: Guest;
+  partnerAName: string;
+  partnerBName: string;
+  onOpen: () => void;
+  onPatch: (patch: Partial<Guest>) => void;
+}) {
   return (
     <tr className="border-b border-line/70 last:border-0 hover:bg-paper-deep/40">
       <td className="p-3">
@@ -21,11 +34,11 @@ export function GuestRow({ guest, onOpen, onPatch }: { guest: Guest; onOpen: () 
         <select
           value={guest.side}
           onChange={(e) => onPatch({ side: e.target.value as Side })}
-          className="rounded-md border border-transparent bg-transparent px-1.5 py-1 text-sm capitalize outline-none hover:border-line-strong focus:border-coral"
+          className="rounded-md border border-transparent bg-transparent px-1.5 py-1 text-sm outline-none hover:border-line-strong focus:border-coral"
         >
           {sideSchema.options.map((s) => (
             <option key={s} value={s}>
-              {s}
+              {sideLabel(s, partnerAName, partnerBName)}
             </option>
           ))}
         </select>

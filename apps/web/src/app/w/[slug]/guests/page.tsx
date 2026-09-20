@@ -20,10 +20,14 @@ import { useEntityList } from "@/lib/use-entity-list";
 const TIER_ORDER: Tier[] = ["must", "should", "nice"];
 const TIER_RANK: Record<Tier, number> = { must: 0, should: 1, nice: 2 };
 const NO_HOUSEHOLD = "__none__";
+const SIDE_FILTER_ALL = "__all__";
 
 export default function GuestsPage() {
   const { repo, wedding } = useRepoContext();
   const weddingId = wedding?.id;
+  const partnerAName = wedding?.partnerA.name ?? "Partner A";
+  const partnerBName = wedding?.partnerB.name ?? "Partner B";
+  const [sideFilter, setSideFilter] = useState<string>(SIDE_FILTER_ALL);
 
   const loadGuests = useCallback(async () => {
     if (!repo || !weddingId) return undefined;
@@ -41,9 +45,14 @@ export default function GuestsPage() {
   const [householdDialog, setHouseholdDialog] = useState(false);
   const [cut, setCut] = useState(0);
 
+  const filteredGuests = useMemo(
+    () => (sideFilter === SIDE_FILTER_ALL ? guests : guests.filter((g) => g.side === sideFilter)),
+    [guests, sideFilter],
+  );
+
   const groups = useMemo(() => {
     const byHousehold = new Map<string, Guest[]>();
-    for (const guest of guests) {
+    for (const guest of filteredGuests) {
       const key = guest.householdId ?? NO_HOUSEHOLD;
       const list = byHousehold.get(key);
       if (list) list.push(guest);
@@ -55,7 +64,7 @@ export default function GuestsPage() {
       .map((h) => ({ id: h.id, name: h.name, guests: sortByName(byHousehold.get(h.id)!) }));
     const unassigned = byHousehold.get(NO_HOUSEHOLD);
     return unassigned ? [...named, { id: NO_HOUSEHOLD, name: "No household on file", guests: sortByName(unassigned) }] : named;
-  }, [guests, households]);
+  }, [filteredGuests, households]);
 
   const sortedByTier = useMemo(
     () => [...guests].sort((a, b) => TIER_RANK[a.tier] - TIER_RANK[b.tier] || a.firstName.localeCompare(b.firstName)),
@@ -88,7 +97,13 @@ export default function GuestsPage() {
         title="Guests"
         description="Households, tiers, and how many fit if you have to cut."
         action={
-          <div className="flex gap-2">
+          <div className="flex items-center gap-2">
+            <Select value={sideFilter} onChange={(e) => setSideFilter(e.target.value)} className="w-auto">
+              <option value={SIDE_FILTER_ALL}>Everyone</option>
+              <option value="a">{partnerAName}</option>
+              <option value="b">{partnerBName}</option>
+              <option value="both">Both</option>
+            </Select>
             <Button variant="outline" size="sm" onClick={() => setHouseholdDialog(true)}>
               <Plus className="size-4" /> Household
             </Button>
@@ -101,7 +116,7 @@ export default function GuestsPage() {
 
       <div className="grid gap-4 sm:grid-cols-3">
         {TIER_ORDER.map((tier) => (
-          <TierTile key={tier} tier={tier} guests={guests} />
+          <TierTile key={tier} tier={tier} guests={guests} partnerAName={partnerAName} partnerBName={partnerBName} />
         ))}
       </div>
 
@@ -111,7 +126,9 @@ export default function GuestsPage() {
         </p>
         <Slider className="mt-4" min={0} max={guests.length} value={cutValue} onChange={(e) => setCut(Number(e.target.value))} data-testid="guests-cut-slider" />
         <p className="mt-3 text-sm">
-          Inviting the top <strong className="tabular">{cutValue}</strong> of {guests.length} (ranked must → should → nice) includes:
+          Inviting the top <strong className="tabular">{cutValue}</strong> of {guests.length}
+          {guests.length > 0 && <span className="tabular text-ink-soft"> ({Math.round((cutValue / guests.length) * 100)}%)</span>} (ranked
+          must → should → nice) includes:
         </p>
         <div className="mt-2 flex flex-wrap gap-x-5 gap-y-1 text-sm text-ink-soft">
           {includedByTier.map(({ tier, included: inc, total }) => (
@@ -144,7 +161,15 @@ export default function GuestsPage() {
             </thead>
             <tbody>
               {groups.map((group) => (
-                <GuestGroup key={group.id} name={group.name} guests={group.guests} onOpen={(g) => setGuestDialog({ open: true, guest: g })} onPatch={patchGuest} />
+                <GuestGroup
+                  key={group.id}
+                  name={group.name}
+                  guests={group.guests}
+                  partnerAName={partnerAName}
+                  partnerBName={partnerBName}
+                  onOpen={(g) => setGuestDialog({ open: true, guest: g })}
+                  onPatch={patchGuest}
+                />
               ))}
             </tbody>
           </table>
@@ -157,12 +182,16 @@ export default function GuestsPage() {
         weddingId={weddingId}
         households={households}
         guest={guestDialog.guest}
+        partnerAName={partnerAName}
+        partnerBName={partnerBName}
         onSave={saveGuest}
       />
       <HouseholdDialog
         open={householdDialog}
         onOpenChange={setHouseholdDialog}
         weddingId={weddingId}
+        partnerAName={partnerAName}
+        partnerBName={partnerBName}
         onSave={async (h) => {
           await repo.households.upsert(h);
           await reloadHouseholds();
@@ -176,7 +205,21 @@ function sortByName(list: Guest[]): Guest[] {
   return [...list].sort((a, b) => a.firstName.localeCompare(b.firstName) || (a.lastName ?? "").localeCompare(b.lastName ?? ""));
 }
 
-function GuestGroup({ name, guests, onOpen, onPatch }: { name: string; guests: Guest[]; onOpen: (g: Guest) => void; onPatch: (g: Guest, patch: Partial<Guest>) => void }) {
+function GuestGroup({
+  name,
+  guests,
+  partnerAName,
+  partnerBName,
+  onOpen,
+  onPatch,
+}: {
+  name: string;
+  guests: Guest[];
+  partnerAName: string;
+  partnerBName: string;
+  onOpen: (g: Guest) => void;
+  onPatch: (g: Guest, patch: Partial<Guest>) => void;
+}) {
   return (
     <>
       <tr>
@@ -185,7 +228,14 @@ function GuestGroup({ name, guests, onOpen, onPatch }: { name: string; guests: G
         </td>
       </tr>
       {guests.map((guest) => (
-        <GuestRow key={guest.id} guest={guest} onOpen={() => onOpen(guest)} onPatch={(patch) => onPatch(guest, patch)} />
+        <GuestRow
+          key={guest.id}
+          guest={guest}
+          partnerAName={partnerAName}
+          partnerBName={partnerBName}
+          onOpen={() => onOpen(guest)}
+          onPatch={(patch) => onPatch(guest, patch)}
+        />
       ))}
     </>
   );
@@ -195,11 +245,15 @@ function HouseholdDialog({
   open,
   onOpenChange,
   weddingId,
+  partnerAName,
+  partnerBName,
   onSave,
 }: {
   open: boolean;
   onOpenChange: (open: boolean) => void;
   weddingId: string;
+  partnerAName: string;
+  partnerBName: string;
   onSave: (household: Household) => Promise<void>;
 }) {
   const [name, setName] = useState("");
@@ -219,9 +273,9 @@ function HouseholdDialog({
         <div className="flex flex-col gap-1.5">
           <Label className="text-xs">Side</Label>
           <Select value={side} onChange={(e) => setSide(e.target.value as Side)}>
-            <option value="a">a</option>
-            <option value="b">b</option>
-            <option value="both">both</option>
+            <option value="a">{partnerAName}</option>
+            <option value="b">{partnerBName}</option>
+            <option value="both">Both</option>
           </Select>
         </div>
       </DialogBody>

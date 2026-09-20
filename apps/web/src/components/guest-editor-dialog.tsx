@@ -9,6 +9,7 @@ import { Dialog, DialogBody, DialogCloseButton, DialogFooter, DialogHeader, Dial
 import { Input } from "@/components/ui/input";
 import { Label } from "@/components/ui/label";
 import { Select } from "@/components/ui/select";
+import { sideLabel } from "@/lib/side-label";
 
 /** Any detail beyond the default first-name + tier flow — presence of one of these means an
  * edited guest should open with details already expanded, so nothing looks lost. */
@@ -24,6 +25,8 @@ export function GuestEditorDialog({
   weddingId,
   households,
   guest,
+  partnerAName,
+  partnerBName,
   onSave,
 }: {
   open: boolean;
@@ -31,6 +34,8 @@ export function GuestEditorDialog({
   weddingId: string;
   households: Household[];
   guest?: Guest;
+  partnerAName: string;
+  partnerBName: string;
   onSave: (guest: Guest) => Promise<void>;
 }) {
   const [form, setForm] = useState(() => emptyForm());
@@ -126,7 +131,7 @@ export function GuestEditorDialog({
                 <Select value={form.side} onChange={(e) => setForm((f) => ({ ...f, side: e.target.value as Side }))}>
                   {sideSchema.options.map((s) => (
                     <option key={s} value={s}>
-                      {s}
+                      {sideLabel(s, partnerAName, partnerBName)}
                     </option>
                   ))}
                 </Select>
