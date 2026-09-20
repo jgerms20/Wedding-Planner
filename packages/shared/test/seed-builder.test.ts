@@ -84,14 +84,16 @@ describe("buildSeedBundle", () => {
 describe("registered seed", () => {
   it("builds the real Joshua & Janel bundle with all destinations and sourced numbers", async () => {
     const { SEED_BENCHMARKS, SEED_DESTINATIONS } = await import("../src/seed/registry");
-    expect(SEED_DESTINATIONS).toHaveLength(9);
+    expect(SEED_DESTINATIONS).toHaveLength(50);
     expect(SEED_DESTINATIONS[0].name).toBe("Brazil");
     for (const d of SEED_DESTINATIONS) {
       expect(d.sourceUrls.length).toBeGreaterThan(0);
       expect(d.legalNotes).toMatch(/Verify with the local authority or an attorney\.$/);
       expect(d.venues.length).toBeGreaterThanOrEqual(3);
       for (const v of d.venues) expect(v.sourceUrls.length).toBeGreaterThan(0);
-      expect(d.attendanceRateEstimate).toBeGreaterThan(0.5);
+      // Long-haul destinations (Maldives, Bali, Iceland, etc.) are honestly modeled as
+      // low-attendance elopement-scale options rather than inflated to a false floor.
+      expect(d.attendanceRateEstimate).toBeGreaterThan(0.35);
       expect(d.attendanceRateEstimate).toBeLessThanOrEqual(0.9);
     }
     const percentTotal = SEED_BENCHMARKS!.categories.reduce((s, c) => s + c.percent, 0);

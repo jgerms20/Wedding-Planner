@@ -78,13 +78,24 @@ export async function buildSnapshot(repo: WeddingRepo, weddingId: string, option
   lines.push("", "## Destinations");
   const venuesByDestination = new Map<string, number>();
   for (const venue of venues) venuesByDestination.set(venue.destinationId, (venuesByDestination.get(venue.destinationId) ?? 0) + 1);
+  // Full stats only for what the couple is actually comparing (favorited, matching the
+  // Explore/Favorites split on the Destinations page) — the rest of the Explore catalog can
+  // run to 50+ entries, so those get a name-only line instead of full per-destination detail,
+  // keeping the AI aware of what exists without blowing the token budget.
   const sortedDestinations = [...destinations].sort(byKey((d) => d.name));
   for (const destination of sortedDestinations) {
-    const attendance =
-      destination.attendanceRateEstimate !== undefined ? `${Math.round(destination.attendanceRateEstimate * 100)}% likely to attend` : "attendance unknown";
-    lines.push(
-      `- ${destination.name}, ${destination.country} [id ${destination.id}] — travel ${money(destination.travelCostPerGuestEstimate)}/guest, ${attendance}, ${venuesByDestination.get(destination.id) ?? 0} venue(s) saved`,
-    );
+    if ((destination.favoritedBy?.length ?? 0) > 0) {
+      const attendance =
+        destination.attendanceRateEstimate !== undefined ? `${Math.round(destination.attendanceRateEstimate * 100)}% likely to attend` : "attendance unknown";
+      lines.push(
+        `- ${destination.name}, ${destination.country} [id ${destination.id}] [FAVORITED] — travel ${money(destination.travelCostPerGuestEstimate)}/guest, ${attendance}, ${venuesByDestination.get(destination.id) ?? 0} venue(s) saved`,
+      );
+    } else {
+      // No id here: an unfavorited destination is browse-only context, not something an
+      // action would target directly, and the id would otherwise cost ~36 chars x up to 50
+      // rows for no benefit — the couple would favorite it first before acting on it.
+      lines.push(`- ${destination.name}, ${destination.country}`);
+    }
   }
   if (sortedDestinations.length === 0) lines.push("- none yet");
 
