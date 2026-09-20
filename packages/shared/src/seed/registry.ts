@@ -1,4 +1,5 @@
 import { benchmarks } from "./benchmarks";
+import { amalfiCoastItaly } from "./destinations/amalfi-coast-italy";
 import { ashevilleNc } from "./destinations/asheville-nc";
 import { austinTx } from "./destinations/austin-tx";
 import { bahamas } from "./destinations/bahamas";
@@ -11,6 +12,7 @@ import { cartagenaColombia } from "./destinations/cartagena-colombia";
 import { charlestonSc } from "./destinations/charleston-sc";
 import { chattanoogaTn } from "./destinations/chattanooga-tn";
 import { columbiaSc } from "./destinations/columbia-sc";
+import { costaRicaGuanacaste } from "./destinations/costa-rica-guanacaste";
 import { fredericksburgTx } from "./destinations/fredericksburg-tx";
 import { galvestonTx } from "./destinations/galveston-tx";
 import { gulfShoresOrangeBeachAl } from "./destinations/gulf-shores-orange-beach-al";
@@ -27,10 +29,13 @@ import { sanAntonioTx } from "./destinations/san-antonio-tx";
 import { santaFeNm } from "./destinations/santa-fe-nm";
 import { seattleWa } from "./destinations/seattle-wa";
 import { sedonaAz } from "./destinations/sedona-az";
+import { stLucia } from "./destinations/st-lucia";
 import { taosNm } from "./destinations/taos-nm";
 import { thirtyARosemaryBeachFl } from "./destinations/30a-rosemary-beach-fl";
 import { tucsonAz } from "./destinations/tucson-az";
 import { tulumMexico } from "./destinations/tulum-mexico";
+import { turksAndCaicos } from "./destinations/turks-and-caicos";
+import { tuscanyItaly } from "./destinations/tuscany-italy";
 import { charlottesvilleVa } from "./destinations/virginia";
 import { washingtonDc } from "./destinations/washington-dc";
 import { wilmingtonNc } from "./destinations/wilmington-nc";
@@ -79,5 +84,10 @@ export const SEED_DESTINATIONS: DestinationSeed[] = [
   rivieraMayaMexico,
   cartagenaColombia,
   puntaCanaDominicanRepublic,
+  stLucia,
+  turksAndCaicos,
+  costaRicaGuanacaste,
+  tuscanyItaly,
+  amalfiCoastItaly,
 ];
 export const SEED_BENCHMARKS: CostBenchmarks | null = benchmarks;
