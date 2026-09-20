@@ -1,8 +1,8 @@
 "use client";
 
-import { parseSeasonStart, scenarioMath, SEED_BENCHMARKS, type Decision, type Destination, type Scenario, type Task } from "@bower/shared";
+import { parseSeasonStart, scenarioMath, type Decision, type Destination, type Scenario, type Task } from "@bower/shared";
 import { differenceInCalendarDays, format, parseISO } from "date-fns";
-import { ArrowRight, Check, Mic, Quote, RefreshCw, X } from "lucide-react";
+import { ArrowRight, Check, Mic, RefreshCw } from "lucide-react";
 import Link from "next/link";
 import { useCallback, useMemo, useState } from "react";
 import { restoreSeed } from "@/lib/bootstrap";
@@ -57,11 +57,6 @@ export default function HomePage() {
   const nextAnchor = useMemo(() => upcomingAnchor(settings?.planConfig.anchors ?? []), [settings]);
   const estimateTotal = budgetItems.reduce((sum, item) => sum + (item.estimate ?? 0), 0);
   const committedTotal = budgetItems.reduce((sum, item) => sum + (item.contracted ?? item.quoted ?? 0), 0);
-  const [tip] = useState(() => {
-    const tips = SEED_BENCHMARKS?.tips ?? [];
-    return tips.length > 0 ? tips[Math.floor(Math.random() * tips.length)] : undefined;
-  });
-  const [tipDismissed, setTipDismissed] = useState(false);
 
   if (!ready || !wedding) {
     return <LoadingState label="Opening your atlas…" />;
@@ -262,23 +257,6 @@ export default function HomePage() {
           proposes, you approve.
         </p>
       </section>
-
-      {tip && !tipDismissed && (
-        <div className="rise fixed bottom-6 left-4 z-30 hidden max-w-xs rounded-lg border border-line-strong bg-card/95 p-4 shadow-[0_14px_32px_-10px_rgba(20,40,32,0.35)] backdrop-blur lg:flex lg:flex-col lg:gap-2">
-          <div className="flex items-start justify-between gap-2">
-            <Quote className="size-4 shrink-0 text-coral" />
-            <button
-              type="button"
-              onClick={() => setTipDismissed(true)}
-              aria-label="Dismiss"
-              className="rounded-full p-0.5 text-ink-mute transition-colors hover:bg-muted"
-            >
-              <X className="size-3.5" />
-            </button>
-          </div>
-          <p className="text-sm leading-relaxed text-ink-soft">{tip.text}</p>
-        </div>
-      )}
     </div>
   );
 }

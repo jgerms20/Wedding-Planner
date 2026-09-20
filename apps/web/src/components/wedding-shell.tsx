@@ -1,5 +1,6 @@
 "use client";
 
+import { SEED_BENCHMARKS } from "@bower/shared";
 import {
   CalendarDays,
   FolderOpen,
@@ -9,11 +10,13 @@ import {
   MapPinned,
   Moon,
   PartyPopper,
+  Quote,
   Settings as SettingsIcon,
   Sparkles,
   Sun,
   Users,
   Wallet,
+  X,
 } from "lucide-react";
 import Link from "next/link";
 import { usePathname } from "next/navigation";
@@ -54,6 +57,11 @@ function useActive(base: string) {
 function ShellChrome({ children }: { children: ReactNode }) {
   const { wedding, ready } = useRepoContext();
   const [conciergeOpen, setConciergeOpen] = useState(false);
+  const [tip] = useState(() => {
+    const tips = SEED_BENCHMARKS?.tips ?? [];
+    return tips.length > 0 ? tips[Math.floor(Math.random() * tips.length)] : undefined;
+  });
+  const [tipDismissed, setTipDismissed] = useState(false);
   const base = `/w/${WEDDING_SLUG}`;
   const isActive = useActive(base);
   const dateLine = wedding?.targetDate
@@ -94,6 +102,22 @@ function ShellChrome({ children }: { children: ReactNode }) {
             );
           })}
         </nav>
+        {tip && !tipDismissed && (
+          <div className="mx-3 mb-4 rounded-md border border-rail-line bg-rail-active/40 p-3">
+            <div className="flex items-start justify-between gap-2">
+              <Quote className="size-3.5 shrink-0 text-gold" />
+              <button
+                type="button"
+                onClick={() => setTipDismissed(true)}
+                aria-label="Dismiss"
+                className="rounded-full p-0.5 text-rail-muted transition-colors hover:bg-rail-active"
+              >
+                <X className="size-3 stroke-[1.5]" />
+              </button>
+            </div>
+            <p className="mt-1 text-xs leading-relaxed text-rail-muted">{tip.text}</p>
+          </div>
+        )}
         <div className="flex items-center gap-2 px-4 py-5">
           <button
             type="button"
