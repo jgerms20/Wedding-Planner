@@ -1,4 +1,5 @@
 import { benchmarks } from "./benchmarks";
+import { algarvePortugal } from "./destinations/algarve-portugal";
 import { amalfiCoastItaly } from "./destinations/amalfi-coast-italy";
 import { ashevilleNc } from "./destinations/asheville-nc";
 import { austinTx } from "./destinations/austin-tx";
@@ -19,7 +20,9 @@ import { galvestonTx } from "./destinations/galveston-tx";
 import { gulfShoresOrangeBeachAl } from "./destinations/gulf-shores-orange-beach-al";
 import { highlandsCashiersNc } from "./destinations/highlands-cashiers-nc";
 import { iceland } from "./destinations/iceland";
+import { ibizaSpain } from "./destinations/ibiza-spain";
 import { jamaica } from "./destinations/jamaica";
+import { lakeComoItaly } from "./destinations/lake-como-italy";
 import { maldives } from "./destinations/maldives";
 import { marrakechMorocco } from "./destinations/marrakech-morocco";
 import { memphisTn } from "./destinations/memphis-tn";
@@ -27,10 +30,12 @@ import { mobileAl } from "./destinations/mobile-al";
 import { newOrleans } from "./destinations/new-orleans";
 import { pensacolaFl } from "./destinations/pensacola-fl";
 import { portlandOr } from "./destinations/portland-or";
+import { provenceFrance } from "./destinations/provence-france";
 import { puntaCanaDominicanRepublic } from "./destinations/punta-cana-dominican-republic";
 import { rivieraMayaMexico } from "./destinations/riviera-maya-mexico";
 import { sanAntonioTx } from "./destinations/san-antonio-tx";
 import { santaFeNm } from "./destinations/santa-fe-nm";
+import { santoriniGreece } from "./destinations/santorini-greece";
 import { scottishHighlandsScotland } from "./destinations/scottish-highlands-scotland";
 import { seattleWa } from "./destinations/seattle-wa";
 import { sedonaAz } from "./destinations/sedona-az";
@@ -99,5 +104,10 @@ export const SEED_DESTINATIONS: DestinationSeed[] = [
   iceland,
   marrakechMorocco,
   maldives,
+  lakeComoItaly,
+  santoriniGreece,
+  provenceFrance,
+  algarvePortugal,
+  ibizaSpain,
 ];
 export const SEED_BENCHMARKS: CostBenchmarks | null = benchmarks;
