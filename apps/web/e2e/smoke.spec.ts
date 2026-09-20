@@ -7,7 +7,7 @@ test("first load lands on the pre-seeded Home, and the redesigned pages hold up"
   await page.goto("./");
   await page.waitForURL(/\/w\/our-wedding\/?$/);
   await expect(page.getByText("Joshua & Janel").first()).toBeVisible();
-  await expect(page.getByTestId("home-headline")).toHaveText("Spring 2028");
+  await expect(page.getByTestId("home-headline")).toHaveText("April 15, 2028");
 
   // Plan: phases render as chapter openers, grouped tasks and all.
   await page.getByRole("link", { name: "Plan", exact: true }).click();
