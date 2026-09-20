@@ -313,6 +313,7 @@ export default function DestinationsPage() {
         onEdit={(scenario) => setScenarioDialog({ open: true, scenario })}
         onDuplicate={(s) => void handleDuplicateScenario(s)}
         onNewScenario={() => setScenarioDialog({ open: true })}
+        onViewDetails={(destinationId) => setDetailId(destinationId)}
       />
 
       <DestinationDetailDialog

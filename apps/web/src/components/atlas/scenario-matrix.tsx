@@ -3,9 +3,10 @@
 import { scenarioMath, type Destination, type Scenario } from "@bower/shared";
 import { format, isValid, parseISO } from "date-fns";
 import { Copy, Plus, Printer } from "lucide-react";
-import { useState, type ReactNode } from "react";
+import { useMemo, useState, type ReactNode } from "react";
 import { AccentChip } from "@/components/atlas/chips";
 import { Button } from "@/components/ui/button";
+import { Checkbox } from "@/components/ui/checkbox";
 import { formatMoney } from "@/lib/format";
 import { cn } from "@/lib/utils";
 
@@ -17,6 +18,7 @@ export function ScenarioMatrix({
   onEdit,
   onDuplicate,
   onNewScenario,
+  onViewDetails,
 }: {
   scenarios: Scenario[];
   destinations: Destination[];
@@ -25,11 +27,28 @@ export function ScenarioMatrix({
   onEdit: (scenario: Scenario) => void;
   onDuplicate: (scenario: Scenario) => void;
   onNewScenario: () => void;
+  onViewDetails: (destinationId: string) => void;
 }) {
+  const [showAll, setShowAll] = useState(false);
   const destinationById = new Map(destinations.map((d) => [d.id, d]));
+  const favoritedIds = new Set(destinations.filter((d) => (d.favoritedBy ?? []).length > 0).map((d) => d.id));
+
+  // With up to 50 destinations, comparing every scenario at once is an unusable, unbounded
+  // scroll — default to what the couple is actually comparing (favorited, matching the
+  // Explore/Favorites split), plus anything already pinned or without a destination set, so
+  // nothing the couple cares about silently disappears. "Show all" opts into the full list.
+  const visible = useMemo(
+    () =>
+      showAll
+        ? scenarios
+        : scenarios.filter((s) => s.pinned || !s.destinationId || favoritedIds.has(s.destinationId)),
+    [scenarios, showAll, favoritedIds],
+  );
+  const hiddenCount = scenarios.length - visible.length;
+
   const pinnedSource = scenarios.find((s) => s.pinned);
   // Our plan reads first; the rest follow by total so the comparison is a ladder.
-  const ordered = [...scenarios].sort((a, b) => {
+  const ordered = [...visible].sort((a, b) => {
     if (a.pinned !== b.pinned) return a.pinned ? -1 : 1;
     return scenarioMath(a).totalCost - scenarioMath(b).totalCost;
   });
@@ -56,14 +75,23 @@ export function ScenarioMatrix({
         </div>
       </div>
 
+      {scenarios.length > 0 && (
+        <label className="no-print mt-3 flex w-fit items-center gap-2 text-sm text-ink-soft">
+          <Checkbox checked={showAll} onChange={(e) => setShowAll(e.target.checked)} />
+          Show all destinations{hiddenCount > 0 && !showAll ? ` (${hiddenCount} hidden, not favorited)` : ""}
+        </label>
+      )}
+
       {ordered.length === 0 ? (
-        <p className="mt-5 text-sm text-ink-soft">No scenarios yet. Tell Atlas a place, or add one.</p>
+        <p className="mt-5 text-sm text-ink-soft">
+          {scenarios.length === 0 ? "No scenarios yet. Tell Atlas a place, or add one." : "Nothing favorited yet — heart a destination on Explore, or check “show all” above."}
+        </p>
       ) : (
         <div className="rise rise-2 mt-5 overflow-x-auto rounded-lg border border-line">
           <table className="w-full min-w-[760px] border-collapse text-sm">
             <thead>
               <tr className="border-b border-line bg-paper-deep/60 text-left">
-                <th className="w-40 shrink-0 p-3 align-bottom text-xs font-semibold tracking-wide text-ink-mute uppercase">
+                <th className="sticky left-0 z-10 w-40 shrink-0 border-r border-line bg-paper-deep p-3 align-bottom text-xs font-semibold tracking-wide text-ink-mute uppercase">
                   &nbsp;
                 </th>
                 {ordered.map((s) => (
@@ -102,7 +130,10 @@ export function ScenarioMatrix({
                 values={ordered.map((s) => ({ id: s.id, value: scenarioMath(s).costPerGuest }))}
               />
               <Row label="Guest travel burden" values={ordered.map((s) => formatMoney(scenarioMath(s).guestTravelBurden))} tabular />
-              <NotesRow values={ordered.map((s) => s.notes ?? "—")} />
+              <NotesRow
+                values={ordered.map((s) => ({ destinationId: s.destinationId, hasNotes: Boolean(s.notes) }))}
+                onViewDetails={onViewDetails}
+              />
             </tbody>
           </table>
         </div>
@@ -181,19 +212,30 @@ function formatOne(iso: string): string | undefined {
 }
 
 
-/** How each number was derived. Long by design, so it starts collapsed. */
-function NotesRow({ values }: { values: string[] }) {
-  const [open, setOpen] = useState(false);
+/** How each number was derived. The full prose lives in the detail dialog, not this row. */
+function NotesRow({
+  values,
+  onViewDetails,
+}: {
+  values: { destinationId: string | undefined; hasNotes: boolean }[];
+  onViewDetails: (destinationId: string) => void;
+}) {
   return (
     <tr className="border-b border-line last:border-0">
-      <td className="p-3 align-top text-xs font-semibold tracking-wide text-ink-mute uppercase">
-        <button type="button" onClick={() => setOpen((v) => !v)} className="text-left underline decoration-dotted underline-offset-4">
-          {open ? "Hide how" : "How we got these"}
-        </button>
-      </td>
+      <td className="p-3 align-top text-xs font-semibold tracking-wide text-ink-mute uppercase">How we got these</td>
       {values.map((v, i) => (
-        <td key={i} className={cn("p-3 align-top text-xs leading-relaxed text-ink-soft", !open && "line-clamp-3")}>
-          {v}
+        <td key={i} className="p-3 align-top text-xs">
+          {v.hasNotes && v.destinationId ? (
+            <button
+              type="button"
+              onClick={() => onViewDetails(v.destinationId as string)}
+              className="text-left text-coral underline decoration-dotted underline-offset-4"
+            >
+              Full derivation
+            </button>
+          ) : (
+            <span className="text-ink-mute">—</span>
+          )}
         </td>
       ))}
     </tr>
