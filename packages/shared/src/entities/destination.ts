@@ -31,6 +31,12 @@ export const destinationSchema = z.object({
   /** Attribution shown under `imageUrl`, e.g. "Photo: Jane Doe / Wikimedia Commons". Required
    * whenever `imageUrl` is set. */
   imageCredit: z.string().optional(),
+  /** Real, cited flight time + fare from a specific US origin city — seeded only for the
+   * Caribbean-islands comparison (see `CaribbeanComparisonTable`), not researched for every
+   * destination. */
+  originFlights: z
+    .array(z.object({ origin: z.string(), hours: z.number(), fareEstimate: z.number(), sourceUrl: z.string() }))
+    .optional(),
   createdAt: z.string(),
   updatedAt: z.string(),
 });

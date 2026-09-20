@@ -3,6 +3,7 @@
 import { newId, nowIso, pinScenario, unpinScenario, reestimateBudgetFromScenario, type Destination, type Scenario, type Venue, type VenueStatus } from "@bower/shared";
 import { Plus, RefreshCw } from "lucide-react";
 import { useCallback, useMemo, useState } from "react";
+import { CaribbeanComparisonTable } from "@/components/atlas/caribbean-comparison-table";
 import { DestinationDetailDialog } from "@/components/atlas/destination-detail-dialog";
 import { DestinationExploreCard } from "@/components/atlas/destination-explore-card";
 import { DestinationPostcard } from "@/components/atlas/destination-postcard";
@@ -23,7 +24,7 @@ import { usePriorities } from "@/lib/use-priorities";
 import { useRepoContext } from "@/lib/repo-context";
 import { useEntityList } from "@/lib/use-entity-list";
 
-type DestinationTab = "explore" | "favorites";
+type DestinationTab = "explore" | "favorites" | "caribbean";
 type RegionFilter = "all" | "domestic" | "international";
 
 const REGION_FILTERS: { key: RegionFilter; label: string }[] = [
@@ -84,6 +85,8 @@ export default function DestinationsPage() {
         : favoriteDestinations.filter((d) => isDomesticCountry(d.country) === (region === "domestic")),
     [favoriteDestinations, region],
   );
+
+  const caribbeanDestinations = useMemo(() => orderedDestinations.filter((d) => (d.originFlights ?? []).length > 0), [orderedDestinations]);
 
   const explorePool = useMemo(() => [...destinations].sort((a, b) => a.name.localeCompare(b.name)), [destinations]);
   const exploreDomesticCount = useMemo(() => explorePool.filter((d) => isDomesticCountry(d.country)).length, [explorePool]);
@@ -235,6 +238,7 @@ export default function DestinationsPage() {
               {([
                 { key: "explore", label: "Explore" },
                 { key: "favorites", label: `Favorites${favoriteDestinations.length > 0 ? ` (${favoriteDestinations.length})` : ""}` },
+                { key: "caribbean", label: "Caribbean" },
               ] as const).map((t) => (
                 <button
                   key={t.key}
@@ -247,6 +251,7 @@ export default function DestinationsPage() {
                 </button>
               ))}
             </div>
+            {tab !== "caribbean" && (
             <div className="inline-flex w-fit rounded-full border border-line p-0.5 text-xs">
               {REGION_FILTERS.map((r) => {
                 const count = tab === "explore" ? (r.key === "domestic" ? exploreDomesticCount : r.key === "international" ? exploreInternationalCount : explorePool.length) : r.key === "domestic" ? favoriteDomesticCount : r.key === "international" ? favoriteInternationalCount : favoriteDestinations.length;
@@ -266,6 +271,7 @@ export default function DestinationsPage() {
                 );
               })}
             </div>
+            )}
           </div>
 
           {tab === "explore" ? (
@@ -293,6 +299,12 @@ export default function DestinationsPage() {
                 </div>
               )}
             </div>
+          ) : tab === "caribbean" ? (
+            <CaribbeanComparisonTable
+              destinations={caribbeanDestinations}
+              scenarioByDestination={scenarioByDestination}
+              onViewDetails={(destinationId) => setDetailId(destinationId)}
+            />
           ) : favoriteDestinations.length === 0 ? (
             <p className="mt-6 rounded-lg border border-dashed border-line-strong p-4 text-sm text-ink-soft">
               Heart a destination on Explore and it&apos;ll show up here, ready to rank and compare.

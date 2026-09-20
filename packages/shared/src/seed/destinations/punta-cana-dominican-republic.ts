@@ -24,6 +24,32 @@ export const puntaCanaDominicanRepublic: DestinationSeed = {
   flightCostEstimate: 350,
   lodgingPerNightEstimate: 300,
   attendanceRateEstimate: 0.68,
+  originFlights: [
+    {
+      origin: "Atlanta",
+      hours: 3.5,
+      fareEstimate: 738,
+      sourceUrl: "https://www.booking.com/flights/route/city-to-city/us-atlanta-to-do-punta-cana.html",
+    },
+    {
+      origin: "Charlotte",
+      hours: 3.6,
+      fareEstimate: 584,
+      sourceUrl: "https://www.farecompare.com/flights/Charlotte-CLT/Punta_Cana-PUJ/market.html",
+    },
+    {
+      origin: "Baltimore",
+      hours: 3.9,
+      fareEstimate: 593,
+      sourceUrl: "https://www.farecompare.com/flights/Baltimore-BWI/Punta_Cana-PUJ/market.html",
+    },
+    {
+      origin: "Los Angeles",
+      hours: 8.8,
+      fareEstimate: 680,
+      sourceUrl: "https://www.rome2rio.com/s/Los-Angeles-Airport-LAX/Punta-Cana-Airport-PUJ",
+    },
+  ],
   weatherNotes:
     "March is toward the end of Punta Cana's dry season: warm and breezy (highs ~81°F/27°C, lows ~76°F/24°C) with light rainfall (about 55mm across just 4 rainy days) and warm sea temperatures (~79°F/26°C). April holds similar temperatures (highs ~82°F/28°C) and is the final month of the dry season, though rain and humidity begin to build noticeably toward the end of the month. May is one of the wetter months as the rainy season (May-November) begins, with temperatures climbing to ~84°F/29°C highs. March and April are the more reliable window for a dry outdoor ceremony (holiday-weather.com; punta-cana.info; weather-and-climate.com).",
   legalNotes:

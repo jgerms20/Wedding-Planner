@@ -24,6 +24,27 @@ export const jamaica: DestinationSeed = {
   flightCostEstimate: 360,
   lodgingPerNightEstimate: 250,
   attendanceRateEstimate: 0.65,
+  originFlights: [
+    {
+      origin: "Atlanta",
+      hours: 2.9,
+      fareEstimate: 483,
+      sourceUrl: "https://www.farecompare.com/flights/Montego_Bay-MBJ/Atlanta-ATL/market.html",
+    },
+    {
+      origin: "Charlotte",
+      hours: 3.1,
+      fareEstimate: 431,
+      sourceUrl: "https://www.farecompare.com/flights/Charlotte-CLT/Montego_Bay-MBJ/market.html",
+    },
+    {
+      origin: "Baltimore",
+      hours: 3.6,
+      fareEstimate: 567,
+      sourceUrl: "https://www.kayak.com/flight-routes/Baltimore-Washington-BWI/Montego-Bay-Sangster-Intl-MBJ",
+    },
+    { origin: "Los Angeles", hours: 7.4, fareEstimate: 502, sourceUrl: "https://www.momondo.com/flights/los-angeles/montego-bay" },
+  ],
   weatherNotes:
     "Jamaica's dry season runs roughly November-April, with March one of the driest months (brief showers only) but also windier, which can chop up the water on north-coast resorts like Montego Bay (101holidays.co.uk; cruisecritic.com). April is the tail end of the dry season; May is one of the wettest months of the year as the wet/hurricane season begins to build. Atlantic hurricane season officially starts June 1, so a March-through-April wedding date sits safely ahead of it, while a May date starts to carry rising rain risk (101holidays.co.uk).",
   legalNotes:

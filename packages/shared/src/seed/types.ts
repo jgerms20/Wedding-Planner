@@ -48,6 +48,9 @@ export interface DestinationSeed {
    * Both or neither — a photo without attribution isn't usable. */
   imageUrl?: string;
   imageCredit?: string;
+  /** Real, cited flight time + fare from a specific US origin city — only populated for the
+   * five Caribbean-island finalists that feed the Caribbean comparison tab. */
+  originFlights?: { origin: string; hours: number; fareEstimate: number; sourceUrl: string }[];
   /** Round-trip airfare from major US hubs plus three nights of lodging, per guest. */
   travelCostPerGuestEstimate: number;
   /** The airfare portion of travelCostPerGuestEstimate, as cited in travelNotes' "Travel-cost math". */

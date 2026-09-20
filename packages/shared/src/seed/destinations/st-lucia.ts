@@ -29,6 +29,27 @@ export const stLucia: DestinationSeed = {
   flightCostEstimate: 450,
   lodgingPerNightEstimate: 300,
   attendanceRateEstimate: 0.62,
+  originFlights: [
+    {
+      origin: "Atlanta",
+      hours: 4.4,
+      fareEstimate: 698,
+      sourceUrl: "https://www.booking.com/flights/route/city-to-country/us-atlanta-to-lc.html",
+    },
+    {
+      origin: "Charlotte",
+      hours: 4.7,
+      fareEstimate: 600,
+      sourceUrl: "https://www.rome2rio.com/s/Charlotte-Airport-CLT/St-Lucia-Hewanorra-Airport-UVF",
+    },
+    { origin: "Baltimore", hours: 7.5, fareEstimate: 700, sourceUrl: "https://www.rome2rio.com/s/Baltimore/Saint-Lucia" },
+    {
+      origin: "Los Angeles",
+      hours: 10.1,
+      fareEstimate: 700,
+      sourceUrl: "https://www.rome2rio.com/s/Los-Angeles-Airport-LAX/St-Lucia-Hewanorra-Airport-UVF",
+    },
+  ],
   weatherNotes:
     "St. Lucia's cool, dry season runs January through mid-April, and March-April are prime: highs around 86-88°F, lows near 73-77°F, low humidity and only ~50-55mm of rain a month (eastwinds.com; thingstodoinsaintlucia.com). May is a genuine transition month — afternoon showers start returning as the wet season approaches, though it hasn't fully arrived — so early-to-mid May still offers good odds while late May starts to trend wetter (eastwinds.com).",
   legalNotes:

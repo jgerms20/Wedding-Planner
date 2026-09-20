@@ -173,6 +173,7 @@ export function buildDestinationFromSeed(
     sourceUrls: seed.sourceUrls,
     imageUrl: seed.imageUrl,
     imageCredit: seed.imageCredit,
+    originFlights: seed.originFlights,
     sortOrder: options.sortOrder,
     createdAt: now,
     updatedAt: now,

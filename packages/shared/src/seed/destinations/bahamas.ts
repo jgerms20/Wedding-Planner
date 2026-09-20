@@ -24,6 +24,17 @@ export const bahamas: DestinationSeed = {
   flightCostEstimate: 350,
   lodgingPerNightEstimate: 300,
   attendanceRateEstimate: 0.7,
+  originFlights: [
+    { origin: "Atlanta", hours: 2.3, fareEstimate: 574, sourceUrl: "https://www.farecompare.com/flights/Atlanta-ATL/Nassau-NAS/market.html" },
+    { origin: "Charlotte", hours: 2.2, fareEstimate: 553, sourceUrl: "https://www.farecompare.com/flights/Charlotte-CLT/Nassau-NAS/market.html" },
+    {
+      origin: "Baltimore",
+      hours: 2.8,
+      fareEstimate: 493,
+      sourceUrl: "https://www.farecompare.com/flights/Baltimore-BWI/Nassau-NAS/market.html",
+    },
+    { origin: "Los Angeles", hours: 7.2, fareEstimate: 462, sourceUrl: "https://www.momondo.com/flights/los-angeles/nassau" },
+  ],
   weatherNotes:
     "The Bahamas' dry season runs December-May, and March-April sit right in the sweet spot: warm (mid-70s to low-80s°F), sunny, calm and essentially hurricane-free. May marks the start of the transition toward the wet season, with rising humidity and rainfall as the calendar approaches June (villapads.com; nassauparadiseisland.com). Atlantic hurricane season officially runs June-November, so any date in the March-May window is safely ahead of it.",
   legalNotes:

@@ -30,6 +30,32 @@ export const turksAndCaicos: DestinationSeed = {
   flightCostEstimate: 400,
   lodgingPerNightEstimate: 450,
   attendanceRateEstimate: 0.63,
+  originFlights: [
+    {
+      origin: "Atlanta",
+      hours: 2.9,
+      fareEstimate: 924,
+      sourceUrl: "https://www.farecompare.com/flights/Atlanta-ATL/Providenciales-PLS/market.html",
+    },
+    {
+      origin: "Charlotte",
+      hours: 3.0,
+      fareEstimate: 625,
+      sourceUrl: "https://www.kayak.com/flight-routes/Charlotte-Douglas-CLT/Providenciales-PLS",
+    },
+    {
+      origin: "Baltimore",
+      hours: 6.6,
+      fareEstimate: 490,
+      sourceUrl: "https://www.rome2rio.com/s/Baltimore-Airport-BWI/Providenciales-Airport-PLS",
+    },
+    {
+      origin: "Los Angeles",
+      hours: 7.7,
+      fareEstimate: 740,
+      sourceUrl: "https://www.rome2rio.com/s/Los-Angeles-Airport-LAX/Providenciales-Airport-PLS",
+    },
+  ],
   weatherNotes:
     "The dry season runs January through April, with March (~82°F, minimal rain) and April (~84°F, one of the driest months, ~1.3 rainy days) the strongest weather bets. May is noticeably wetter (~5.8 rainy days, average 81°F) as the transition toward wet season begins, though rainfall stays light overall (~1.7 inches across ~13 short showers) and many guides still call late April-May the best-kept-secret shoulder window: thinner crowds, lower rates, still-excellent weather (bigbluecollective.com; whitevillas.net).",
   legalNotes:
