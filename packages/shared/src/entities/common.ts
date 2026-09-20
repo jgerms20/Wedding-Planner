@@ -78,6 +78,8 @@ export const subEventKindSchema = z.enum([
   "brunch",
   "second_reception",
   "sangeet",
+  "henna_night",
+  "tea_ceremony",
   "honeymoon",
   "other",
 ]);

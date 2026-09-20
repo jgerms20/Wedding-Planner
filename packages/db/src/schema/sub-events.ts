@@ -1,4 +1,4 @@
-import { date, numeric, pgTable, text, uuid } from "drizzle-orm/pg-core";
+import { date, integer, numeric, pgTable, text, uuid } from "drizzle-orm/pg-core";
 import { weddings } from "./weddings";
 
 export const subEventKindValues = [
@@ -8,9 +8,16 @@ export const subEventKindValues = [
   "groom_shower",
   "bachelor",
   "bachelorette",
+  "joint_bachelor_bachelorette",
+  "premarital_counseling",
   "rehearsal_dinner",
   "welcome_party",
+  "after_party",
   "brunch",
+  "second_reception",
+  "sangeet",
+  "henna_night",
+  "tea_ceremony",
   "honeymoon",
   "other",
 ] as const;
@@ -29,6 +36,7 @@ export const subEvents = pgTable("sub_events", {
   budgetEstimate: numeric("budget_estimate"),
   notes: text("notes"),
   guestRule: text("guest_rule"),
+  sortOrder: integer("sort_order"),
 });
 
 export type SubEvent = typeof subEvents.$inferSelect;

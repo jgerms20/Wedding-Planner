@@ -12,6 +12,9 @@ export const subEventSchema = z.object({
   budgetEstimate: z.number().optional(),
   notes: z.string().optional(),
   guestRule: z.string().optional(),
+  /** Manual rank, lowest first — the couple's own order. Optional so events added before this
+   * field existed still read back fine. */
+  sortOrder: z.number().optional(),
 });
 export type SubEvent = z.infer<typeof subEventSchema>;
 
