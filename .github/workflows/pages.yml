@@ -1,4 +1,4 @@
-name: Deploy web (local mode) to GitHub Pages
+name: Deploy web to GitHub Pages
 
 on:
   push:
@@ -56,10 +56,17 @@ jobs:
       - name: Install dependencies
         run: pnpm install --frozen-lockfile
 
-      - name: Build static export (local data mode)
+      # Shared mode (both partners, one wedding) turns on once the repo has the Supabase project's
+      # URL and publishable key as Actions *variables* (Settings -> Secrets and variables ->
+      # Actions -> Variables): SUPABASE_URL and SUPABASE_ANON_KEY. Both are public by design — they
+      # ship in the page bundle, and row-level security decides access. Without them the site
+      # builds in local (this-browser-only) mode, exactly as before.
+      - name: Build static export
         run: pnpm --filter @bower/web build
         env:
-          NEXT_PUBLIC_DATA_MODE: local
+          NEXT_PUBLIC_DATA_MODE: ${{ vars.SUPABASE_URL != '' && vars.SUPABASE_ANON_KEY != '' && 'supabase' || 'local' }}
+          NEXT_PUBLIC_SUPABASE_URL: ${{ vars.SUPABASE_URL }}
+          NEXT_PUBLIC_SUPABASE_ANON_KEY: ${{ vars.SUPABASE_ANON_KEY }}
           NEXT_PUBLIC_BASE_PATH: /Wedding-Planner
 
       # Without this, GitHub Pages' default Jekyll processing ignores any

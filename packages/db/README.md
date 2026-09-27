@@ -113,3 +113,21 @@ service-role connection (which bypasses RLS), consistent with
 - `DATABASE_URL` — required by `migrate`, `seed`, and the RLS test suite.
 - `LOCAL_PG_*` — optional overrides for `scripts/local-pg.sh` (see its
   header comment).
+
+## Turning on shared mode (Supabase)
+
+Shared mode lets both partners sign in and see one wedding, live. The browser talks to Supabase
+directly; row-level security (`is_wedding_member`) is what guards the data, so only the project's
+public URL and publishable key ever ship in the site.
+
+1. Create a Supabase project. In **SQL Editor**, run `migrations/0000_foundation.sql`, then
+   `migrations/0001_shared_docs.sql` (both are safe to re-run). This keeps the database password out
+   of any chat or CI log.
+2. **Authentication → URL Configuration**: set the Site URL to the deployed site
+   (e.g. `https://<user>.github.io/Wedding-Planner/`) and add it, with `/**`, to Redirect URLs, plus
+   `http://localhost:3000/**` for local testing.
+3. In the GitHub repo, **Settings → Secrets and variables → Actions → Variables**, add
+   `SUPABASE_URL` (Project URL) and `SUPABASE_ANON_KEY` (publishable/anon key). The Pages workflow
+   builds in shared mode whenever both are set, and in local mode otherwise.
+
+Locally: `NEXT_PUBLIC_DATA_MODE=supabase NEXT_PUBLIC_SUPABASE_URL=… NEXT_PUBLIC_SUPABASE_ANON_KEY=… pnpm dev`.
