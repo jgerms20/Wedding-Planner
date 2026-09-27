@@ -146,6 +146,8 @@ export interface ParsedGuest {
   flags: string[];
   /** The line it came from, shown in review so nothing is silently reinterpreted. */
   source: string;
+  /** The list didn't say a tier, so `tier` is a placeholder for the couple to pick. */
+  tierGuessed?: boolean;
 }
 
 const RELATIONSHIP_PREFIX = /^(aunt|uncle|cousin|grandma|grandpa|grandmother|grandfather|godmother|godfather)\s+/i;
@@ -174,12 +176,20 @@ function splitName(raw: string): { firstName: string; lastName?: string } {
  */
 export function parseGuestList(text: string, options: { side: Side; tier?: Tier }): ParsedGuest[] {
   const rows: ParsedGuest[] = [];
+  // "Tier 2:" / "Tier 2 — close friends" headings set the tier for the lines under them.
+  let sectionTier: Tier | undefined;
   for (const rawLine of text.split(/\r?\n/)) {
     let line = rawLine
       .replace(/\*\*|__|`/g, "")
       .replace(/^\s*(?:[-*•·]+|\d+\s*[.)])\s*/, "")
       .trim();
     if (!line) continue;
+    const tierHeading = /^tier\s*([1-5])\b(?:\s*(?:[:—–-].*)?)?$/i.exec(line);
+    if (tierHeading) {
+      sectionTier = Number(tierHeading[1]) as Tier;
+      continue;
+    }
+    const statedTier = options.tier ?? sectionTier;
     // Section headers ("My friends", "Family / family friends:"), not names.
     if (/:$/.test(line)) continue;
     if (/^(family|friends|my friends|family\s*\/\s*family friends|guests?|guest list)$/i.test(line)) continue;
@@ -194,11 +204,12 @@ export function parseGuestList(text: string, options: { side: Side; tier?: Tier 
         firstName: line.replace(/\s*[—–-]\s*.*$/, "").replace(/^all (the )?/i, "").replace(/^\w/, (c) => c.toUpperCase()),
         notes: "Group — individual names to come",
         side: options.side,
-        tier: options.tier ?? DEFAULT_TIER,
+        tier: statedTier ?? DEFAULT_TIER,
         plusOne: false,
         tags: [GROUP_TAG],
         flags: ["group"],
         source,
+        tierGuessed: statedTier === undefined,
       });
       continue;
     }
@@ -267,7 +278,7 @@ export function parseGuestList(text: string, options: { side: Side; tier?: Tier 
     const hedged = personHedges.length > 0 || nameHedged || (/\(\s*\?\s*\)/.test(rawLine) && notes.every((n) => n === "?"));
     if (hedged) flags.push("maybe");
     if (UNCLEAR.test(noteText) || /same person/i.test(noteText)) flags.push("check spelling");
-    const tier: Tier = options.tier ?? (hedged ? 4 : DEFAULT_TIER);
+    const tier: Tier = statedTier ?? (hedged ? 4 : DEFAULT_TIER);
 
     // "Lauren + Ben", "Mr. Clint + Ms. Tasna", "Jonny & Viv": two people.
     const names = line
@@ -299,6 +310,7 @@ export function parseGuestList(text: string, options: { side: Side; tier?: Tier 
         tags: flags.includes("check spelling") ? [CHECK_SPELLING_TAG] : [],
         flags: [...flags],
         source,
+        tierGuessed: statedTier === undefined,
       });
     });
   }

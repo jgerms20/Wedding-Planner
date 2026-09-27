@@ -13,11 +13,11 @@ describe("tidyGuestList", () => {
         {
           parsed: {
             rows: [
-              { firstName: "lauren", relationship: "cousin", side: "b", tier: "2", plusOne: false, flags: [], source: "cousin lauren and her husband ben" },
-              { firstName: "Ben", relationship: "Lauren's husband", side: "b", tier: "2", plusOne: false, flags: [], source: "cousin lauren and her husband ben" },
-              { firstName: "April", side: "b", tier: "1", plusOne: true, plusOneCount: 3, flags: [], source: "April plus her 3 kids" },
-              { firstName: "Audis group chat", side: "b", tier: "4", plusOne: false, flags: ["Group"], source: "the audis group chat" },
-              { firstName: "  ", side: "b", tier: "3", plusOne: false, flags: [], source: "" },
+              { firstName: "lauren", relationship: "cousin", side: "b", tier: "2", tierStated: true, plusOne: false, flags: [], source: "cousin lauren and her husband ben" },
+              { firstName: "Ben", relationship: "Lauren's husband", side: "b", tier: "2", tierStated: true, plusOne: false, flags: [], source: "cousin lauren and her husband ben" },
+              { firstName: "April", side: "b", tier: "1", tierStated: true, plusOne: true, plusOneCount: 3, flags: [], source: "April plus her 3 kids" },
+              { firstName: "Audis group chat", side: "b", tier: "3", tierStated: false, plusOne: false, flags: ["Group"], source: "the audis group chat" },
+              { firstName: "  ", side: "b", tier: "3", tierStated: false, plusOne: false, flags: [], source: "" },
             ],
           },
         },
@@ -30,6 +30,8 @@ describe("tidyGuestList", () => {
     expect(rows[0]).toMatchObject({ tier: 2, side: "b", relationship: "cousin" });
     expect(rows[2]).toMatchObject({ plusOne: true, plusOneCount: 3 });
     expect(rows[3]!.tags).toEqual(["group"]);
+    // The couple picks tiers: a tier the list never stated comes back marked as a placeholder.
+    expect(rows.map((r) => r.tierGuessed)).toEqual([false, false, false, true]);
 
     const call = port.parseCalls[0]!;
     expect(call.model).toBe("claude-sonnet-5");

@@ -71,6 +71,21 @@ describe("parseGuestList — the shorthand from the couple's own pasted lists", 
     );
     expect(rows.map((r) => r.firstName)).toEqual(["Mom"]);
   });
+
+  it(`takes tiers from "Tier N" headings and marks every other tier as a placeholder`, () => {
+    const rows = parse(["Tier 1:", "Mom", "Tier 2 — close friends", "Lauren + Ben", "", "Kayleigh"].join("\n"));
+    const byName = Object.fromEntries(rows.map((r) => [r.firstName, r]));
+    expect(byName.Mom).toMatchObject({ tier: 1, tierGuessed: false });
+    expect(byName.Ben).toMatchObject({ tier: 2, tierGuessed: false });
+    // A heading carries on until the next one: the list said "Tier 2" above Kayleigh too.
+    expect(byName.Kayleigh).toMatchObject({ tier: 2, tierGuessed: false });
+
+    const plain = parse("Mom\nTaraji — maybe");
+    expect(plain.map((r) => [r.tier, r.tierGuessed])).toEqual([
+      [3, true],
+      [4, true],
+    ]);
+  });
 });
 
 function guest(partial: Partial<Guest> & Pick<Guest, "firstName">): Guest {

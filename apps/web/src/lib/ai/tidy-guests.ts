@@ -17,7 +17,7 @@ Rules:
 - A group that isn't individual people yet ("the Faithful Black Audis chat", "Dad's golf guys") is one row: the group's name as firstName, and the flag "group".
 - firstName and lastName exactly as written, fixing only capitalization. If a spelling looks uncertain (the writer says so, or it's written two ways), keep what they wrote and flag "check spelling"; put the alternative in notes.
 - relationship is how they know the couple, when the list says ("cousin", "Mom's friend", "college roommate"). Anything else worth keeping goes in notes.
-- tier is "1" (can't get married without them) to "5" (only if there's room). Use the list's own numbering or grouping if it has one; "must" is "1", "maybe"/"if there's room" is "4" or "5"; otherwise use the default tier you are given.
+- tier is "1" (can't get married without them) to "5" (only if there's room). Use the list's own tiers or priority grouping if it has one ("Tier 2:" headings, "must", "if there's room"), and set tierStated true. If the list doesn't say, use the default tier you are given (or "4" for someone the writer hedges on) and set tierStated false: the couple picks tiers themselves, so never present a guess as their decision.
 - side is "a", "b" or "both". Use the default side you are given unless the list clearly says otherwise for that person.
 - flags: "maybe" when the writer hedges about inviting this person, "check spelling", "group", "same person?" when a line might repeat someone already on this list. Otherwise empty.
 - source is the exact line the row came from.
@@ -32,6 +32,7 @@ const tidyRowSchema = z.object({
   notes: z.string().optional(),
   side: sideSchema,
   tier: z.enum(["1", "2", "3", "4", "5"]),
+  tierStated: z.boolean(),
   plusOne: z.boolean(),
   plusOneCount: z.number().int().optional(),
   flags: z.array(z.string()),
@@ -97,6 +98,7 @@ export async function tidyGuestList(input: TidyGuestsInput): Promise<TidyGuestsR
         tags: flags.filter((f) => f === GROUP_TAG || f === CHECK_SPELLING_TAG),
         flags,
         source: row.source.trim(),
+        tierGuessed: !row.tierStated,
       };
     });
   return { rows, usage: result.usage };

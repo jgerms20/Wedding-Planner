@@ -120,6 +120,8 @@ export function BulkAddDialog({
 
   const update = (key: string, patch: Partial<ReviewRow>) => setRows((rs) => rs?.map((r) => (r.key === key ? { ...r, ...patch } : r)) ?? null);
   const chosen = rows?.filter((r) => r.include && r.firstName.trim()) ?? [];
+  const guessedTiers = rows?.filter((r) => r.include && r.tierGuessed).length ?? 0;
+  const setGuessedTiers = (tier: Tier) => setRows((rs) => rs?.map((r) => (r.tierGuessed ? { ...r, tier, tierGuessed: false } : r)) ?? null);
 
   async function add() {
     setBusy(true);
@@ -215,6 +217,26 @@ export function BulkAddDialog({
               {error ?? "Claude reworked this list. Check anything flagged, and the line each row came from, before adding."}
             </p>
           )}
+          {guessedTiers > 0 && (
+            <div className="flex flex-wrap items-center gap-x-3 gap-y-2 border-b border-line bg-gold-soft/40 px-4 py-2.5 text-xs text-ink-soft">
+              <span>
+                {guessedTiers === 1 ? "1 name didn't" : `${guessedTiers} names didn't`} come with a tier, so {guessedTiers === 1 ? "it's" : "they're"} highlighted
+                below with a placeholder. Pick one per row, or set them all:
+              </span>
+              <span className="flex gap-1" role="group" aria-label="Set every highlighted tier">
+                {TIERS.map((t) => (
+                  <button
+                    key={t}
+                    type="button"
+                    onClick={() => setGuessedTiers(t)}
+                    className="tabular rounded-full border border-line-strong bg-card px-2.5 py-0.5 text-ink hover:border-coral hover:text-coral"
+                  >
+                    {t}
+                  </button>
+                ))}
+              </span>
+            </div>
+          )}
           <table className="w-full min-w-[720px] border-collapse text-sm">
             <thead className="sticky top-0 bg-card">
               <tr className="border-b border-line text-left text-[0.65rem] font-semibold tracking-[0.14em] text-ink-mute uppercase">
@@ -274,8 +296,13 @@ export function BulkAddDialog({
                   <td className="p-2">
                     <select
                       value={row.tier}
-                      onChange={(e) => update(row.key, { tier: Number(e.target.value) as Tier })}
-                      className="tabular rounded-md border border-transparent bg-transparent px-1 py-1 outline-none hover:border-line-strong"
+                      onChange={(e) => update(row.key, { tier: Number(e.target.value) as Tier, tierGuessed: false })}
+                      title={row.tierGuessed ? "The list didn't say — pick a tier" : undefined}
+                      aria-label={row.tierGuessed ? `Tier for ${row.firstName} (not picked yet)` : `Tier for ${row.firstName}`}
+                      className={cn(
+                        "tabular rounded-md border px-1 py-1 outline-none hover:border-line-strong",
+                        row.tierGuessed ? "border-dashed border-gold bg-gold-soft/60" : "border-transparent bg-transparent",
+                      )}
                     >
                       {TIERS.map((t) => (
                         <option key={t} value={t}>
