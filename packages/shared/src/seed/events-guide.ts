@@ -208,6 +208,22 @@ export const PARTY_IDEAS: Record<PartyKind, PartyIdea[]> = {
       description: "Line up two to four craft breweries for flights or a guided tour, with a designated driver or party bus. An easy, cheaper option close to home.",
       sourceUrl: "https://www.zola.com/expert-advice/bachelor-party-ideas",
     },
+    {
+      title: "New Orleans weekend",
+      description: "Oysters at Acme Oyster House (there's a 15-dozen challenge), betting on the horses at the historic Fair Grounds Race Course, and bowling with live music at Rock 'n' Bowl. New Orleans is also on your shortlist, so it can double as a scouting trip.",
+      sourceUrl: "https://www.neworleans.com/weddings/pre-post-wedding-events/bachelor-parties/",
+    },
+    {
+      title: "Kentucky Bourbon Trail",
+      description: "Base in Louisville and hire a driver or a full-service guide to take the group between distilleries, with Bardstown as the heart of it. Nobody has to drive, and the guide handles the reservations.",
+      roughCostPerPerson: "$250-400 a day for a full-service guided tour",
+      sourceUrl: "https://mybourbontrailplan.com/bourbon-trail-bachelor-party-guide.html",
+    },
+    {
+      title: "Atlanta: Topgolf, barbecue and a speakeasy",
+      description: "An afternoon at Topgolf, dinner at Fox Bros Bar-B-Q, then the Red Phone Booth speakeasy (you walk in through a red phone booth). A short drive or flight for most of your list.",
+      sourceUrl: "https://www.theknot.com/content/atlanta-bachelor-party",
+    },
   ],
   bachelorette: [
     {
@@ -264,6 +280,17 @@ export const PARTY_IDEAS: Record<PartyKind, PartyIdea[]> = {
       description: "Hire an instructor for a hip-hop, heels or salsa class, then take over a karaoke room. Karaoke usually costs less and is less crowded than a club.",
       sourceUrl: "https://www.zola.com/expert-advice/affordable-bachelorette-party-ideas",
     },
+    {
+      title: "Charleston harbor boat weekend",
+      description: "A private party boat or harbor cruise, brunch, and King Street at night. Lodging runs about $150-400+ each for the weekend and a private boat about $450-800+ for the whole group; leave room for Charleston's 2% hospitality tax and 15-20% tips for the captain.",
+      sourceUrl: "https://www.badgirlsyoga.com/blog/charleston-bachelorette-party-cost",
+    },
+    {
+      title: "Tulum villa and cenote weekend",
+      description: "Split a private villa, swim in the cenotes, and book a beach club or private chef. A private cenote party for about 15 people costs $1,800-3,500 for the group.",
+      roughCostPerPerson: "$600-1,200 all-in for 4 nights",
+      sourceUrl: "https://www.thebeachplanner.com/tulum-bachelorette-itinerary/",
+    },
   ],
   joint_bachelor_bachelorette: [
     {
@@ -290,6 +317,23 @@ export const PARTY_IDEAS: Record<PartyKind, PartyIdea[]> = {
       title: "Team scavenger hunt and lawn-game Olympics",
       description: "Split into mixed teams for a city scavenger hunt, then giant Jenga with couple trivia, darts and pickup basketball. This one costs very little.",
       sourceUrl: "https://www.zola.com/expert-advice/joint-bachelor-bachelorette-party-games",
+    },
+    {
+      title: "Cartagena, Colombia group trip",
+      description: "A colonial house in the old walled city with a pool, a boat day to the Rosario Islands, and nights out. Package prices rise in high season (late March to mid April, June to July, and the holidays). Cartagena is also in your atlas.",
+      roughCostPerPerson: "From $709 for 4 days / 3 nights",
+      sourceUrl: "https://primecartagena.com/packages/cartagena-bachelor-bachelorette-party-packages/",
+    },
+    {
+      title: "Short Bahamas cruise",
+      description: "A 4-night Royal Caribbean sailing to Nassau and the line's private island, where meals and entertainment are included. One real trip came to $1,168 each, including an interior cabin, flights, a hotel the night before and onboard extras.",
+      roughCostPerPerson: "About $1,170 all-in for 4 nights",
+      sourceUrl: "https://www.royalcaribbeanblog.com/2025/09/27/bahamas-cruise-royal-caribbean-4-night-what-it-costs",
+    },
+    {
+      title: "New Orleans festival weekend",
+      description: "Time a co-ed weekend to a festival: French Quarter Fest (mid April, free) or Jazz Fest (late April to early May, at the Fair Grounds). Everyone can join for the whole weekend or just a day.",
+      sourceUrl: "https://www.neworleans.com/weddings/pre-post-wedding-events/joint-bachelor-bachelorette-parties/",
     },
   ],
 };

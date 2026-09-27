@@ -28,6 +28,22 @@ export const SUB_EVENT_LABELS: Record<SubEventKind, string> = {
   group_excursion: "Group excursion",
   day_after_pool_party: "Day-after pool party",
   farewell_dinner: "Farewell dinner",
+  barbershop_day: "Barbershop day",
+  glam_morning: "Glam morning",
+  families_meet: "Families meet",
+  knocking_ceremony: "Knocking ceremony",
+  traditional_engagement: "Traditional engagement",
+  lobola_negotiation: "Lobola",
+  kitchen_party: "Kitchen party",
+  haldi: "Haldi",
+  baraat: "Baraat",
+  door_games: "Door games",
+  paebaek: "Paebaek",
+  aufruf: "Aufruf",
+  polterabend: "Polterabend",
+  callejoneada: "Callejoneada",
+  second_line: "Second line",
+  jumping_the_broom: "Jumping the broom",
   honeymoon: "Honeymoon",
   other: "Something else",
 };
@@ -60,13 +76,29 @@ export const SUB_EVENT_DESCRIPTIONS: Record<SubEventKind, string> = {
   group_excursion: "An organized outing for guests during a destination wedding weekend, such as a catamaran cruise or island tour.",
   day_after_pool_party: "A relaxed pool or beach hangout for guests the day after the wedding, common at destination and resort weddings.",
   farewell_dinner: "A last group dinner for guests still in town after the wedding, before everyone heads home.",
+  barbershop_day: "The groom and his guys get fresh cuts and shaves together at a barbershop, usually the day before or the morning of. Low-key time together, and everyone looks sharp in the photos.",
+  glam_morning: "Hair and makeup with the wedding party the morning of, often with mimosas and the photographer catching the getting-ready moments.",
+  families_meet: "The first time both families sit down together, often a dinner hosted by the couple or one set of parents early in the engagement.",
+  knocking_ceremony: "Ghanaian kɔkɔɔkɔ (knocking): the groom's family formally visits the bride's family with drinks and gifts to ask for her hand. It opens the way to the traditional engagement.",
+  traditional_engagement: "A West African traditional wedding (Nigerian, Ghanaian and others): the families meet in cultural attire, the bride's family presents a list of customary gifts, and there's music, food and dancing. Often a separate day from the church or civil wedding.",
+  lobola_negotiation: "Southern African lobola (bride wealth) talks: representatives of the two families meet to agree it, traditionally counted in cattle and now often money, then celebrate together.",
+  kitchen_party: "A women's celebration before the wedding in East and Southern Africa (Zambia, Mozambique, Tanzania and others): guests bring kitchen gifts, share marriage advice, and dance.",
+  haldi: "A Hindu pre-wedding ritual where family members apply turmeric paste to the couple as a blessing, usually the morning before the wedding or a day or two earlier.",
+  baraat: "The groom's procession to the ceremony in North Indian weddings, with a dhol drummer and dancing guests, sometimes with the groom on a horse or in a vintage car.",
+  door_games: "A Chinese wedding-morning tradition (called gatecrashing in Singapore and Malaysia): the groom and groomsmen complete challenges set by the bridesmaids before they're let in to collect the bride.",
+  paebaek: "A Korean ceremony after the wedding: the couple bows to the groom's family (now often both families), who toss dates and chestnuts for the couple to catch, a blessing for children.",
+  aufruf: "A Jewish tradition: the groom, or the couple, is called up to the Torah at synagogue on the Shabbat before the wedding, often followed by a kiddush lunch.",
+  polterabend: "A German pre-wedding party where guests smash porcelain for luck and the couple sweeps it up together, a first lesson in teamwork.",
+  callejoneada: "A Mexican street procession after the ceremony: guests follow a band or mariachis through town, often with giant mojiganga puppets. Best known in San Miguel de Allende and Oaxaca.",
+  second_line: "A New Orleans brass-band parade through the streets, guests waving handkerchiefs and parasols, usually right after the ceremony. It needs a city parade permit.",
+  jumping_the_broom: "An African American tradition with roots in slavery, when enslaved people's marriages weren't legally recognized: the couple jumps a broom at the end of the ceremony. Plan who makes or decorates the broom and who explains what it means.",
   honeymoon: "The trip after the wedding — worth tracking here for its own dates and budget.",
   other: "Anything else worth its own date, host, and budget line.",
 };
 
 /** Broader grouping for the Consider grid, so it reads as sections instead of one flat list of
  * granular kinds (e.g. "premarital counseling" alone reading oddly next to "honeymoon"). */
-export type SubEventCategory = "relationship" | "pre_wedding" | "wedding_weekend" | "post_wedding";
+export type SubEventCategory = "relationship" | "pre_wedding" | "traditions" | "wedding_weekend" | "post_wedding";
 
 export const SUB_EVENT_CATEGORY: Record<SubEventKind, SubEventCategory> = {
   premarital_counseling: "relationship",
@@ -77,9 +109,9 @@ export const SUB_EVENT_CATEGORY: Record<SubEventKind, SubEventCategory> = {
   bachelor: "pre_wedding",
   bachelorette: "pre_wedding",
   joint_bachelor_bachelorette: "pre_wedding",
-  henna_night: "pre_wedding",
-  tea_ceremony: "pre_wedding",
-  sangeet: "pre_wedding",
+  henna_night: "traditions",
+  tea_ceremony: "traditions",
+  sangeet: "traditions",
   engagement_photoshoot: "relationship",
   bridal_party_proposal: "pre_wedding",
   tasting: "pre_wedding",
@@ -90,6 +122,22 @@ export const SUB_EVENT_CATEGORY: Record<SubEventKind, SubEventCategory> = {
   group_excursion: "wedding_weekend",
   day_after_pool_party: "post_wedding",
   farewell_dinner: "post_wedding",
+  barbershop_day: "wedding_weekend",
+  glam_morning: "wedding_weekend",
+  families_meet: "relationship",
+  knocking_ceremony: "traditions",
+  traditional_engagement: "traditions",
+  lobola_negotiation: "traditions",
+  kitchen_party: "traditions",
+  haldi: "traditions",
+  baraat: "traditions",
+  door_games: "traditions",
+  paebaek: "traditions",
+  aufruf: "traditions",
+  polterabend: "traditions",
+  callejoneada: "traditions",
+  second_line: "traditions",
+  jumping_the_broom: "traditions",
   rehearsal_dinner: "wedding_weekend",
   welcome_party: "wedding_weekend",
   after_party: "wedding_weekend",
@@ -102,9 +150,10 @@ export const SUB_EVENT_CATEGORY: Record<SubEventKind, SubEventCategory> = {
 export const SUB_EVENT_CATEGORY_LABELS: Record<SubEventCategory, string> = {
   relationship: "Relationship stuff",
   pre_wedding: "Before the wedding",
+  traditions: "From different traditions",
   wedding_weekend: "Wedding weekend",
   post_wedding: "After",
 };
 
 /** Category display order for the Consider grid. */
-export const SUB_EVENT_CATEGORY_ORDER: SubEventCategory[] = ["relationship", "pre_wedding", "wedding_weekend", "post_wedding"];
+export const SUB_EVENT_CATEGORY_ORDER: SubEventCategory[] = ["relationship", "pre_wedding", "traditions", "wedding_weekend", "post_wedding"];
