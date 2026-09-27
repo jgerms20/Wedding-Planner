@@ -78,6 +78,9 @@ export const settingsSchema = z.object({
   seedLedger: z.array(z.string()).optional(),
   /** Guest pairs the couple marked "different people" in the duplicate finder ("idA|idB", sorted). */
   notDuplicates: z.array(z.string()).optional(),
+  /** Ids of each partner's pre-sharing browser copy already folded into this shared wedding, so
+   * the "bring it in" banner never offers to merge the same copy twice (from any device). */
+  mergedFrom: z.array(z.string()).optional(),
 });
 export type Settings = z.infer<typeof settingsSchema>;
 

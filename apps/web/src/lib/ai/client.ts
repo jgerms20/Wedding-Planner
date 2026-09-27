@@ -62,6 +62,24 @@ export function createBrowserClient(apiKey?: string): Anthropic {
   return new Anthropic({ apiKey: key, dangerouslyAllowBrowser: true });
 }
 
+/**
+ * Catches the pastes that can never work before spending a network call on them. The Console's
+ * key panel shows the key's *id* ("apikey_…") and a shortened preview ("sk-ant-api03-sPM...WgAA");
+ * the full key is only shown once, when it's created.
+ */
+export function describeKeyShape(key: string): string | null {
+  const value = key.trim();
+  if (/^apikey_/i.test(value)) {
+    return "That's the key's ID, not the key. The key itself starts with sk-ant- and is shown only once, when you create it. Create a new key in the Console and copy it straight away.";
+  }
+  if (value.includes("...") || value.includes("…")) {
+    return "That's the shortened preview of a key. The full key is shown only once, when you create it. Create a new key in the Console and copy it straight away.";
+  }
+  if (!value.startsWith("sk-ant-")) return "Claude API keys start with sk-ant-. Check you copied the whole key.";
+  if (/\s/.test(value)) return "The key has a space or line break in it. Paste it again as one piece.";
+  return null;
+}
+
 /** Cheapest possible call that proves a key works: one model from the list. */
 export async function verifyApiKey(key: string): Promise<{ ok: true } | { ok: false; error: string }> {
   try {
@@ -74,7 +92,7 @@ export async function verifyApiKey(key: string): Promise<{ ok: true } | { ok: fa
 }
 
 export function describeApiError(error: unknown): string {
-  if (error instanceof Anthropic.AuthenticationError) return "That key was rejected. Check it and paste it again.";
+  if (error instanceof Anthropic.AuthenticationError) return "Anthropic says this key isn't valid. It may have been deleted or mistyped. Create a new key in the Console and paste the whole thing.";
   if (error instanceof Anthropic.PermissionDeniedError) return "That key does not have access to the Messages API.";
   if (error instanceof Anthropic.RateLimitError) return "Claude is rate limiting this key. Try again in a minute.";
   if (error instanceof Anthropic.APIConnectionError) return "Could not reach Claude from this browser.";

@@ -100,7 +100,7 @@ export function RepoProvider({ children }: { children: ReactNode }) {
           return;
         }
         setCloudWeddingId(weddingId);
-        setMergePending(await localCopyPending(weddingId));
+        setMergePending(await localCopyPending(supabase, weddingId));
         setRepo(sharedRepo(supabase, weddingId));
         setCloudStatus("ready");
       } catch (err) {

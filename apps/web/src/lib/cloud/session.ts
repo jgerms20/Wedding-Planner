@@ -2,6 +2,7 @@ import type { SupabaseClient } from "@supabase/supabase-js";
 import {
   createDocRepo,
   createLocalRepo,
+  defaultSettings,
   describeMerge,
   exportBundleSchema,
   newId,
@@ -29,6 +30,13 @@ function wasMerged(weddingId: string): boolean {
   } catch {
     return false;
   }
+}
+
+/** Records that a browser's local copy is now part of the shared wedding, for every device to see. */
+async function recordMergedFrom(repo: WeddingRepo, weddingId: string, localWeddingId: string) {
+  const settings = (await repo.getSettings(weddingId)) ?? defaultSettings(weddingId);
+  if (settings.mergedFrom?.includes(localWeddingId)) return;
+  await repo.saveSettings({ ...settings, mergedFrom: [...(settings.mergedFrom ?? []), localWeddingId] });
 }
 
 export function sharedRepo(supabase: SupabaseClient, weddingId: string): WeddingRepo {
@@ -60,15 +68,23 @@ export async function createSharedWedding(supabase: SupabaseClient): Promise<str
   const repo = sharedRepo(supabase, weddingId);
   if (localWedding) await repo.importJson(await local.exportJson(localWedding.id));
   else await restoreSeed(repo);
+  await recordMergedFrom(repo, weddingId, weddingId);
   markMerged(weddingId);
   return weddingId;
 }
 
 /** True when this browser holds its own pre-sharing copy that hasn't been merged in yet. */
-export async function localCopyPending(weddingId: string): Promise<boolean> {
+export async function localCopyPending(supabase: SupabaseClient, weddingId: string): Promise<boolean> {
   if (wasMerged(weddingId)) return false;
   const localWedding = await createLocalRepo().getWedding(WEDDING_SLUG);
-  return Boolean(localWedding);
+  if (!localWedding) return false;
+  // Already folded in — by this browser before, or on this person's behalf from elsewhere.
+  const settings = await sharedRepo(supabase, weddingId).getSettings(weddingId);
+  if (localWedding.id === weddingId || settings?.mergedFrom?.includes(localWedding.id)) {
+    markMerged(weddingId);
+    return false;
+  }
+  return true;
 }
 
 /** Brings this browser's pre-sharing copy into the shared wedding. Returns a one-line summary. */
@@ -91,6 +107,7 @@ export async function mergeLocalCopy(supabase: SupabaseClient, weddingId: string
   }
   for (const [collection, docs] of byCollection) await store.putMany(collection, docs);
 
+  await recordMergedFrom(shared, weddingId, localWedding.id);
   markMerged(weddingId);
   return describeMerge(summary);
 }

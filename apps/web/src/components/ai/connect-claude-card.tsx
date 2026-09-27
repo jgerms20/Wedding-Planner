@@ -2,7 +2,7 @@
 
 import { Check, ExternalLink, Loader2 } from "lucide-react";
 import { useEffect, useState } from "react";
-import { getApiKey, setApiKey, verifyApiKey } from "@/lib/ai/client";
+import { describeKeyShape, getApiKey, setApiKey, verifyApiKey } from "@/lib/ai/client";
 import { useRepoContext } from "@/lib/repo-context";
 
 /**
@@ -42,6 +42,12 @@ export function ConnectClaudeCard() {
   async function connect() {
     const key = draft.trim();
     if (!key) return;
+    const shapeProblem = describeKeyShape(key);
+    if (shapeProblem) {
+      setStatus("error");
+      setMessage(shapeProblem);
+      return;
+    }
     setStatus("checking");
     setMessage(null);
     const result = await verifyApiKey(key);
