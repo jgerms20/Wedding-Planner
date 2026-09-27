@@ -36,6 +36,8 @@ test("first load lands on the pre-seeded Home, and the redesigned pages hold up"
   // "Not for us" sets a destination aside instead of deleting it, and it stays set aside (and
   // single) across a reload — a removed seed destination used to quietly come back on load.
   await page.getByRole("button", { name: "Not for us: Iceland" }).click();
+  // The banner appears only once the save has landed — reloading before that races the write.
+  await expect(page.getByText(/Iceland moved to/)).toBeVisible();
   await page.reload();
   await page.getByRole("button", { name: /^Not for us \(1\)/ }).click();
   await page.getByRole("button", { name: "Bring it back" }).click();

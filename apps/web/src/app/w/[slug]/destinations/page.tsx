@@ -255,7 +255,7 @@ export default function DestinationsPage() {
       ) : (
         <>
           <div className="mt-6 flex flex-wrap items-center justify-between gap-3">
-            <div className="inline-flex w-fit rounded-full border border-line p-0.5 text-sm">
+            <div className="inline-flex w-fit max-w-full overflow-x-auto rounded-full border border-line p-0.5 text-sm">
               {([
                 { key: "explore", label: "Explore" },
                 { key: "favorites", label: `Favorites${favoriteDestinations.length > 0 ? ` (${favoriteDestinations.length})` : ""}` },
@@ -267,7 +267,7 @@ export default function DestinationsPage() {
                   type="button"
                   onClick={() => setTab(t.key)}
                   aria-pressed={tab === t.key}
-                  className={cn("rounded-full px-4 py-1.5 transition-colors", tab === t.key ? "bg-ink text-rail-foreground" : "text-ink-soft hover:text-foreground")}
+                  className={cn("shrink-0 rounded-full px-4 py-1.5 whitespace-nowrap transition-colors", tab === t.key ? "bg-ink text-rail-foreground" : "text-ink-soft hover:text-foreground")}
                 >
                   {t.label}
                 </button>
