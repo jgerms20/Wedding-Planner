@@ -1,7 +1,9 @@
 "use client";
 
 import { CHECK_SPELLING_TAG, GROUP_TAG, guestDisplayName, sideSchema, TIERS, type Guest, type Side, type Tier } from "@bower/shared";
-import { Pencil } from "lucide-react";
+import { useSortable } from "@dnd-kit/sortable";
+import { CSS } from "@dnd-kit/utilities";
+import { GripVertical, Pencil, X } from "lucide-react";
 import { useState } from "react";
 import { sideLabel } from "@/lib/side-label";
 import { cn } from "@/lib/utils";
@@ -27,21 +29,37 @@ export function GuestRow({
   number,
   partnerAName,
   partnerBName,
+  withNames,
+  selected,
+  onSelect,
+  dragEnabled,
   onOpen,
   onPatch,
+  onRemove,
 }: {
   guest: Guest;
   number: number;
   partnerAName: string;
   partnerBName: string;
+  /** Display names of the guests this one comes with. */
+  withNames: string[];
+  selected: boolean;
+  onSelect: (selected: boolean, shiftKey: boolean) => void;
+  /** Off while a search or filter hides part of the list (order is per whole tier). */
+  dragEnabled: boolean;
   onOpen: () => void;
   onPatch: (patch: Partial<Guest>) => void;
+  onRemove: () => void;
 }) {
+  const { attributes, listeners, setNodeRef, setActivatorNodeRef, transform, transition, isDragging } = useSortable({
+    id: guest.id,
+    disabled: !dragEnabled,
+  });
   const [editing, setEditing] = useState(false);
   const [draft, setDraft] = useState("");
   const isGroup = guest.tags.includes(GROUP_TAG);
   const checkSpelling = guest.tags.includes(CHECK_SPELLING_TAG);
-  const detail = [guest.relationship, guest.notes].filter(Boolean).join(" · ");
+  const detail = [guest.relationship, withNames.length > 0 ? `with ${withNames.join(", ")}` : undefined, guest.notes].filter(Boolean).join(" · ");
 
   function commit() {
     setEditing(false);
@@ -52,8 +70,40 @@ export function GuestRow({
   }
 
   return (
-    <tr className="border-b border-line/70 last:border-0 hover:bg-paper-deep/40">
-      <td className="tabular w-10 py-2.5 pr-1 pl-3 text-right text-xs text-ink-mute">{number}</td>
+    <tr
+      ref={setNodeRef}
+      style={{ transform: CSS.Translate.toString(transform), transition }}
+      className={cn(
+        "border-b border-line/70 bg-card last:border-0 hover:bg-paper-deep/40",
+        selected && "bg-coral-soft/50 hover:bg-coral-soft/60",
+        isDragging && "relative z-10 shadow-lg",
+      )}
+    >
+      <td className="w-16 py-2.5 pl-2">
+        <div className="flex items-center gap-1">
+          <button
+            type="button"
+            ref={setActivatorNodeRef}
+            {...attributes}
+            {...listeners}
+            disabled={!dragEnabled}
+            aria-label={`Drag ${guestDisplayName(guest)} to reorder`}
+            title={dragEnabled ? "Drag to reorder, or onto another tier" : "Clear the search and filter to drag"}
+            className="cursor-grab touch-none rounded p-0.5 text-ink-mute hover:text-foreground disabled:cursor-default disabled:opacity-30 active:cursor-grabbing"
+          >
+            <GripVertical className="size-3.5 stroke-[1.5]" />
+          </button>
+          <input
+            type="checkbox"
+            checked={selected}
+            onClick={(e) => onSelect(!selected, e.shiftKey)}
+            onChange={() => {}}
+            aria-label={`Select ${guestDisplayName(guest)}`}
+            className="accent-[var(--coral)]"
+          />
+          <span className="tabular ml-0.5 w-6 text-right text-xs text-ink-mute">{number}</span>
+        </div>
+      </td>
       <td className="min-w-[14rem] p-2.5">
         {editing ? (
           <input
@@ -81,8 +131,9 @@ export function GuestRow({
             {guestDisplayName(guest)}
           </button>
         )}
-        {(detail || checkSpelling || isGroup) && (
+        {(detail || checkSpelling || isGroup || guest.role) && (
           <p className="mt-0.5 line-clamp-2 text-xs text-ink-mute">
+            {guest.role && <span className="mr-1.5 rounded-full bg-ink px-1.5 py-px text-[0.65rem] font-medium text-rail-foreground">{guest.role}</span>}
             {checkSpelling && <span className="mr-1.5 rounded-full bg-gold-soft px-1.5 py-px text-[0.65rem] font-medium text-ink">check spelling</span>}
             {isGroup && <span className="mr-1.5 rounded-full border border-line px-1.5 py-px text-[0.65rem]">group · names to come</span>}
             {detail}
@@ -135,7 +186,7 @@ export function GuestRow({
           </button>
         )}
       </td>
-      <td className="w-10 p-2 pr-3 text-right">
+      <td className="w-20 p-2 pr-3 text-right whitespace-nowrap">
         <button
           type="button"
           onClick={onOpen}
@@ -143,6 +194,15 @@ export function GuestRow({
           className="rounded-full p-1.5 text-ink-mute transition-colors hover:bg-muted hover:text-foreground"
         >
           <Pencil className="size-3.5 stroke-[1.5]" />
+        </button>
+        <button
+          type="button"
+          onClick={onRemove}
+          aria-label={`Remove ${guestDisplayName(guest)}`}
+          title="Take off the list (you can undo)"
+          className="rounded-full p-1.5 text-ink-mute transition-colors hover:bg-muted hover:text-destructive"
+        >
+          <X className="size-3.5 stroke-[1.5]" />
         </button>
       </td>
     </tr>

@@ -1,8 +1,8 @@
 "use client";
 
-import { DEFAULT_TIER, newId, nowIso, sideSchema, TIER_LABELS, TIERS, type Guest, type Household, type Side, type Tier } from "@bower/shared";
-import { ChevronDown, ChevronRight } from "lucide-react";
-import { useEffect, useState, type ReactNode } from "react";
+import { DEFAULT_TIER, guestDisplayName, newId, nowIso, sideSchema, TIER_LABELS, TIERS, WEDDING_ROLES, type Guest, type Household, type Side, type Tier } from "@bower/shared";
+import { ChevronDown, ChevronRight, X } from "lucide-react";
+import { useEffect, useMemo, useState, type ReactNode } from "react";
 import { Button } from "@/components/ui/button";
 import { Checkbox } from "@/components/ui/checkbox";
 import { Dialog, DialogBody, DialogCloseButton, DialogFooter, DialogHeader, DialogTitle } from "@/components/ui/dialog";
@@ -15,7 +15,7 @@ import { sideLabel } from "@/lib/side-label";
  * edited guest should open with details already expanded, so nothing looks lost. */
 function hasDetails(g: Guest): boolean {
   return Boolean(
-    g.lastName || g.householdId || g.email || g.relationship || g.notes || g.dietary || g.homeCity || g.plusOne || g.isChild || g.side !== "both",
+    g.lastName || g.householdId || g.email || g.relationship || g.notes || g.dietary || g.homeCity || g.plusOne || g.isChild || g.side !== "both" || g.role || g.withGuestIds?.length,
   );
 }
 
@@ -24,6 +24,7 @@ export function GuestEditorDialog({
   onOpenChange,
   weddingId,
   households,
+  guests = [],
   guest,
   partnerAName,
   partnerBName,
@@ -33,6 +34,8 @@ export function GuestEditorDialog({
   onOpenChange: (open: boolean) => void;
   weddingId: string;
   households: Household[];
+  /** Everyone else on the list, for "goes with". */
+  guests?: Guest[];
   guest?: Guest;
   partnerAName: string;
   partnerBName: string;
@@ -40,11 +43,21 @@ export function GuestEditorDialog({
 }) {
   const [form, setForm] = useState(() => emptyForm());
   const [showDetails, setShowDetails] = useState(false);
+  const [withQuery, setWithQuery] = useState("");
+  const others = useMemo(() => guests.filter((g) => g.id !== guest?.id), [guests, guest?.id]);
+  const withMatches = useMemo(() => {
+    const q = withQuery.trim().toLowerCase();
+    if (!q) return [];
+    return others
+      .filter((g) => !form.withGuestIds.includes(g.id) && [g.firstName, g.lastName, g.relationship].some((f) => f?.toLowerCase().includes(q)))
+      .slice(0, 6);
+  }, [withQuery, others, form.withGuestIds]);
 
   useEffect(() => {
     if (!open) return;
     setForm(guest ? toForm(guest) : emptyForm());
     setShowDetails(guest ? hasDetails(guest) : false);
+    setWithQuery("");
   }, [open, guest]);
 
   async function handleSave() {
@@ -66,6 +79,9 @@ export function GuestEditorDialog({
       dietary: form.dietary || undefined,
       homeCity: form.homeCity || undefined,
       notes: form.notes || undefined,
+      role: form.role.trim() || undefined,
+      withGuestIds: form.withGuestIds.length ? form.withGuestIds : undefined,
+      sortOrder: guest && guest.tier === form.tier ? guest.sortOrder : undefined,
       tags: guest?.tags ?? [],
       rsvp: guest?.rsvp ?? {},
       createdAt: guest?.createdAt ?? now,
@@ -158,6 +174,66 @@ export function GuestEditorDialog({
                 <Input value={form.notes} onChange={(e) => setForm((f) => ({ ...f, notes: e.target.value }))} placeholder="maybe +1, girl from CLT" />
               </Field>
             </Row>
+            <Row>
+              <Field label="Wedding party role">
+                <Input
+                  list="wedding-roles"
+                  value={form.role}
+                  onChange={(e) => setForm((f) => ({ ...f, role: e.target.value }))}
+                  placeholder="Groomsman, flower girl…"
+                />
+                <datalist id="wedding-roles">
+                  {WEDDING_ROLES.map((r) => (
+                    <option key={r} value={r} />
+                  ))}
+                </datalist>
+              </Field>
+              <Field label="Goes with">
+                <div className="relative">
+                  <Input value={withQuery} onChange={(e) => setWithQuery(e.target.value)} placeholder="Type a name, e.g. Dion" />
+                  {withMatches.length > 0 && (
+                    <ul className="absolute z-10 mt-1 w-full overflow-hidden rounded-md border border-line bg-card text-sm shadow-lg">
+                      {withMatches.map((g) => (
+                        <li key={g.id}>
+                          <button
+                            type="button"
+                            onClick={() => {
+                              setForm((f) => ({ ...f, withGuestIds: [...f.withGuestIds, g.id] }));
+                              setWithQuery("");
+                            }}
+                            className="w-full px-3 py-1.5 text-left hover:bg-paper-deep"
+                          >
+                            {guestDisplayName(g)}
+                            {g.relationship && <span className="ml-1.5 text-xs text-ink-mute">{g.relationship}</span>}
+                          </button>
+                        </li>
+                      ))}
+                    </ul>
+                  )}
+                </div>
+              </Field>
+            </Row>
+            {form.withGuestIds.length > 0 && (
+              <div className="-mt-1 flex flex-wrap gap-1.5">
+                {form.withGuestIds.map((id) => {
+                  const other = others.find((g) => g.id === id);
+                  if (!other) return null;
+                  return (
+                    <span key={id} className="inline-flex items-center gap-1 rounded-full border border-line bg-paper-deep/60 px-2 py-0.5 text-xs">
+                      with {guestDisplayName(other)}
+                      <button
+                        type="button"
+                        aria-label={`Unlink ${guestDisplayName(other)}`}
+                        onClick={() => setForm((f) => ({ ...f, withGuestIds: f.withGuestIds.filter((x) => x !== id) }))}
+                        className="rounded-full text-ink-mute hover:text-foreground"
+                      >
+                        <X className="size-3" />
+                      </button>
+                    </span>
+                  );
+                })}
+              </div>
+            )}
             <div className="flex flex-wrap items-center gap-6 text-sm">
               <label className="flex items-center gap-2">
                 <Checkbox checked={form.plusOne} onChange={(e) => setForm((f) => ({ ...f, plusOne: e.target.checked }))} />
@@ -212,6 +288,8 @@ function emptyForm() {
     isChild: false,
     dietary: "",
     homeCity: "",
+    role: "",
+    withGuestIds: [] as string[],
   };
 }
 
@@ -231,6 +309,8 @@ function toForm(g: Guest) {
     isChild: g.isChild,
     dietary: g.dietary ?? "",
     homeCity: g.homeCity ?? "",
+    role: g.role ?? "",
+    withGuestIds: g.withGuestIds ?? [],
   };
 }
 

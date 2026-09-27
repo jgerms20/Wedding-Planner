@@ -4,5 +4,6 @@ import type { Side } from "@bower/shared";
 export function sideLabel(side: Side, partnerAName: string, partnerBName: string): string {
   if (side === "a") return partnerAName;
   if (side === "b") return partnerBName;
+  if (side === "unsure") return "Not sure";
   return "Both";
 }

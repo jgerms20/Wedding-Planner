@@ -59,10 +59,12 @@ function useActive(base: string) {
 function ShellChrome({ children }: { children: ReactNode }) {
   const { wedding, ready } = useRepoContext();
   const [conciergeOpen, setConciergeOpen] = useState(false);
-  const [tip] = useState(() => {
+  // Picked after mount: a random pick during the static prerender wouldn't match the browser's.
+  const [tip, setTip] = useState<NonNullable<typeof SEED_BENCHMARKS>["tips"][number] | undefined>(undefined);
+  useEffect(() => {
     const tips = SEED_BENCHMARKS?.tips ?? [];
-    return tips.length > 0 ? tips[Math.floor(Math.random() * tips.length)] : undefined;
-  });
+    if (tips.length > 0) setTip(tips[Math.floor(Math.random() * tips.length)]);
+  }, []);
   const [tipDismissed, setTipDismissed] = useState(false);
   const base = `/w/${WEDDING_SLUG}`;
   const isActive = useActive(base);

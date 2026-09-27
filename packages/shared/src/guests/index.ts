@@ -1,6 +1,24 @@
 import type { Guest, Side, Tier } from "../entities/index";
 import { DEFAULT_TIER } from "../entities/index";
 
+/** Wedding-party parts the couple can pick from (they can also type their own). */
+export const WEDDING_ROLES = [
+  "Best man",
+  "Maid of honor",
+  "Matron of honor",
+  "Groomsman",
+  "Bridesmaid",
+  "Flower girl",
+  "Ring bearer",
+  "Officiant",
+  "Mother of the bride",
+  "Father of the bride",
+  "Mother of the groom",
+  "Father of the groom",
+  "Reader",
+  "Usher",
+] as const;
+
 /** A guest standing in for a group whose names aren't known yet ("the Faithful Black Audis chat"). */
 export const GROUP_TAG = "group";
 /** Set on names the couple should double-check (unclear transcription, uncertain spelling). */
@@ -116,7 +134,9 @@ export function mergeGuests(a: Guest, b: Guest): Guest {
   return {
     ...a,
     lastName: a.lastName ?? b.lastName,
-    side: a.side === b.side ? a.side : "both",
+    side: a.side === b.side ? a.side : a.side === "unsure" ? b.side : b.side === "unsure" ? a.side : "both",
+    role: a.role ?? b.role,
+    withGuestIds: [...new Set([...(a.withGuestIds ?? []), ...(b.withGuestIds ?? [])])].filter((id) => id !== a.id && id !== b.id),
     tier: Math.min(a.tier, b.tier) as Tier,
     relationship,
     plusOne: a.plusOne || b.plusOne,

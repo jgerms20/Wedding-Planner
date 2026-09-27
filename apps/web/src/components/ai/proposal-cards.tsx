@@ -271,6 +271,7 @@ function GuestEditor({ action, onChange }: { action: GuestAction; onChange: (act
               <option value="a">Joshua</option>
               <option value="b">Janel</option>
               <option value="both">Both</option>
+              <option value="unsure">Not sure</option>
             </select>
           </label>
           <label className="flex flex-col gap-1">

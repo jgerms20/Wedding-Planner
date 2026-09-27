@@ -44,7 +44,8 @@ export const PHASE_LABELS: Record<PhaseKey, string> = {
 export const taskStatusSchema = z.enum(["todo", "doing", "done", "skipped"]);
 export type TaskStatus = z.infer<typeof taskStatusSchema>;
 
-export const sideSchema = z.enum(["a", "b", "both"]);
+/** "unsure" is for a name nobody has placed yet — better than guessing a side. */
+export const sideSchema = z.enum(["a", "b", "both", "unsure"]);
 export type Side = z.infer<typeof sideSchema>;
 
 /** Guest priority, 1 (can't get married without them) through 5 (only if there's room). */

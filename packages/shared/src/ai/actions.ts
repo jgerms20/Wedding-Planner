@@ -27,7 +27,7 @@ const isoDate = z.string().describe("YYYY-MM-DD");
 export const guestDraftSchema = z.object({
   firstName: z.string(),
   lastName: z.string().optional(),
-  side: sideSchema.optional().describe("a = Joshua's side, b = Janel's side, both = shared friends"),
+  side: sideSchema.optional().describe("a = Joshua's side, b = Janel's side, both = shared friends, unsure = nobody's placed them yet"),
   tier: z
     .enum(["1", "2", "3", "4", "5"])
     .optional()

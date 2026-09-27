@@ -37,6 +37,10 @@ export const guestSchema = z.object({
   tags: z.array(z.string()),
   /** The couple's own order within the tier (drag and drop). Unset falls back to family-first. */
   sortOrder: z.number().optional(),
+  /** Their part in the wedding, if any: "Best man", "Flower girl", "Mother of the bride"... */
+  role: z.string().optional(),
+  /** Other guests they come as a unit with (a partner, a friend group), by guest id. */
+  withGuestIds: z.array(z.string()).optional(),
   /** Keyed by sub-event id, or the literal "wedding" for the main event. */
   rsvp: z.record(z.string(), rsvpStatusSchema),
   createdAt: z.string(),

@@ -97,6 +97,7 @@ export function HeadcountCard({
 
       <p className="tabular mt-3 text-xs text-ink-soft">
         {partnerAName} {bySide("a")} · {partnerBName} {bySide("b")} · Both {bySide("both")}
+        {bySide("unsure") > 0 && <> · Not sure yet {bySide("unsure")}</>}
       </p>
     </section>
   );
