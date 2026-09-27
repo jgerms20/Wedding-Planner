@@ -11,7 +11,7 @@ describe("applying and undoing a proposal", () => {
       {
         type: "add_guests",
         guests: [
-          { firstName: "Marcus", lastName: "Lee", side: "a", tier: "must", householdName: "The Lees" },
+          { firstName: "Marcus", lastName: "Lee", side: "a", tier: "1", householdName: "The Lees" },
           { firstName: "Tasha", lastName: "Lee", side: "a", householdName: "The Lees" },
         ],
       },

@@ -27,9 +27,13 @@ export const guestSchema = z.object({
   tier: tierSchema,
   relationship: z.string().optional(),
   plusOne: z.boolean(),
+  /** How many people come with them when `plusOne` is on (a partner, or "+2", or kids). Default 1. */
+  plusOneCount: z.number().int().min(1).max(10).optional(),
   isChild: z.boolean(),
   dietary: z.string().optional(),
   homeCity: z.string().optional(),
+  /** Anything hedged or worth remembering: "maybe", "girl from CLT", "spelling unclear". */
+  notes: z.string().optional(),
   tags: z.array(z.string()),
   /** Keyed by sub-event id, or the literal "wedding" for the main event. */
   rsvp: z.record(z.string(), rsvpStatusSchema),

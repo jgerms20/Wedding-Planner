@@ -1,6 +1,6 @@
 "use client";
 
-import { newId, nowIso, sideSchema, tierSchema, type Guest, type Household, type Side, type Tier } from "@bower/shared";
+import { DEFAULT_TIER, newId, nowIso, sideSchema, TIER_LABELS, TIERS, type Guest, type Household, type Side, type Tier } from "@bower/shared";
 import { ChevronDown, ChevronRight } from "lucide-react";
 import { useEffect, useState, type ReactNode } from "react";
 import { Button } from "@/components/ui/button";
@@ -15,7 +15,7 @@ import { sideLabel } from "@/lib/side-label";
  * edited guest should open with details already expanded, so nothing looks lost. */
 function hasDetails(g: Guest): boolean {
   return Boolean(
-    g.lastName || g.householdId || g.email || g.relationship || g.dietary || g.homeCity || g.plusOne || g.isChild || g.side !== "both",
+    g.lastName || g.householdId || g.email || g.relationship || g.notes || g.dietary || g.homeCity || g.plusOne || g.isChild || g.side !== "both",
   );
 }
 
@@ -61,9 +61,11 @@ export function GuestEditorDialog({
       tier: form.tier,
       relationship: form.relationship || undefined,
       plusOne: form.plusOne,
+      plusOneCount: form.plusOne && form.plusOneCount > 1 ? form.plusOneCount : undefined,
       isChild: form.isChild,
       dietary: form.dietary || undefined,
       homeCity: form.homeCity || undefined,
+      notes: form.notes || undefined,
       tags: guest?.tags ?? [],
       rsvp: guest?.rsvp ?? {},
       createdAt: guest?.createdAt ?? now,
@@ -90,10 +92,10 @@ export function GuestEditorDialog({
             />
           </Field>
           <Field label="Tier">
-            <Select value={form.tier} onChange={(e) => setForm((f) => ({ ...f, tier: e.target.value as Tier }))}>
-              {tierSchema.options.map((t) => (
+            <Select value={form.tier} onChange={(e) => setForm((f) => ({ ...f, tier: Number(e.target.value) as Tier }))}>
+              {TIERS.map((t) => (
                 <option key={t} value={t}>
-                  {t}
+                  Tier {t} — {TIER_LABELS[t]}
                 </option>
               ))}
             </Select>
@@ -148,14 +150,32 @@ export function GuestEditorDialog({
                 <Input value={form.relationship} onChange={(e) => setForm((f) => ({ ...f, relationship: e.target.value }))} placeholder="College friend" />
               </Field>
             </Row>
-            <Field label="Dietary">
-              <Input value={form.dietary} onChange={(e) => setForm((f) => ({ ...f, dietary: e.target.value }))} />
-            </Field>
-            <div className="flex gap-6 text-sm">
+            <Row>
+              <Field label="Dietary">
+                <Input value={form.dietary} onChange={(e) => setForm((f) => ({ ...f, dietary: e.target.value }))} />
+              </Field>
+              <Field label="Notes">
+                <Input value={form.notes} onChange={(e) => setForm((f) => ({ ...f, notes: e.target.value }))} placeholder="maybe +1, girl from CLT" />
+              </Field>
+            </Row>
+            <div className="flex flex-wrap items-center gap-6 text-sm">
               <label className="flex items-center gap-2">
                 <Checkbox checked={form.plusOne} onChange={(e) => setForm((f) => ({ ...f, plusOne: e.target.checked }))} />
                 Plus-one
               </label>
+              {form.plusOne && (
+                <label className="flex items-center gap-2 text-ink-soft">
+                  bringing
+                  <Input
+                    type="number"
+                    min={1}
+                    max={10}
+                    value={form.plusOneCount}
+                    onChange={(e) => setForm((f) => ({ ...f, plusOneCount: Math.max(1, Math.min(10, Number(e.target.value) || 1)) }))}
+                    className="h-8 w-16"
+                  />
+                </label>
+              )}
               <label className="flex items-center gap-2">
                 <Checkbox checked={form.isChild} onChange={(e) => setForm((f) => ({ ...f, isChild: e.target.checked }))} />
                 Child
@@ -184,9 +204,11 @@ function emptyForm() {
     email: "",
     phone: "",
     side: "both" as Side,
-    tier: "should" as Tier,
+    tier: DEFAULT_TIER as Tier,
     relationship: "",
+    notes: "",
     plusOne: false,
+    plusOneCount: 1,
     isChild: false,
     dietary: "",
     homeCity: "",
@@ -203,7 +225,9 @@ function toForm(g: Guest) {
     side: g.side,
     tier: g.tier,
     relationship: g.relationship ?? "",
+    notes: g.notes ?? "",
     plusOne: g.plusOne,
+    plusOneCount: g.plusOneCount ?? 1,
     isChild: g.isChild,
     dietary: g.dietary ?? "",
     homeCity: g.homeCity ?? "",

@@ -37,7 +37,7 @@ describe("applyActions", () => {
     const action: BowerAction = {
       type: "add_guests",
       guests: [
-        { firstName: "Marcus", lastName: "Lee", side: "a", tier: "must", householdName: "The Lees", homeCity: "Atlanta" },
+        { firstName: "Marcus", lastName: "Lee", side: "a", tier: "1", householdName: "The Lees", homeCity: "Atlanta" },
         { firstName: "Tasha", lastName: "Lee", side: "a", householdName: "The Lees" },
       ],
     };
@@ -50,7 +50,9 @@ describe("applyActions", () => {
     expect(guests).toHaveLength(2);
     expect(households).toHaveLength(1);
     expect(guests.every((g) => g.householdId === households[0].id)).toBe(true);
-    expect(guests[1].tier).toBe("must");
+    expect(guests.find((g) => g.firstName === "Marcus")?.tier).toBe(1);
+    // No tier given: lands in the middle until someone ranks them.
+    expect(guests.find((g) => g.firstName === "Tasha")?.tier).toBe(3);
 
     await undoResults(repo, results);
     expect(await repo.guests.list(wedding.id)).toHaveLength(0);

@@ -20,6 +20,11 @@ export const destinationSchema = z.object({
   sourceUrls: z.array(z.string()),
   /** Which partner(s) have marked this a favorite — shown independent of rank. */
   favoritedBy: z.array(z.enum(["A", "B"])).optional(),
+  /** Set aside as "not for us" — hidden from Explore/Favorites/the comparison but kept (and
+   * restorable) instead of deleted, so a seeded destination can't quietly come back. */
+  excluded: z.boolean().optional(),
+  /** Optional reason, e.g. "Janel: too far for Grandmommy". */
+  excludedNote: z.string().optional(),
   /** Manual rank, lowest first; the couple's own order, not derived from cost or a pinned scenario.
    * Rank 1 (the lowest sortOrder) is the "Front-runner". Defaults to seed order; editable via the
    * postcard's up/down arrows. Optional so destinations created before this field existed still

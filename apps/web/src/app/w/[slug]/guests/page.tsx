@@ -1,33 +1,47 @@
 "use client";
 
-import { newId, type Guest, type Household, type Side, type Tier } from "@bower/shared";
-import { Plus, Scissors } from "lucide-react";
-import { useCallback, useMemo, useState } from "react";
+import {
+  CHECK_SPELLING_TAG,
+  coreName,
+  findPossibleDuplicates,
+  guestHeadcount,
+  mergeGuests,
+  newId,
+  TIER_LABELS,
+  TIERS,
+  type Guest,
+  type Household,
+  type Side,
+  type Tier,
+} from "@bower/shared";
+import { ListPlus, Plus, Search } from "lucide-react";
+import { useCallback, useMemo, useState, type ReactNode } from "react";
 import { GuestEditorDialog } from "@/components/guest-editor-dialog";
+import { BulkAddDialog } from "@/components/guests/bulk-add-dialog";
+import { DuplicatesPanel } from "@/components/guests/duplicates-panel";
 import { GuestRow } from "@/components/guests/guest-row";
-import { TierTile } from "@/components/guests/tier-tile";
+import { HeadcountCard } from "@/components/guests/headcount-card";
 import { PageHeader } from "@/components/page-header";
 import { Button } from "@/components/ui/button";
 import { Dialog, DialogBody, DialogCloseButton, DialogFooter, DialogHeader, DialogTitle } from "@/components/ui/dialog";
 import { Input } from "@/components/ui/input";
 import { Label } from "@/components/ui/label";
 import { Select } from "@/components/ui/select";
-import { Slider } from "@/components/ui/slider";
 import { LoadingState } from "@/components/loading-state";
 import { useRepoContext } from "@/lib/repo-context";
 import { useEntityList } from "@/lib/use-entity-list";
 
-const TIER_ORDER: Tier[] = ["must", "should", "nice"];
-const TIER_RANK: Record<Tier, number> = { must: 0, should: 1, nice: 2 };
-const NO_HOUSEHOLD = "__none__";
 const SIDE_FILTER_ALL = "__all__";
+const CHECK_FILTER = "__check__";
 
 export default function GuestsPage() {
-  const { repo, wedding } = useRepoContext();
+  const { repo, wedding, settings, reloadSettings } = useRepoContext();
   const weddingId = wedding?.id;
   const partnerAName = wedding?.partnerA.name ?? "Partner A";
   const partnerBName = wedding?.partnerB.name ?? "Partner B";
   const [sideFilter, setSideFilter] = useState<string>(SIDE_FILTER_ALL);
+  const [query, setQuery] = useState("");
+  const [throughTier, setThroughTier] = useState<Tier>(5);
 
   const loadGuests = useCallback(async () => {
     if (!repo || !weddingId) return undefined;
@@ -42,42 +56,33 @@ export default function GuestsPage() {
   const { items: households, reload: reloadHouseholds } = useEntityList(loadHouseholds);
 
   const [guestDialog, setGuestDialog] = useState<{ open: boolean; guest?: Guest }>({ open: false });
+  const [bulkOpen, setBulkOpen] = useState(false);
   const [householdDialog, setHouseholdDialog] = useState(false);
-  const [cut, setCut] = useState(0);
 
-  const filteredGuests = useMemo(
-    () => (sideFilter === SIDE_FILTER_ALL ? guests : guests.filter((g) => g.side === sideFilter)),
-    [guests, sideFilter],
-  );
+  const visible = useMemo(() => {
+    const q = query.trim().toLowerCase();
+    return guests.filter((g) => {
+      if (sideFilter === CHECK_FILTER && !g.tags.includes(CHECK_SPELLING_TAG)) return false;
+      if (sideFilter !== SIDE_FILTER_ALL && sideFilter !== CHECK_FILTER && g.side !== sideFilter) return false;
+      if (!q) return true;
+      return [g.firstName, g.lastName, g.relationship, g.notes].some((field) => field?.toLowerCase().includes(q));
+    });
+  }, [guests, sideFilter, query]);
 
-  const groups = useMemo(() => {
-    const byHousehold = new Map<string, Guest[]>();
-    for (const guest of filteredGuests) {
-      const key = guest.householdId ?? NO_HOUSEHOLD;
-      const list = byHousehold.get(key);
-      if (list) list.push(guest);
-      else byHousehold.set(key, [guest]);
-    }
-    const named = households
-      .filter((h) => byHousehold.has(h.id))
-      .sort((a, b) => a.name.localeCompare(b.name))
-      .map((h) => ({ id: h.id, name: h.name, guests: sortByName(byHousehold.get(h.id)!) }));
-    const unassigned = byHousehold.get(NO_HOUSEHOLD);
-    return unassigned ? [...named, { id: NO_HOUSEHOLD, name: "No household on file", guests: sortByName(unassigned) }] : named;
-  }, [filteredGuests, households]);
+  // One running number down the whole list, grouped by tier, so the count is always visible.
+  const tierGroups = useMemo(() => {
+    let number = 0;
+    return TIERS.map((tier) => {
+      const inTier = visible
+        .filter((g) => g.tier === tier)
+        .sort((a, b) => coreName(a).localeCompare(coreName(b)) || (a.relationship ?? "").localeCompare(b.relationship ?? ""))
+        .map((guest) => ({ guest, number: ++number }));
+      return { tier, rows: inTier, people: inTier.reduce((sum, r) => sum + guestHeadcount(r.guest), 0) };
+    }).filter((group) => group.rows.length > 0);
+  }, [visible]);
 
-  const sortedByTier = useMemo(
-    () => [...guests].sort((a, b) => TIER_RANK[a.tier] - TIER_RANK[b.tier] || a.firstName.localeCompare(b.firstName)),
-    [guests],
-  );
-
-  const cutValue = Math.min(cut, guests.length);
-  const included = sortedByTier.slice(0, cutValue);
-  const includedByTier = TIER_ORDER.map((tier) => ({
-    tier,
-    included: included.filter((g) => g.tier === tier).length,
-    total: guests.filter((g) => g.tier === tier).length,
-  }));
+  const duplicates = useMemo(() => findPossibleDuplicates(guests, settings?.notDuplicates), [guests, settings?.notDuplicates]);
+  const checkCount = guests.filter((g) => g.tags.includes(CHECK_SPELLING_TAG)).length;
 
   if (!repo || !weddingId) return <LoadingState />;
 
@@ -91,85 +96,106 @@ export default function GuestsPage() {
     await reloadGuests();
   }
 
+  async function mergePair(a: Guest, b: Guest) {
+    await repo!.guests.upsert(mergeGuests(a, b));
+    await repo!.guests.remove(b.id);
+    await reloadGuests();
+  }
+
+  async function markDifferent(key: string) {
+    if (!settings) return;
+    await repo!.saveSettings({ ...settings, notDuplicates: [...new Set([...(settings.notDuplicates ?? []), key])] });
+    await reloadSettings();
+  }
+
   return (
-    <div className="flex flex-col gap-8">
+    <div className="flex flex-col gap-6">
       <PageHeader
         title="Guests"
-        description="Households, tiers, and how many fit if you have to cut."
+        description={`${guests.length} on the list so far — rank them in tiers and watch the headcount.`}
         action={
-          <div className="flex items-center gap-2">
-            <Select value={sideFilter} onChange={(e) => setSideFilter(e.target.value)} className="w-auto">
-              <option value={SIDE_FILTER_ALL}>Everyone</option>
-              <option value="a">{partnerAName}</option>
-              <option value="b">{partnerBName}</option>
-              <option value="both">Both</option>
-            </Select>
-            <Button variant="outline" size="sm" onClick={() => setHouseholdDialog(true)}>
-              <Plus className="size-4" /> Household
+          <div className="flex flex-wrap items-center gap-2">
+            <Button variant="outline" size="sm" onClick={() => setBulkOpen(true)}>
+              <ListPlus className="size-4 stroke-[1.5]" /> Add a list
             </Button>
             <Button size="sm" onClick={() => setGuestDialog({ open: true })}>
-              <Plus className="size-4" /> Add guest
+              <Plus className="size-4 stroke-[1.5]" /> Add guest
             </Button>
           </div>
         }
       />
 
-      <div className="grid gap-4 sm:grid-cols-3">
-        {TIER_ORDER.map((tier) => (
-          <TierTile key={tier} tier={tier} guests={guests} partnerAName={partnerAName} partnerBName={partnerBName} />
-        ))}
-      </div>
+      <HeadcountCard
+        guests={guests}
+        throughTier={throughTier}
+        onThroughTierChange={setThroughTier}
+        target={wedding?.guestTarget}
+        partnerAName={partnerAName}
+        partnerBName={partnerBName}
+      />
 
-      <div className="postcard rise p-5">
-        <p className="eyebrow flex items-center gap-1.5">
-          <Scissors className="size-3.5 text-coral" /> Cut at N
-        </p>
-        <Slider className="mt-4" min={0} max={guests.length} value={cutValue} onChange={(e) => setCut(Number(e.target.value))} data-testid="guests-cut-slider" />
-        <p className="mt-3 text-sm">
-          Inviting the top <strong className="tabular">{cutValue}</strong> of {guests.length}
-          {guests.length > 0 && <span className="tabular text-ink-soft"> ({Math.round((cutValue / guests.length) * 100)}%)</span>} (ranked
-          must → should → nice) includes:
-        </p>
-        <div className="mt-2 flex flex-wrap gap-x-5 gap-y-1 text-sm text-ink-soft">
-          {includedByTier.map(({ tier, included: inc, total }) => (
-            <span key={tier} className="tabular">
-              <span className="text-foreground capitalize">{tier}</span>: {inc}/{total}
-            </span>
-          ))}
+      <DuplicatesPanel
+        duplicates={duplicates}
+        partnerAName={partnerAName}
+        partnerBName={partnerBName}
+        onMerge={(a, b) => void mergePair(a, b)}
+        onDifferent={(pair) => void markDifferent(pair.key)}
+      />
+
+      <div className="flex flex-wrap items-center gap-2">
+        <div className="relative min-w-[12rem] flex-1">
+          <Search className="pointer-events-none absolute top-1/2 left-2.5 size-4 -translate-y-1/2 text-ink-mute" />
+          <Input value={query} onChange={(e) => setQuery(e.target.value)} placeholder="Find someone" className="pl-8" />
         </div>
+        <Select value={sideFilter} onChange={(e) => setSideFilter(e.target.value)} className="w-auto" aria-label="Filter by side">
+          <option value={SIDE_FILTER_ALL}>Everyone</option>
+          <option value="a">{partnerAName}&apos;s side</option>
+          <option value="b">{partnerBName}&apos;s side</option>
+          <option value="both">Both</option>
+          {checkCount > 0 && <option value={CHECK_FILTER}>Check spelling ({checkCount})</option>}
+        </Select>
+        <button type="button" onClick={() => setHouseholdDialog(true)} className="text-sm text-ink-soft hover:text-coral">
+          + Household
+        </button>
       </div>
-
-      <p className="text-sm text-ink-soft">Fastest way in: talk to the bar below. &ldquo;Add the Robinsons from DC, four of them, must-invite.&rdquo;</p>
 
       {guests.length === 0 ? (
-        <div className="postcard rise flex flex-col items-start gap-2 p-8">
-          <p className="text-[15px] text-ink-soft">No guests yet. Tell Atlas who belongs on the list and it lands here, sorted by household.</p>
+        <div className="postcard rise flex flex-col items-start gap-3 p-8">
+          <p className="text-[15px] text-ink-soft">No guests yet. Paste a list and I&apos;ll sort it out — you check it before anything&apos;s added.</p>
+          <Button size="sm" onClick={() => setBulkOpen(true)}>
+            <ListPlus className="size-4 stroke-[1.5]" /> Add a list
+          </Button>
         </div>
+      ) : visible.length === 0 ? (
+        <p className="text-sm text-ink-soft">Nobody matches that.</p>
       ) : (
         <div className="overflow-x-auto rounded-lg border border-line">
-          <table className="w-full min-w-[720px] border-collapse text-sm">
+          <table className="w-full min-w-[640px] border-collapse text-sm">
             <thead>
               <tr className="border-b border-line text-left text-[0.65rem] font-semibold tracking-[0.14em] text-ink-mute uppercase">
+                <th className="w-10 py-3 pr-1 pl-3 text-right">#</th>
                 <th className="p-3">Name</th>
                 <th className="p-3">Side</th>
                 <th className="p-3">Tier</th>
-                <th className="p-3">Home city</th>
                 <th className="p-3 text-center">+1</th>
-                <th className="p-3 text-center">Child</th>
-                <th className="p-3">Dietary</th>
+                <th className="w-10 p-3" />
               </tr>
             </thead>
             <tbody>
-              {groups.map((group) => (
-                <GuestGroup
-                  key={group.id}
-                  name={group.name}
-                  guests={group.guests}
-                  partnerAName={partnerAName}
-                  partnerBName={partnerBName}
-                  onOpen={(g) => setGuestDialog({ open: true, guest: g })}
-                  onPatch={patchGuest}
-                />
+              {tierGroups.map((group) => (
+                <TierSection key={group.tier} tier={group.tier} people={group.people} count={group.rows.length}>
+                  {group.rows.map(({ guest, number }) => (
+                    <GuestRow
+                      key={guest.id}
+                      guest={guest}
+                      number={number}
+                      partnerAName={partnerAName}
+                      partnerBName={partnerBName}
+                      onOpen={() => setGuestDialog({ open: true, guest })}
+                      onPatch={(patch) => void patchGuest(guest, patch)}
+                    />
+                  ))}
+                </TierSection>
               ))}
             </tbody>
           </table>
@@ -186,6 +212,18 @@ export default function GuestsPage() {
         partnerBName={partnerBName}
         onSave={saveGuest}
       />
+      <BulkAddDialog
+        open={bulkOpen}
+        onOpenChange={setBulkOpen}
+        weddingId={weddingId}
+        guests={guests}
+        partnerAName={partnerAName}
+        partnerBName={partnerBName}
+        onAdd={async (added) => {
+          for (const guest of added) await repo.guests.upsert(guest);
+          await reloadGuests();
+        }}
+      />
       <HouseholdDialog
         open={householdDialog}
         onOpenChange={setHouseholdDialog}
@@ -201,42 +239,18 @@ export default function GuestsPage() {
   );
 }
 
-function sortByName(list: Guest[]): Guest[] {
-  return [...list].sort((a, b) => a.firstName.localeCompare(b.firstName) || (a.lastName ?? "").localeCompare(b.lastName ?? ""));
-}
-
-function GuestGroup({
-  name,
-  guests,
-  partnerAName,
-  partnerBName,
-  onOpen,
-  onPatch,
-}: {
-  name: string;
-  guests: Guest[];
-  partnerAName: string;
-  partnerBName: string;
-  onOpen: (g: Guest) => void;
-  onPatch: (g: Guest, patch: Partial<Guest>) => void;
-}) {
+function TierSection({ tier, people, count, children }: { tier: Tier; people: number; count: number; children: ReactNode }) {
   return (
     <>
       <tr>
-        <td colSpan={7} className="bg-paper-deep/60 px-3 py-1.5 text-[0.65rem] font-semibold tracking-[0.14em] text-ink-soft uppercase">
-          {name}
+        <td colSpan={6} className="bg-paper-deep/60 px-3 py-1.5 text-[0.65rem] font-semibold tracking-[0.14em] text-ink-soft uppercase">
+          Tier {tier} · {TIER_LABELS[tier]}
+          <span className="tabular ml-2 font-normal tracking-normal normal-case text-ink-mute">
+            {count} {count === 1 ? "guest" : "guests"} · {people} {people === 1 ? "person" : "people"} with plus-ones
+          </span>
         </td>
       </tr>
-      {guests.map((guest) => (
-        <GuestRow
-          key={guest.id}
-          guest={guest}
-          partnerAName={partnerAName}
-          partnerBName={partnerBName}
-          onOpen={() => onOpen(guest)}
-          onPatch={(patch) => onPatch(guest, patch)}
-        />
-      ))}
+      {children}
     </>
   );
 }

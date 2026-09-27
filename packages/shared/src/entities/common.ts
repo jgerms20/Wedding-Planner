@@ -47,8 +47,28 @@ export type TaskStatus = z.infer<typeof taskStatusSchema>;
 export const sideSchema = z.enum(["a", "b", "both"]);
 export type Side = z.infer<typeof sideSchema>;
 
-export const tierSchema = z.enum(["must", "should", "nice"]);
-export type Tier = z.infer<typeof tierSchema>;
+/** Guest priority, 1 (can't get married without them) through 5 (only if there's room). */
+export const TIERS = [1, 2, 3, 4, 5] as const;
+export type Tier = (typeof TIERS)[number];
+
+/** Guests saved before numbered tiers used must/should/nice; those map onto the 1–5 scale. */
+const LEGACY_TIERS: Record<string, Tier> = { must: 1, should: 3, nice: 5 };
+
+export const tierSchema = z.preprocess(
+  (value) => (typeof value === "string" ? (LEGACY_TIERS[value] ?? Number(value)) : value),
+  z.union([z.literal(1), z.literal(2), z.literal(3), z.literal(4), z.literal(5)]),
+);
+
+export const TIER_LABELS: Record<Tier, string> = {
+  1: "Can't get married without them",
+  2: "Closest circle",
+  3: "Want them there",
+  4: "Would be nice",
+  5: "Only if there's room",
+};
+
+/** Where a newly added guest lands until someone ranks them. */
+export const DEFAULT_TIER: Tier = 3;
 
 export const venueStatusSchema = z.enum([
   "idea",

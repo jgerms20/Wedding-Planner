@@ -16,7 +16,7 @@ describe("parseFallback — guests", () => {
     const action = only("add my cousin Marcus from Atlanta, must invite");
     expect(action).toMatchObject({
       type: "add_guests",
-      guests: [{ firstName: "Marcus", relationship: "cousin", homeCity: "Atlanta", tier: "must" }],
+      guests: [{ firstName: "Marcus", relationship: "cousin", homeCity: "Atlanta", tier: "1" }],
     });
   });
 
@@ -44,7 +44,7 @@ describe("parseFallback — guests", () => {
 
   it("maps “Janel’s side” to side b", () => {
     const action = only("invite Rose Adeyemi, Janel's side, should invite");
-    expect(action).toMatchObject({ type: "add_guests", guests: [{ firstName: "Rose", side: "b", tier: "should" }] });
+    expect(action).toMatchObject({ type: "add_guests", guests: [{ firstName: "Rose", side: "b", tier: "3" }] });
   });
 
   it("flags a plus one", () => {
@@ -54,12 +54,12 @@ describe("parseFallback — guests", () => {
 
   it("flags kids", () => {
     const action = only("add our nephew Eli, kid, nice to have");
-    expect(action).toMatchObject({ type: "add_guests", guests: [{ firstName: "Eli", isChild: true, tier: "nice" }] });
+    expect(action).toMatchObject({ type: "add_guests", guests: [{ firstName: "Eli", isChild: true, tier: "5" }] });
   });
 
   it("puts a name on the guest list with the 'put ... on' phrasing", () => {
     const action = only("put Grace Okafor on the guest list");
-    expect(action).toMatchObject({ type: "add_guests", guests: [{ firstName: "Grace", lastName: "Okafor", tier: "must" }] });
+    expect(action).toMatchObject({ type: "add_guests", guests: [{ firstName: "Grace", lastName: "Okafor", tier: "3" }] });
   });
 
   it("treats “we need to invite” as a guest add, not a task", () => {

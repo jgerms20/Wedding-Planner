@@ -135,7 +135,7 @@ export async function buildSnapshot(repo: WeddingRepo, weddingId: string, option
 
   lines.push("", "## Guests");
   lines.push(`total: ${guests.length}`);
-  lines.push(`by tier: ${countLine(guests, (g) => g.tier, ["must", "should", "nice"])}`);
+  lines.push(`by tier: ${countLine(guests, (g) => `tier ${g.tier}`, ["tier 1", "tier 2", "tier 3", "tier 4", "tier 5"])}`);
   lines.push(`by side: ${countLine(guests, (g) => g.side, ["a", "b", "both"])}`);
   lines.push(`plus ones: ${guests.filter((g) => g.plusOne).length}, children: ${guests.filter((g) => g.isChild).length}`);
 

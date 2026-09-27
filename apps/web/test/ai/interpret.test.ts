@@ -9,7 +9,7 @@ const MODEL_RESPONSE: BowerResponse = {
   actions: [
     {
       type: "add_guests",
-      guests: [{ firstName: "Marcus", lastName: "Lee", side: "a", tier: "must", homeCity: "Atlanta", relationship: "cousin" }],
+      guests: [{ firstName: "Marcus", lastName: "Lee", side: "a", tier: "1", homeCity: "Atlanta", relationship: "cousin" }],
     },
   ],
 };

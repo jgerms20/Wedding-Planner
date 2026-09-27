@@ -4,11 +4,12 @@ import {
   phaseKeySchema,
   sideSchema,
   subEventKindSchema,
-  tierSchema,
+  DEFAULT_TIER,
   type BudgetItem,
   type Guest,
   type Household,
   type Task,
+  type Tier,
   type Wedding,
 } from "../entities/index";
 import type { WeddingRepo } from "../repo/types";
@@ -27,7 +28,10 @@ export const guestDraftSchema = z.object({
   firstName: z.string(),
   lastName: z.string().optional(),
   side: sideSchema.optional().describe("a = Joshua's side, b = Janel's side, both = shared friends"),
-  tier: tierSchema.optional().describe("must / should / nice; default must"),
+  tier: z
+    .enum(["1", "2", "3", "4", "5"])
+    .optional()
+    .describe("1 = can't get married without them, 2 = closest circle, 3 = want them there, 4 = would be nice, 5 = only if there's room; default 3"),
   relationship: z.string().optional().describe("e.g. cousin, college friend, coworker"),
   plusOne: z.boolean().optional(),
   isChild: z.boolean().optional(),
@@ -329,7 +333,7 @@ async function applyOne(
             email: draft.email,
             phone: draft.phone,
             side: draft.side ?? "both",
-            tier: draft.tier ?? "must",
+            tier: draft.tier ? (Number(draft.tier) as Tier) : DEFAULT_TIER,
             relationship: draft.relationship,
             plusOne: draft.plusOne ?? false,
             isChild: draft.isChild ?? false,

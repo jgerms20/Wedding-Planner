@@ -1,6 +1,6 @@
 "use client";
 
-import { applyActions, describeAction, undoResults, type ApplyResult, type BowerAction } from "@bower/shared";
+import { applyActions, describeAction, TIERS, undoResults, type ApplyResult, type BowerAction } from "@bower/shared";
 import { Check, Pencil, Undo2, X } from "lucide-react";
 import { useEffect, useState } from "react";
 import { useRepoContext } from "@/lib/repo-context";
@@ -276,13 +276,15 @@ function GuestEditor({ action, onChange }: { action: GuestAction; onChange: (act
           <label className="flex flex-col gap-1">
             <span className="eyebrow">Tier</span>
             <select
-              value={guest.tier ?? "must"}
+              value={guest.tier ?? "3"}
               onChange={(e) => update(index, { tier: e.target.value as GuestAction["guests"][number]["tier"] })}
               className="h-9 rounded-md border border-line-strong bg-background px-2 text-sm outline-none focus:border-coral"
             >
-              <option value="must">Must</option>
-              <option value="should">Should</option>
-              <option value="nice">Nice</option>
+              {TIERS.map((t) => (
+                <option key={t} value={String(t)}>
+                  Tier {t}
+                </option>
+              ))}
             </select>
           </label>
           <label className="col-span-2 flex flex-col gap-1 sm:col-span-4">

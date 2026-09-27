@@ -1,5 +1,5 @@
 import { isValid, parse as parseDateString } from "date-fns";
-import type { Side, Tier } from "../entities/index";
+import type { Side } from "../entities/index";
 import type { BowerAction, GuestDraft } from "./actions";
 
 /**
@@ -188,7 +188,7 @@ function parseGuests(body: string, options: FallbackOptions): GuestDraft[] {
 }
 
 interface Modifiers {
-  tier?: Tier;
+  tier?: GuestDraft["tier"];
   side?: Side;
   plusOne?: boolean;
   isChild?: boolean;
@@ -199,9 +199,11 @@ function readModifiers(text: string, options: FallbackOptions): Modifiers {
   const partnerA = options.partnerAName ?? DEFAULT_PARTNER_A;
   const partnerB = options.partnerBName ?? DEFAULT_PARTNER_B;
   const mods: Modifiers = {};
-  if (/\bmust\b/i.test(text)) mods.tier = "must";
-  else if (/\bshould\b/i.test(text)) mods.tier = "should";
-  else if (/\bnice(?:\s+to\s+have)?\b/i.test(text)) mods.tier = "nice";
+  const numbered = /\btier\s*([1-5])\b/i.exec(text);
+  if (numbered) mods.tier = numbered[1] as GuestDraft["tier"];
+  else if (/\bmust\b/i.test(text)) mods.tier = "1";
+  else if (/\bshould\b/i.test(text)) mods.tier = "3";
+  else if (/\bnice(?:\s+to\s+have)?\b/i.test(text)) mods.tier = "5";
   if (/\b(?:plus[\s-]?ones?|\+\s?1)\b/i.test(text)) mods.plusOne = true;
   if (/\b(?:kids?|child|children)\b/i.test(text)) mods.isChild = true;
   const sideMatch = /\b([A-Za-z]+)(?:'s|s')\s+side\b/i.exec(text);
@@ -293,7 +295,7 @@ function parseGuestSegment(segment: string, shared: Modifiers, options: Fallback
   if (relationship) draft.relationship = relationship;
   const side = own.side ?? shared.side;
   if (side) draft.side = side;
-  draft.tier = own.tier ?? shared.tier ?? "must";
+  draft.tier = own.tier ?? shared.tier ?? "3";
   const homeCity = own.homeCity ?? shared.homeCity;
   if (homeCity) draft.homeCity = homeCity;
   if (own.plusOne ?? shared.plusOne) draft.plusOne = true;

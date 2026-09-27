@@ -7,3 +7,4 @@ export * from "./timeline/index";
 export * from "./ai/index";
 export * from "./seed/index";
 export * from "./budget/index";
+export * from "./guests/index";

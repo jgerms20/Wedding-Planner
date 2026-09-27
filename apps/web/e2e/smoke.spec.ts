@@ -33,12 +33,15 @@ test("first load lands on the pre-seeded Home, and the redesigned pages hold up"
   await expect(page.getByText("Charleston, SC")).toBeVisible();
   await expect(page.getByText("Tulum", { exact: true })).toBeVisible();
 
-  // Guests: the cut-at-N slider renders, and the couple's real dictated guest list (imported via
-  // reconcileGuests, not empty as in earlier rounds) actually shows up.
+  // Guests: the headcount card renders, both partners' lists are in (Janel's corrected spellings,
+  // Joshua's numbered pool), and each partner's "Mom" stays a separate person.
   await page.getByRole("link", { name: "Guests", exact: true }).click();
   await page.waitForURL(/\/w\/our-wedding\/guests\/?$/);
-  await expect(page.getByTestId("guests-cut-slider")).toBeVisible();
+  await expect(page.getByTestId("guests-headcount")).toBeVisible();
   await expect(page.getByText("Reagan").first()).toBeVisible();
+  await expect(page.getByRole("button", { name: "Alayna", exact: true })).toBeVisible();
+  await expect(page.getByRole("button", { name: "Grandmommy", exact: true })).toBeVisible();
+  await expect(page.getByRole("button", { name: "Mom", exact: true })).toHaveCount(2);
 
   // Settings: the seed-restore action is there, ready if the couple wants to start over.
   await page.getByRole("link", { name: "Settings", exact: true }).click();

@@ -73,6 +73,11 @@ export const settingsSchema = z.object({
   notifications: z.record(z.string(), z.boolean()),
   monthlyCostCapCents: z.number(),
   planConfig: planConfigSchema,
+  /** Seed records already added to this wedding (destinations, venues, guest-list entries), so a
+   * record the couple deletes or renames is never quietly re-added on the next load. */
+  seedLedger: z.array(z.string()).optional(),
+  /** Guest pairs the couple marked "different people" in the duplicate finder ("idA|idB", sorted). */
+  notDuplicates: z.array(z.string()).optional(),
 });
 export type Settings = z.infer<typeof settingsSchema>;
 

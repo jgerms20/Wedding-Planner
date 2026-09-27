@@ -11,7 +11,13 @@ import {
   scenarioMath,
   SEED_BENCHMARKS,
   SEED_DESTINATIONS,
+  stableId,
   STARTER_GUEST_LIST,
+  coreName,
+  GUEST_CORRECTIONS,
+  GUEST_LIST_ROUND_6,
+  type Guest,
+  type GuestListEntry,
   type Wedding,
   type WeddingRepo,
 } from "@bower/shared";
@@ -51,14 +57,52 @@ export async function ensureWedding(repo: WeddingRepo): Promise<Wedding> {
 }
 
 /**
- * Non-destructive maintenance for an *existing* wedding's destinations, run once per load:
- * 1. Backfills `sortOrder` on any destination saved before that field existed, ranked by its
- *    current cost-derived order so nothing visually reshuffles the first time this runs.
- * 2. Adds any seed destination newly registered in `SEED_DESTINATIONS` (matched by name) that
- *    isn't already present — e.g. a destination added to the research pass after this couple's
- *    wedding was first seeded. New destinations are appended after whatever's already there and
- *    are never auto-pinned; `restoreSeed()` is the only thing that replaces existing data.
- * Both steps are no-ops once already applied.
+ * What's already been added from the seed data, kept in the wedding's settings (so it's shared
+ * between both partners). The reconcile steps below add new seed records exactly once: a record
+ * the couple later deletes, renames, or sets aside is never quietly re-added.
+ *
+ * Records these steps create get ids derived from what they are (`stableId`), so if both partners
+ * open the app at the same moment and both add the same new record, they write one record.
+ */
+interface Ledger {
+  has(key: string): boolean;
+  add(key: string): void;
+  /** True the first time this kind of record ("d:", "v:", "g:") is reconciled against a ledger —
+   * i.e. the wedding's existing records of that kind predate it. Per kind, because the three
+   * reconcile steps run in turn and each saves. */
+  firstRunFor(prefix: string): boolean;
+  save(): Promise<void>;
+}
+
+async function openLedger(repo: WeddingRepo, weddingId: string): Promise<Ledger> {
+  const settings = (await repo.getSettings(weddingId)) ?? defaultSettings(weddingId);
+  const keys = new Set(settings.seedLedger ?? []);
+  const before = keys.size;
+  const seenPrefixes = new Set([...keys].map((k) => k.slice(0, 2)));
+  return {
+    has: (key) => keys.has(key),
+    add: (key) => void keys.add(key),
+    firstRunFor: (prefix) => !seenPrefixes.has(prefix),
+    async save() {
+      if (settings.seedLedger !== undefined && keys.size === before) return;
+      const latest = (await repo.getSettings(weddingId)) ?? settings;
+      await repo.saveSettings({ ...latest, seedLedger: [...new Set([...(latest.seedLedger ?? []), ...keys])] });
+    },
+  };
+}
+
+const norm = (value: string | undefined) => (value ?? "").trim().toLowerCase().replace(/\s+/g, " ");
+const destinationKey = (name: string) => `d:${norm(name)}`;
+const venueKey = (destination: string, venue: string) => `v:${norm(destination)}|${norm(venue)}`;
+const guestKey = (g: { side: string; firstName: string; lastName?: string; relationship?: string }) =>
+  `g:${g.side}:${norm(`${g.firstName} ${g.lastName ?? ""}`)}:${norm(g.relationship)}`;
+
+/**
+ * Keeps an *existing* wedding's destinations current, once per load:
+ * 1. Backfills `sortOrder` on anything saved before that field existed.
+ * 2. Adds seed destinations registered since this wedding last synced — once. The first time this
+ *    runs against a wedding that predates the ledger, a seed destination that's missing was
+ *    removed by hand, so it comes back set aside ("not for us") rather than active.
  */
 export async function reconcileDestinations(repo: WeddingRepo, weddingId: string): Promise<void> {
   const [destinations, scenarios] = await Promise.all([repo.destinations.list(weddingId), repo.scenarios.list(weddingId)]);
@@ -76,88 +120,153 @@ export async function reconcileDestinations(repo: WeddingRepo, weddingId: string
     );
   }
 
-  const existingNames = new Set(destinations.map((d) => d.name.trim().toLowerCase()));
-  const missingSeeds = SEED_DESTINATIONS.filter((seed) => !existingNames.has(seed.name.trim().toLowerCase()));
-  if (missingSeeds.length === 0) return;
-
+  const ledger = await openLedger(repo, weddingId);
+  const existingNames = new Set(destinations.map((d) => norm(d.name)));
+  const established = destinations.length > 0;
   let nextSortOrder = Math.max(0, ...destinations.map((d, i) => d.sortOrder ?? i + 1)) + 1;
-  for (const seed of missingSeeds) {
-    const { destination, venues, scenario } = buildDestinationFromSeed(seed, weddingId, now, {
-      guestTarget: COUPLE.guestTarget,
-      sortOrder: nextSortOrder++,
-      pinned: false,
+
+  for (const seed of SEED_DESTINATIONS) {
+    const key = destinationKey(seed.name);
+    if (existingNames.has(norm(seed.name))) {
+      ledger.add(key);
+      continue;
+    }
+    if (ledger.has(key)) continue; // added before, then removed on purpose
+    const built = buildDestinationFromSeed(seed, weddingId, now, { guestTarget: COUPLE.guestTarget, sortOrder: nextSortOrder++, pinned: false });
+    const destinationId = stableId(weddingId, "destinations", key);
+    const setAside = ledger.firstRunFor("d:") && established;
+    await repo.destinations.upsert({
+      ...built.destination,
+      id: destinationId,
+      excluded: setAside || undefined,
+      excludedNote: setAside ? "Removed before \"Not for us\" existed — restore it if that was a mistake." : undefined,
     });
-    await repo.destinations.upsert(destination);
-    for (const venue of venues) await repo.venues.upsert(venue);
-    await repo.scenarios.upsert(scenario);
+    for (const venue of built.venues) {
+      await repo.venues.upsert({ ...venue, id: stableId(weddingId, "venues", venueKey(seed.name, venue.name)), destinationId });
+    }
+    await repo.scenarios.upsert({ ...built.scenario, id: stableId(weddingId, "scenarios", key), destinationId });
+    ledger.add(key);
+    for (const venue of seed.venues) ledger.add(venueKey(seed.name, venue.name));
   }
+  await ledger.save();
 }
 
 /**
- * Adds the couple's own dictated guest list to an *existing* wedding, run once per load
- * alongside `reconcileDestinations`. Purely additive and idempotent: diffs by lowercased
- * first+last name against guests already on file, so re-running never double-inserts and a
- * guest the couple has since edited or removed by hand is never recreated.
+ * Brings the couple's own guest lists into an *existing* wedding, once per load:
+ * 1. The round-4 dictated list: added in full to a brand-new wedding; for a wedding that already
+ *    has guests, just recorded as done (so a guest they removed or renamed never comes back).
+ * 2. Round-6 corrections (Janel's re-spelled names, new plus-ones) — applied once, so a later
+ *    hand edit wins.
+ * 3. Round-6 additions from both lists, skipping anyone already listed under the same name and
+ *    side (the two Amoses are told apart by relationship).
  */
 export async function reconcileGuests(repo: WeddingRepo, weddingId: string): Promise<void> {
   const existing = await repo.guests.list(weddingId);
-  const existingNames = new Set(existing.map((g) => `${g.firstName} ${g.lastName ?? ""}`.trim().toLowerCase()));
+  const ledger = await openLedger(repo, weddingId);
   const now = nowIso();
-  for (const note of STARTER_GUEST_LIST) {
-    const key = `${note.firstName} ${note.lastName ?? ""}`.trim().toLowerCase();
-    if (existingNames.has(key)) continue;
-    await repo.guests.upsert({
-      id: newId(),
+
+  const add = async (entry: GuestListEntry, key: string) => {
+    const guest: Guest = {
+      id: stableId(weddingId, "guests", key),
       weddingId,
-      firstName: note.firstName,
-      lastName: note.lastName,
-      side: note.side,
-      tier: note.tier,
-      relationship: note.relationship,
-      plusOne: false,
+      firstName: entry.firstName,
+      lastName: entry.lastName,
+      side: entry.side,
+      tier: entry.tier,
+      relationship: entry.relationship,
+      notes: entry.notes,
+      plusOne: entry.plusOne ?? false,
+      plusOneCount: entry.plusOneCount,
       isChild: false,
-      tags: [],
+      tags: entry.tags ?? [],
       rsvp: {},
       createdAt: now,
       updatedAt: now,
-    });
+    };
+    await repo.guests.upsert(guest);
+    existing.push(guest);
+  };
+
+  const round4 = STARTER_GUEST_LIST.map((entry) => ({ entry: entry as GuestListEntry, key: guestKey(entry) }));
+  if (ledger.firstRunFor("g:") && existing.length > 0) {
+    for (const { key } of round4) ledger.add(key);
+  } else {
+    for (const { entry, key } of round4) {
+      if (ledger.has(key)) continue;
+      await add(entry, key);
+      ledger.add(key);
+    }
   }
+
+  for (const correction of GUEST_CORRECTIONS) {
+    const key = `fix:${correction.match.side}:${norm(correction.match.firstName)}:${JSON.stringify(correction.set)}`;
+    if (ledger.has(key)) continue;
+    const target = existing.find(
+      (g) =>
+        g.side === correction.match.side &&
+        norm(g.firstName) === norm(correction.match.firstName) &&
+        (!correction.match.relationshipIncludes || norm(g.relationship).includes(norm(correction.match.relationshipIncludes))),
+    );
+    if (target) {
+      const updated = { ...target, ...correction.set, updatedAt: now };
+      await repo.guests.upsert(updated);
+      existing.splice(existing.indexOf(target), 1, updated);
+    }
+    ledger.add(key);
+  }
+
+  for (const entry of GUEST_LIST_ROUND_6) {
+    const key = guestKey(entry);
+    if (ledger.has(key)) continue;
+    const listed = existing.some(
+      (g) =>
+        coreName(g) === coreName(entry) &&
+        (g.side === entry.side || g.side === "both" || entry.side === "both") &&
+        (!entry.relationship || !g.relationship || norm(g.relationship).slice(0, 6) === norm(entry.relationship).slice(0, 6)),
+    );
+    if (!listed) await add(entry, key);
+    ledger.add(key);
+  }
+
+  await ledger.save();
 }
 
 /**
- * Reaches an *existing* destination's venue list, run once per load alongside
- * `reconcileDestinations` (which only ever adds whole new destinations, never touches venues on
- * one already present). Two things happen here, both safe to re-run:
+ * Keeps an *existing* destination's venues current, once per load:
  * 1. Any venue named in `RETRACTED_VENUE_NAMES` is removed outright — a narrow, explicit
- *    correction for a specific bad venue a past round shipped, not a general sync.
- * 2. Any venue in a registered seed's `venues` list, matched by name, that isn't already present
- *    under the corresponding existing destination gets added — the same additive-by-name
- *    approach `reconcileDestinations` already uses for whole destinations, applied one level
- *    down so a researched venue *addition* to an already-synced destination (e.g. a couple more
- *    Portland or DC options) reaches existing wedding data too.
+ *    correction for specific bad venues a past round shipped.
+ * 2. Seed venues added since this wedding last synced are added once; one the couple removed
+ *    stays removed.
  */
 export async function reconcileVenues(repo: WeddingRepo, weddingId: string): Promise<void> {
   const [destinations, venues] = await Promise.all([repo.destinations.list(weddingId), repo.venues.list(weddingId)]);
   const now = nowIso();
 
   for (const venue of venues) {
-    if (RETRACTED_VENUE_NAMES.has(venue.name)) {
-      await repo.venues.remove(venue.id);
-    }
+    if (RETRACTED_VENUE_NAMES.has(venue.name)) await repo.venues.remove(venue.id);
   }
 
-  const destinationByName = new Map(destinations.map((d) => [d.name.trim().toLowerCase(), d]));
+  const ledger = await openLedger(repo, weddingId);
+  const firstRun = ledger.firstRunFor("v:");
+  const destinationByName = new Map(destinations.map((d) => [norm(d.name), d]));
   const remainingVenues = venues.filter((v) => !RETRACTED_VENUE_NAMES.has(v.name));
 
   for (const seed of SEED_DESTINATIONS) {
-    const destination = destinationByName.get(seed.name.trim().toLowerCase());
-    if (!destination) continue; // not yet synced to this wedding — reconcileDestinations handles that case
-    const existingNames = new Set(remainingVenues.filter((v) => v.destinationId === destination.id).map((v) => v.name.trim().toLowerCase()));
+    const destination = destinationByName.get(norm(seed.name));
+    if (!destination) continue; // reconcileDestinations handles a whole missing destination
+    const existingNames = new Set(remainingVenues.filter((v) => v.destinationId === destination.id).map((v) => norm(v.name)));
     for (const venueSeed of seed.venues) {
-      if (existingNames.has(venueSeed.name.trim().toLowerCase())) continue;
-      await repo.venues.upsert(buildVenueFromSeed(venueSeed, weddingId, destination.id, now));
+      const key = venueKey(seed.name, venueSeed.name);
+      if (existingNames.has(norm(venueSeed.name)) || firstRun) {
+        ledger.add(key);
+        continue;
+      }
+      if (ledger.has(key)) continue;
+      await repo.venues.upsert({ ...buildVenueFromSeed(venueSeed, weddingId, destination.id, now), id: stableId(weddingId, "venues", key) });
+      ledger.add(key);
     }
   }
+  await ledger.save();
 }
 
 async function createMinimalWedding(repo: WeddingRepo): Promise<Wedding> {
