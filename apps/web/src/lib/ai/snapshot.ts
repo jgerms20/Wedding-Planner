@@ -84,7 +84,10 @@ export async function buildSnapshot(repo: WeddingRepo, weddingId: string, option
   // keeping the AI aware of what exists without blowing the token budget.
   const sortedDestinations = [...destinations].sort(byKey((d) => d.name));
   for (const destination of sortedDestinations) {
-    if ((destination.favoritedBy?.length ?? 0) > 0) {
+    if (destination.excluded) {
+      // Ruled out by the couple — named once so it's never suggested back to them.
+      lines.push(`- ${destination.name} [NOT FOR US — ruled out, don't suggest]`);
+    } else if ((destination.favoritedBy?.length ?? 0) > 0) {
       const attendance =
         destination.attendanceRateEstimate !== undefined ? `${Math.round(destination.attendanceRateEstimate * 100)}% likely to attend` : "attendance unknown";
       lines.push(

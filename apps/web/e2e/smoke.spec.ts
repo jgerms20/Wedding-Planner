@@ -33,6 +33,15 @@ test("first load lands on the pre-seeded Home, and the redesigned pages hold up"
   await expect(page.getByText("Charleston, SC")).toBeVisible();
   await expect(page.getByText("Tulum", { exact: true })).toBeVisible();
 
+  // "Not for us" sets a destination aside instead of deleting it, and it stays set aside (and
+  // single) across a reload — a removed seed destination used to quietly come back on load.
+  await page.getByRole("button", { name: "Not for us: Iceland" }).click();
+  await page.reload();
+  await page.getByRole("button", { name: /^Not for us \(1\)/ }).click();
+  await page.getByRole("button", { name: "Bring it back" }).click();
+  await page.getByRole("button", { name: "Explore", exact: true }).click();
+  await expect(page.getByRole("button", { name: "Not for us: Iceland" })).toHaveCount(1);
+
   // Guests: the headcount card renders, both partners' lists are in (Janel's corrected spellings,
   // Joshua's numbered pool), and each partner's "Mom" stays a separate person.
   await page.getByRole("link", { name: "Guests", exact: true }).click();

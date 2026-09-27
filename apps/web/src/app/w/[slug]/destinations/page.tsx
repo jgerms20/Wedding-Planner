@@ -24,7 +24,7 @@ import { usePriorities } from "@/lib/use-priorities";
 import { useRepoContext } from "@/lib/repo-context";
 import { useEntityList } from "@/lib/use-entity-list";
 
-type DestinationTab = "explore" | "favorites" | "caribbean";
+type DestinationTab = "explore" | "favorites" | "caribbean" | "not-for-us";
 type RegionFilter = "all" | "domestic" | "international";
 
 const REGION_FILTERS: { key: RegionFilter; label: string }[] = [
@@ -50,6 +50,7 @@ export default function DestinationsPage() {
   const { priorities, add: addPriority, toggle: togglePriority, remove: removePriority } = usePriorities();
 
   const [tab, setTab] = useState<DestinationTab>("explore");
+  const [justSetAside, setJustSetAside] = useState<Destination | null>(null);
   const [region, setRegion] = useState<RegionFilter>("all");
   const [detailId, setDetailId] = useState<string | null>(null);
   const [destinationDialog, setDestinationDialog] = useState<{ open: boolean; destination?: Destination }>({ open: false });
@@ -65,12 +66,20 @@ export default function DestinationsPage() {
     return map;
   }, [scenarios]);
 
+  // "Not for us" destinations stay in the data (restorable, and never re-added by the seed sync)
+  // but drop out of every browsing and comparing view.
+  const activeDestinations = useMemo(() => destinations.filter((d) => !d.excluded), [destinations]);
+  const setAsideDestinations = useMemo(
+    () => destinations.filter((d) => d.excluded).sort((a, b) => a.name.localeCompare(b.name)),
+    [destinations],
+  );
+
   // Order is the couple's own call (sortOrder), not derived from cost or whatever scenario
   // happens to be pinned — that's what made Brazil "stuck" as the front-runner before. Rank 1
   // (lowest sortOrder) is the front-runner, full stop.
   const orderedDestinations = useMemo(
-    () => [...destinations].sort((a, b) => (a.sortOrder ?? Number.MAX_SAFE_INTEGER) - (b.sortOrder ?? Number.MAX_SAFE_INTEGER)),
-    [destinations],
+    () => [...activeDestinations].sort((a, b) => (a.sortOrder ?? Number.MAX_SAFE_INTEGER) - (b.sortOrder ?? Number.MAX_SAFE_INTEGER)),
+    [activeDestinations],
   );
   // Favorites: the same manual rank/Front-runner logic, scoped to whichever destinations either
   // partner has hearted — this is the "actually comparing" subset, versus Explore's "just browsing."
@@ -88,7 +97,7 @@ export default function DestinationsPage() {
 
   const caribbeanDestinations = useMemo(() => orderedDestinations.filter((d) => (d.originFlights ?? []).length > 0), [orderedDestinations]);
 
-  const explorePool = useMemo(() => [...destinations].sort((a, b) => a.name.localeCompare(b.name)), [destinations]);
+  const explorePool = useMemo(() => [...activeDestinations].sort((a, b) => a.name.localeCompare(b.name)), [activeDestinations]);
   const exploreDomesticCount = useMemo(() => explorePool.filter((d) => isDomesticCountry(d.country)).length, [explorePool]);
   const exploreInternationalCount = explorePool.length - exploreDomesticCount;
   const visibleExplore = useMemo(
@@ -168,8 +177,20 @@ export default function DestinationsPage() {
   // destination's venues/scenarios would otherwise become orphaned rows still pointing at an id
   // that no longer resolves to anything. Clean those up here, and clear the pinned scenario if it
   // was one of them, before removing the destination itself.
+  const handleSetAside = async (destination: Destination) => {
+    await repo.destinations.upsert({ ...destination, excluded: true, updatedAt: nowIso() });
+    setJustSetAside(destination);
+    touch();
+  };
+
+  const handleRestore = async (destination: Destination) => {
+    await repo.destinations.upsert({ ...destination, excluded: false, excludedNote: undefined, updatedAt: nowIso() });
+    setJustSetAside((current) => (current?.id === destination.id ? null : current));
+    touch();
+  };
+
   const handleRemoveDestination = async (destination: Destination) => {
-    if (!window.confirm(`Remove ${destination.name}? This also removes its venues and any scenarios built for it.`)) return;
+    if (!window.confirm(`Delete ${destination.name} for good? Its venues and scenarios go too, and it won't come back.`)) return;
     const staleVenues = venues.filter((v) => v.destinationId === destination.id);
     const staleScenarios = scenarios.filter((s) => s.destinationId === destination.id);
     await Promise.all([...staleVenues.map((v) => repo.venues.remove(v.id)), ...staleScenarios.map((s) => repo.scenarios.remove(s.id))]);
@@ -239,6 +260,7 @@ export default function DestinationsPage() {
                 { key: "explore", label: "Explore" },
                 { key: "favorites", label: `Favorites${favoriteDestinations.length > 0 ? ` (${favoriteDestinations.length})` : ""}` },
                 { key: "caribbean", label: "Caribbean" },
+                { key: "not-for-us", label: `Not for us${setAsideDestinations.length > 0 ? ` (${setAsideDestinations.length})` : ""}` },
               ] as const).map((t) => (
                 <button
                   key={t.key}
@@ -251,7 +273,7 @@ export default function DestinationsPage() {
                 </button>
               ))}
             </div>
-            {tab !== "caribbean" && (
+            {tab !== "caribbean" && tab !== "not-for-us" && (
             <div className="inline-flex w-fit rounded-full border border-line p-0.5 text-xs">
               {REGION_FILTERS.map((r) => {
                 const count = tab === "explore" ? (r.key === "domestic" ? exploreDomesticCount : r.key === "international" ? exploreInternationalCount : explorePool.length) : r.key === "domestic" ? favoriteDomesticCount : r.key === "international" ? favoriteInternationalCount : favoriteDestinations.length;
@@ -274,6 +296,20 @@ export default function DestinationsPage() {
             )}
           </div>
 
+          {justSetAside && tab !== "not-for-us" && (
+            <div className="rise mt-5 flex flex-wrap items-center gap-3 rounded-lg border border-line bg-card px-4 py-2.5 text-sm">
+              <p className="flex-1 text-ink-soft">
+                {justSetAside.name} moved to <strong className="font-medium text-foreground">Not for us</strong> — still there if you change your mind.
+              </p>
+              <button type="button" onClick={() => void handleRestore(justSetAside)} className="text-coral hover:underline">
+                Undo
+              </button>
+              <button type="button" onClick={() => setJustSetAside(null)} className="text-ink-mute hover:text-foreground" aria-label="Dismiss">
+                ×
+              </button>
+            </div>
+          )}
+
           {tab === "explore" ? (
             <div className="mt-6 flex flex-col gap-8">
               <div>
@@ -293,12 +329,50 @@ export default function DestinationsPage() {
                       partnerBName={wedding.partnerB.name}
                       onToggleFavorite={(partner) => void handleToggleFavorite(destination, partner)}
                       onViewDetails={() => setDetailId(destination.id)}
-                      onRemove={() => void handleRemoveDestination(destination)}
+                      onRemove={() => void handleSetAside(destination)}
                     />
                   ))}
                 </div>
               )}
             </div>
+          ) : tab === "not-for-us" ? (
+            setAsideDestinations.length === 0 ? (
+              <p className="mt-6 rounded-lg border border-dashed border-line-strong p-4 text-sm text-ink-soft">
+                Nothing set aside. The × on any destination moves it here instead of deleting it, so a &ldquo;no&rdquo; is never lost.
+              </p>
+            ) : (
+              <div className="mt-6 flex flex-col gap-3">
+                <p className="text-sm text-ink-soft">
+                  Places one of you said no to. They&apos;re out of Explore, Favorites and the comparison, but kept here in case you change your minds.
+                </p>
+                <ul className="grid gap-3 sm:grid-cols-2 xl:grid-cols-3">
+                  {setAsideDestinations.map((destination) => (
+                    <li key={destination.id} className="flex flex-col gap-2 rounded-lg border border-line bg-card p-4">
+                      <div>
+                        <p className="font-display text-lg leading-tight">{destination.name}</p>
+                        <p className="line-clamp-1 text-xs text-ink-mute">{destination.region ?? destination.country}</p>
+                      </div>
+                      {destination.excludedNote && <p className="text-xs text-ink-soft">{destination.excludedNote}</p>}
+                      <div className="mt-auto flex items-center gap-3 pt-1 text-sm">
+                        <Button variant="outline" size="sm" onClick={() => void handleRestore(destination)}>
+                          Bring it back
+                        </Button>
+                        <button type="button" onClick={() => setDetailId(destination.id)} className="text-ink-soft hover:text-coral">
+                          Details
+                        </button>
+                        <button
+                          type="button"
+                          onClick={() => void handleRemoveDestination(destination)}
+                          className="ml-auto text-xs text-ink-mute hover:text-destructive"
+                        >
+                          Delete for good
+                        </button>
+                      </div>
+                    </li>
+                  ))}
+                </ul>
+              </div>
+            )
           ) : tab === "caribbean" ? (
             <CaribbeanComparisonTable
               destinations={caribbeanDestinations}
@@ -330,7 +404,7 @@ export default function DestinationsPage() {
                   partnerAName={wedding.partnerA.name}
                   partnerBName={wedding.partnerB.name}
                   onToggleFavorite={(partner) => void handleToggleFavorite(destination, partner)}
-                  onRemove={() => void handleRemoveDestination(destination)}
+                  onRemove={() => void handleSetAside(destination)}
                 />
               ))}
             </div>
@@ -341,8 +415,8 @@ export default function DestinationsPage() {
       <div className="hairline my-10" />
 
       <ScenarioMatrix
-        scenarios={scenarios}
-        destinations={destinations}
+        scenarios={scenarios.filter((s) => s.pinned || !setAsideDestinations.some((d) => d.id === s.destinationId))}
+        destinations={activeDestinations}
         onPin={(id) => void handlePinScenario(id)}
         onUnpin={(id) => void handleUnpinScenario(id)}
         onEdit={(scenario) => setScenarioDialog({ open: true, scenario })}

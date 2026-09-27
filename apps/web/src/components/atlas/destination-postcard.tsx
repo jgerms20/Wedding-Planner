@@ -59,8 +59,8 @@ export function DestinationPostcard({
             <button
               type="button"
               onClick={onRemove}
-              aria-label={`Remove ${destination.name}`}
-              title="Remove"
+              aria-label={`Not for us: ${destination.name}`}
+              title="Not for us — set it aside"
               className="rounded-full p-1 text-ink-mute transition-colors hover:bg-muted hover:text-destructive"
             >
               <X className="size-3.5" />
