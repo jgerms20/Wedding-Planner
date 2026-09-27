@@ -25,6 +25,7 @@ import { ConciergePanel } from "@/components/concierge/concierge-panel";
 import { TellBowerBar } from "@/components/tell-bower/tell-bower-bar";
 import { WEDDING_SLUG } from "@/lib/constants";
 import { seasonLabel } from "@/lib/format";
+import { MergeBanner } from "@/components/cloud/merge-banner";
 import { RepoProvider, useRepoContext } from "@/lib/repo-context";
 import { cn } from "@/lib/utils";
 
@@ -148,7 +149,10 @@ function ShellChrome({ children }: { children: ReactNode }) {
       </header>
 
       <div className="flex min-w-0 flex-1 flex-col">
-        <main className="paper-content mx-auto w-full max-w-6xl flex-1 px-4 pt-6 pb-24 sm:px-8 sm:pt-10 md:pb-10">{children}</main>
+        <main className="paper-content mx-auto w-full max-w-6xl flex-1 px-4 pt-6 pb-24 sm:px-8 sm:pt-10 md:pb-10">
+          <MergeBanner />
+          {children}
+        </main>
       </div>
 
       {/* Mobile tab bar */}

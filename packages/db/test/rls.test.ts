@@ -37,6 +37,7 @@ const TEST_LOGIN_ROLE = "bower_rls_test_client";
 /** One row per tenant table, keyed by wedding, built in dependency order. */
 interface WeddingFixture {
   id: string;
+  slug: string;
   ownerId: string;
   destinationId: string;
   venueId: string;
@@ -116,6 +117,10 @@ async function createWeddingFixture(slug: string, ownerEmail: string): Promise<W
   );
   await admin.query(`insert into public.scenarios (wedding_id, name) values ($1, 'Fixture scenario')`, [weddingId]);
   await admin.query(`insert into public.guests (wedding_id, first_name) values ($1, 'Fixture Guest')`, [weddingId]);
+  await admin.query(
+    `insert into public.wedding_docs (wedding_id, collection, id, data) values ($1, 'guests', $2, '{"firstName":"Fixture"}')`,
+    [weddingId, randomUUID()],
+  );
 
   const {
     rows: [destination],
@@ -171,6 +176,7 @@ async function createWeddingFixture(slug: string, ownerEmail: string): Promise<W
 
   return {
     id: weddingId,
+    slug,
     ownerId,
     destinationId: destination.id,
     venueId: venue.id,
@@ -235,6 +241,7 @@ const MEMBER_WRITE_TABLES = [
   "sub_events",
   "wedding_party_members",
   "decisions",
+  "wedding_docs",
 ] as const;
 
 /** Read-only for members: only the worker (service_role) writes these. */
@@ -360,5 +367,122 @@ describe("RLS isolation", () => {
       wedding2.id,
     ]);
     expect(own.length).toBeGreaterThan(0);
+  });
+});
+
+describe("wedding_docs: the shared store both partners read and write", () => {
+  it("a member can write and read back their own wedding's documents", async () => {
+    const docId = randomUUID();
+    await asOwner1.query(
+      `insert into public.wedding_docs (wedding_id, collection, id, data) values ($1, 'destinations', $2, '{"name":"Tulum"}')`,
+      [wedding1.id, docId],
+    );
+    const { rows } = await asOwner1.query<{ data: { name: string } }>(
+      `select data from public.wedding_docs where wedding_id = $1 and id = $2`,
+      [wedding1.id, docId],
+    );
+    expect(rows[0]?.data.name).toBe("Tulum");
+  });
+
+  it("a member cannot insert into another wedding", async () => {
+    await expect(
+      asOwner1.query(
+        `insert into public.wedding_docs (wedding_id, collection, id, data) values ($1, 'guests', $2, '{}')`,
+        [wedding2.id, randomUUID()],
+      ),
+    ).rejects.toMatchObject({ code: "42501" });
+  });
+
+  it("a member cannot update or delete another wedding's documents", async () => {
+    const updated = await asOwner1.query(`update public.wedding_docs set data = '{"hijacked":true}' where wedding_id = $1`, [
+      wedding2.id,
+    ]);
+    expect(updated.rowCount).toBe(0);
+    const deleted = await asOwner1.query(`delete from public.wedding_docs where wedding_id = $1`, [wedding2.id]);
+    expect(deleted.rowCount).toBe(0);
+    const { rows } = await admin.query(`select 1 from public.wedding_docs where wedding_id = $1 and data ? 'hijacked'`, [
+      wedding2.id,
+    ]);
+    expect(rows).toHaveLength(0);
+  });
+});
+
+describe("joining a wedding", () => {
+  const extraUsers: string[] = [];
+  const extraWeddings: string[] = [];
+  const sessions: Client[] = [];
+
+  async function signedInAs(email: string): Promise<{ client: Client; userId: string }> {
+    const userId = randomUUID();
+    await admin.query("insert into auth.users (id, email) values ($1, $2)", [userId, email]);
+    extraUsers.push(userId);
+    const client = new Client({ connectionString: testClientUrl.toString() });
+    await client.connect();
+    sessions.push(client);
+    await actAs(client, userId);
+    return { client, userId };
+  }
+
+  afterAll(async () => {
+    await Promise.all(sessions.map((c) => c.end().catch(() => {})));
+    for (const id of extraWeddings) await admin.query("delete from public.weddings where id = $1", [id]);
+    for (const id of extraUsers) {
+      await admin.query("delete from public.wedding_invites where accepted_by = $1", [id]);
+      await admin.query("delete from public.profiles where id = $1", [id]);
+      await admin.query("delete from auth.users where id = $1", [id]);
+    }
+  });
+
+  it("an invited partner sees nothing until they claim, then sees only the wedding that invited them", async () => {
+    const { client } = await signedInAs(`invite-${wedding1.slug}@example.com`);
+
+    const before = await client.query(`select 1 from public.wedding_docs where wedding_id = $1`, [wedding1.id]);
+    expect(before.rows).toHaveLength(0);
+
+    const { rows: claimed } = await client.query<{ claim_invites: string }>(`select * from public.claim_invites()`);
+    expect(claimed.map((r) => r.claim_invites)).toEqual([wedding1.id]);
+
+    const after = await client.query(`select 1 from public.wedding_docs where wedding_id = $1`, [wedding1.id]);
+    expect(after.rows.length).toBeGreaterThan(0);
+    const other = await client.query(`select 1 from public.wedding_docs where wedding_id = $1`, [wedding2.id]);
+    expect(other.rows).toHaveLength(0);
+
+    // The invitee can write to the shared wedding, like the partner who created it.
+    await expect(
+      client.query(`insert into public.wedding_docs (wedding_id, collection, id, data) values ($1, 'guests', $2, '{}')`, [
+        wedding1.id,
+        randomUUID(),
+      ]),
+    ).resolves.toMatchObject({ rowCount: 1 });
+  });
+
+  it("someone with no invite claims nothing and stays locked out", async () => {
+    const { client } = await signedInAs(`stranger-${randomUUID()}@example.com`);
+    const { rows } = await client.query(`select * from public.claim_invites()`);
+    expect(rows).toHaveLength(0);
+    const docs = await client.query(`select 1 from public.wedding_docs`);
+    expect(docs.rows).toHaveLength(0);
+  });
+
+  it("create_wedding makes the caller its only member, isolated from everyone else", async () => {
+    const { client, userId } = await signedInAs(`founder-${randomUUID()}@example.com`);
+    const weddingId = randomUUID();
+    extraWeddings.push(weddingId);
+    await client.query(`select public.create_wedding($1, $2)`, [weddingId, `our-wedding-${weddingId.slice(0, 8)}`]);
+
+    const { rows: members } = await admin.query<{ user_id: string }>(
+      `select user_id from public.wedding_members where wedding_id = $1`,
+      [weddingId],
+    );
+    expect(members.map((m) => m.user_id)).toEqual([userId]);
+
+    await expect(
+      client.query(`insert into public.wedding_docs (wedding_id, collection, id, data) values ($1, 'wedding', $2, '{}')`, [
+        weddingId,
+        weddingId,
+      ]),
+    ).resolves.toMatchObject({ rowCount: 1 });
+    const foreign = await client.query(`select 1 from public.wedding_docs where wedding_id = $1`, [wedding1.id]);
+    expect(foreign.rows).toHaveLength(0);
   });
 });

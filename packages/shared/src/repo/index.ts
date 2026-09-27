@@ -4,6 +4,8 @@ import type { DataMode, WeddingRepo } from "./types";
 export * from "./types";
 export * from "./local";
 export * from "./export-bundle";
+export * from "./doc-store";
+export * from "./merge";
 
 /**
  * Creates a WeddingRepo for the given data mode. "local" (Phase 0a) is backed

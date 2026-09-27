@@ -2,6 +2,7 @@
 
 import { AiUsageCard } from "@/components/ai/ai-usage-card";
 import { ConnectClaudeCard } from "@/components/ai/connect-claude-card";
+import { SharingCard } from "@/components/cloud/sharing-card";
 import { nowIso } from "@bower/shared";
 import { AlertTriangle, Download, Upload } from "lucide-react";
 import Link from "next/link";
@@ -22,7 +23,7 @@ import { useRepoContext } from "@/lib/repo-context";
 type ThemeChoice = "system" | "light" | "dark";
 
 export default function SettingsPage() {
-  const { repo, wedding, reloadWedding, touch } = useRepoContext();
+  const { repo, wedding, reloadWedding, touch, cloud } = useRepoContext();
   const fileInputRef = useRef<HTMLInputElement>(null);
   const [importError, setImportError] = useState<string | null>(null);
   const [confirmingRestore, setConfirmingRestore] = useState(false);
@@ -62,7 +63,13 @@ export default function SettingsPage() {
 
   return (
     <div className="flex max-w-2xl flex-col gap-6">
-      <PageHeader title="Settings" description="Names, date, and the basics — plus your data." action={<Badge variant="secondary">Local: this device only</Badge>} />
+      <PageHeader
+        title="Settings"
+        description="Names, date, and the basics — plus your data."
+        action={<Badge variant="secondary">{cloud ? "Shared: both of you" : "Local: this device only"}</Badge>}
+      />
+
+      <SharingCard />
 
       <section className="postcard rise flex flex-col gap-4 p-6">
         <p className="eyebrow">You two</p>
