@@ -144,6 +144,8 @@ export function buildVenueFromSeed(seed: VenueSeed, weddingId: string, destinati
     availabilityNotes: seed.availabilityNotes,
     status: seed.status ?? "idea",
     sourceUrls: seed.sourceUrls,
+    suggestedBy: seed.suggestedBy,
+    suggestedNote: seed.suggestedNote,
     createdAt: now,
     updatedAt: now,
   };

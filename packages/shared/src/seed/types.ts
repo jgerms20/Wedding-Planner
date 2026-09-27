@@ -28,6 +28,10 @@ export interface VenueSeed {
   sourceUrls: string[];
   /** Defaults to "idea". */
   status?: VenueStatus;
+  /** Who put it on the list: a partner who sent it over, or unset for Atlas's own research. */
+  suggestedBy?: "Janel" | "Joshua";
+  /** Their one-line take, e.g. "Historic courtyard & ballroom vibe". */
+  suggestedNote?: string;
 }
 
 export interface DestinationSeed {

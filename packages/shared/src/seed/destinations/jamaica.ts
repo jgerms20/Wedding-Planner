@@ -70,6 +70,16 @@ export const jamaica: DestinationSeed = {
   ],
   venues: [
     {
+      key: "jamaica-jakes-treasure-beach",
+      name: "Jakes",
+      website: "https://jakeshotel.com/weddings",
+      lodgingOnSite: true,
+      styleNotes: "A 49-room boho hotel on Jamaica's quiet south coast at Treasure Beach: colorful oceanfront cottages and villas, no two rooms alike, with an on-site wedding coordinator for small or large groups. Farther from Montego Bay's airport than the north-coast resorts. Capacity and pricing aren't published.",
+      sourceUrls: ["https://jakeshotel.com/weddings", "https://www.destinationweddings.com/jakes-hotel-treasure-beach"],
+      suggestedBy: "Janel",
+      suggestedNote: "Boho beachfront & villa vibe",
+    },
+    {
       key: "jamaica-grand-palladium-montego-bay",
       name: "Grand Palladium Jamaica Resort & Spa",
       website:

@@ -275,9 +275,15 @@ export async function reconcileVenues(repo: WeddingRepo, weddingId: string): Pro
   for (const seed of SEED_DESTINATIONS) {
     const destination = destinationByName.get(norm(seed.name));
     if (!destination) continue; // reconcileDestinations handles a whole missing destination
-    const existingNames = new Set(remainingVenues.filter((v) => v.destinationId === destination.id).map((v) => norm(v.name)));
+    const here = remainingVenues.filter((v) => v.destinationId === destination.id);
+    const existingNames = new Set(here.map((v) => norm(v.name)));
     for (const venueSeed of seed.venues) {
       const key = venueKey(seed.name, venueSeed.name);
+      // A venue the couple already has that a partner later sent over too picks up the credit.
+      const existing = here.find((v) => norm(v.name) === norm(venueSeed.name));
+      if (existing && venueSeed.suggestedBy && !existing.suggestedBy) {
+        await repo.venues.upsert({ ...existing, suggestedBy: venueSeed.suggestedBy, suggestedNote: existing.suggestedNote ?? venueSeed.suggestedNote, updatedAt: now });
+      }
       if (existingNames.has(norm(venueSeed.name)) || firstRun) {
         ledger.add(key);
         continue;

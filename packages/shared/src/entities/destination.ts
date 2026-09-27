@@ -65,6 +65,10 @@ export const venueSchema = z.object({
   availabilityNotes: z.string().optional(),
   status: venueStatusSchema,
   sourceUrls: z.array(z.string()),
+  /** Who put it on the list ("Janel", "Joshua"); unset means Atlas found it. */
+  suggestedBy: z.string().optional(),
+  /** Their one-line take when they sent it. */
+  suggestedNote: z.string().optional(),
   createdAt: z.string(),
   updatedAt: z.string(),
 });

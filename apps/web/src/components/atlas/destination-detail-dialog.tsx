@@ -131,7 +131,7 @@ export function DestinationDetailDialog({
             <p className="mt-2 text-sm text-ink-mute">No venues yet. Tell Atlas to find some, or add one.</p>
           ) : (
             <ul className="mt-2 flex flex-col gap-2">
-              {venues.map((venue) => (
+              {[...venues].sort((a, b) => Number(Boolean(b.suggestedBy)) - Number(Boolean(a.suggestedBy))).map((venue) => (
                 <VenueRow key={venue.id} venue={venue} onEdit={() => onEditVenue(venue)} onStatusChange={(s) => onVenueStatusChange(venue, s)} />
               ))}
             </ul>
@@ -178,6 +178,11 @@ function VenueRow({
           ) : (
             <span className="truncate font-medium">{venue.name}</span>
           )}
+          {venue.suggestedBy ? (
+            <span className="rounded-full bg-coral-soft px-2 py-px text-[0.65rem] font-medium text-coral">From {venue.suggestedBy}</span>
+          ) : (
+            <span className="rounded-full border border-line px-2 py-px text-[0.65rem] text-ink-mute">Atlas found</span>
+          )}
           {venue.lodgingOnSite && <NeutralChip>Lodging on site</NeutralChip>}
           {venue.inHouseCatering && <NeutralChip>In-house catering</NeutralChip>}
           {isEstimate && <EstimateChip />}
@@ -206,6 +211,8 @@ function VenueRow({
         <span>F&amp;B min {formatMoney(venue.fbMinimum)}</span>
         <span>Per guest {formatMoney(venue.perGuestCost)}</span>
       </div>
+      {venue.suggestedNote && <p className="mt-2 text-sm text-foreground italic">&ldquo;{venue.suggestedNote}&rdquo; — {venue.suggestedBy}</p>}
+      {venue.styleNotes && <p className="mt-1.5 line-clamp-4 text-xs leading-relaxed text-ink-soft">{venue.styleNotes}</p>}
       {venue.sourceUrls.length > 0 && <SourceChips urls={venue.sourceUrls} className="mt-2" />}
     </li>
   );

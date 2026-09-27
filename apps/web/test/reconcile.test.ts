@@ -119,8 +119,10 @@ describe("reconcile — research added after a wedding was created", () => {
     const repo = createLocalRepo(`reconcile-${newId()}`);
     const wedding = await ensureWedding(repo);
     const before = await repo.destinations.list(wedding.id);
-    const islands = before.filter((d) => isCaribbean(d.country));
-    expect(islands.length).toBeGreaterThanOrEqual(5);
+    // The five islands whose per-city flights were researched (newer islands don't have them yet).
+    const researched = new Set(["The Bahamas", "Jamaica", "St. Lucia", "Turks and Caicos", "Punta Cana"]);
+    const islands = before.filter((d) => isCaribbean(d.country) && researched.has(d.name));
+    expect(islands).toHaveLength(5);
 
     // Strip the round-5 fields, as a wedding created before them had; and make one hand edit.
     for (const d of before) {
@@ -129,9 +131,33 @@ describe("reconcile — research added after a wedding was created", () => {
     await reconcileDestinations(repo, wedding.id);
     const after = await repo.destinations.list(wedding.id);
 
-    for (const island of after.filter((d) => isCaribbean(d.country))) {
+    for (const island of after.filter((d) => isCaribbean(d.country) && researched.has(d.name))) {
       expect(island.originFlights?.length ?? 0, island.name).toBeGreaterThan(0);
     }
     expect(after.find((d) => d.name === "Jamaica")!.flightCostEstimate).toBe(999);
+  });
+});
+
+describe("reconcile — venues a partner sent over", () => {
+  it("credits Janel on a venue already there, and adds her new ones and new islands", async () => {
+    const repo = createLocalRepo(`reconcile-${newId()}`);
+    const wedding = await ensureWedding(repo);
+    await reconcileVenues(repo, wedding.id); // first sync records what's already there
+    const destinations = await repo.destinations.list(wedding.id);
+    const nola = destinations.find((d) => d.name === "New Orleans, LA")!;
+    // As an older wedding had it: Board of Trade present with no credit, Janel's new picks absent.
+    for (const v of await repo.venues.list(wedding.id)) {
+      if (v.destinationId !== nola.id) continue;
+      if (v.name === "New Orleans Board of Trade") await repo.venues.upsert({ ...v, suggestedBy: undefined, suggestedNote: undefined });
+      if (v.name === "Paradigm Gardens") await repo.venues.remove(v.id);
+    }
+    const settings = (await repo.getSettings(wedding.id))!;
+    await repo.saveSettings({ ...settings, seedLedger: (settings.seedLedger ?? []).filter((k) => !k.includes("paradigm gardens")) });
+
+    await reconcileVenues(repo, wedding.id);
+    const venues = (await repo.venues.list(wedding.id)).filter((v) => v.destinationId === nola.id);
+    expect(venues.find((v) => v.name === "New Orleans Board of Trade")?.suggestedBy).toBe("Janel");
+    expect(venues.find((v) => v.name === "Paradigm Gardens")).toMatchObject({ suggestedBy: "Janel", suggestedNote: "Farm-to-table garden vibe" });
+    expect(destinations.map((d) => d.name)).toEqual(expect.arrayContaining(["Dominica", "Curaçao", "Grand Cayman", "Anguilla"]));
   });
 });

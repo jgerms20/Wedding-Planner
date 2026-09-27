@@ -7,7 +7,12 @@ import { bahamas } from "./destinations/bahamas";
 import { baliIndonesia } from "./destinations/bali-indonesia";
 import { batonRougeLa } from "./destinations/baton-rouge-la";
 import { beaufortSc } from "./destinations/beaufort-sc";
+import { anguilla } from "./destinations/anguilla";
 import { brazil } from "./destinations/brazil";
+import { caymanIslands } from "./destinations/cayman-islands";
+import { curacao } from "./destinations/curacao";
+import { dominica } from "./destinations/dominica";
+import { stVincentGrenadines } from "./destinations/st-vincent-grenadines";
 import { caboSanLucasMexico } from "./destinations/cabo-san-lucas-mexico";
 import { cannonBeachOr } from "./destinations/cannon-beach-or";
 import { cartagenaColombia } from "./destinations/cartagena-colombia";
@@ -109,5 +114,11 @@ export const SEED_DESTINATIONS: DestinationSeed[] = [
   provenceFrance,
   algarvePortugal,
   ibizaSpain,
+  // Janel's venue emails, Sept 2026.
+  dominica,
+  curacao,
+  caymanIslands,
+  anguilla,
+  stVincentGrenadines,
 ];
 export const SEED_BENCHMARKS: CostBenchmarks | null = benchmarks;

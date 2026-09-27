@@ -57,6 +57,16 @@ export const bahamas: DestinationSeed = {
   ],
   venues: [
     {
+      key: "bahamas-normans-cay",
+      name: "Norman's Cay",
+      website: "https://normanscay.com/",
+      lodgingOnSite: true,
+      styleNotes: "A private island in the Exumas with 49 villas, bungalows and cabanas, a hilltop Yacht Club with 360° views and a Beach Club with a mosaic bar. Hosts intimate beach weddings and larger events; wedding capacity and pricing aren't published.",
+      sourceUrls: ["https://normanscay.com/", "https://www.thenewstays.com/hotel/normans-cay/"],
+      suggestedBy: "Janel",
+      suggestedNote: "Island luxury vibe",
+    },
+    {
       key: "bahamas-grand-isle-resort-exuma",
       name: "Grand Isle Resort & Spa",
       website: "https://www.grandisleresort.com/weddings.htm",
@@ -86,6 +96,7 @@ export const bahamas: DestinationSeed = {
     },
     {
       key: "bahamas-goldwynn-nassau",
+      suggestedBy: "Janel",
       name: "Goldwynn Resort & Residences",
       website: "https://goldwynnresorts.com/nassau-bahamas-wedding/",
       capacity: 100,

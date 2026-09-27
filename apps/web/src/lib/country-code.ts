@@ -15,6 +15,14 @@ const CODES: Record<string, string> = {
   "dominican republic": "DO",
   "costa rica": "CR",
   colombia: "CO",
+  dominica: "DM",
+  "curaçao": "CW",
+  curacao: "CW",
+  "cayman islands": "KY",
+  anguilla: "AI",
+  "st. vincent and the grenadines": "VC",
+  "st. lucia": "LC",
+  "turks and caicos islands": "TC",
 };
 
 /** Two-letter code for the passport stamp; falls back to the first two letters of the name. */

@@ -76,6 +76,16 @@ export const puntaCanaDominicanRepublic: DestinationSeed = {
   ],
   venues: [
     {
+      key: "dr-araya-las-galeras",
+      name: "Araya Resort",
+      website: "https://arayaresort.com/",
+      lodgingOnSite: true,
+      styleNotes: "A small boutique resort in Las Galeras on the Samaná Peninsula (not Punta Cana itself; it's on the other side of the country), with oceanview villas above Samaná Bay and sleek indoor-outdoor design. Wedding capacity and pricing aren't published.",
+      sourceUrls: ["https://arayaresort.com/", "https://www.tripadvisor.com/Hotel_Review-g793703-d33325381-Reviews-Araya_Resort-Las_Galeras_Samana_Province_Dominican_Republic.html"],
+      suggestedBy: "Janel",
+      suggestedNote: "Contemporary resort vibe",
+    },
+    {
       key: "punta-cana-dominican-republic-hard-rock",
       name: "Hard Rock Hotel & Casino Punta Cana",
       website: "https://hotel.hardrock.com/punta-cana/weddings.aspx",

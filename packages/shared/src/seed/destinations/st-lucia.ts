@@ -76,6 +76,17 @@ export const stLucia: DestinationSeed = {
   ],
   venues: [
     {
+      key: "st-lucia-cap-maison",
+      name: "Cap Maison",
+      website: "https://capmaison.com/st-lucia-wedding-packages/",
+      capacity: 100,
+      lodgingOnSite: true,
+      styleNotes: "Clifftop Spanish-Mediterranean resort in Gros Islet with 49 rooms (a full buyout gives you all of them). Ceremony spots: Smugglers Point gazebo over the sea (up to 100), the villa rooftop (30) and Rock Maison, a deck on a rock out at sea (30).",
+      sourceUrls: ["https://capmaison.com/st-lucia-wedding-packages/", "https://www.destinationweddings.com/cap-maison"],
+      suggestedBy: "Janel",
+      suggestedNote: "Cliffside Mediterranean vibe",
+    },
+    {
       key: "st-lucia-sandals-grande-st-lucian",
       name: "Sandals Grande St. Lucian Spa & Beach Resort",
       website: "https://www.sandals.com/saint-lucia/weddings/",

@@ -92,6 +92,8 @@ export const santaFeNm: DestinationSeed = {
     },
     {
       key: "sf-botanical-garden",
+      suggestedBy: "Janel",
+      suggestedNote: "High desert & nature vibe",
       name: "Santa Fe Botanical Garden",
       website: "https://visitsfbg.org/explore/rent-the-garden/",
       capacity: 350,

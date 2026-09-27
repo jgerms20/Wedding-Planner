@@ -99,6 +99,7 @@ export const washingtonDc: DestinationSeed = {
     },
     {
       key: "dc-meridian-house",
+      suggestedBy: "Janel",
       name: "Meridian House",
       website: "https://meridian.org/rental/",
       capacity: 150,
