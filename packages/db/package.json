@@ -14,7 +14,8 @@
     "typecheck": "tsc --noEmit",
     "test": "vitest run",
     "migrate": "tsx src/migrate.ts",
-    "seed": "tsx src/seed.ts"
+    "seed": "tsx src/seed.ts",
+    "setup-sql": "tsx src/setup-sql.ts"
   },
   "devDependencies": {
     "@types/node": "^22",
