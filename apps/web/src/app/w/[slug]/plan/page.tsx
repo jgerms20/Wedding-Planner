@@ -14,7 +14,7 @@ import {
 } from "@bower/shared";
 import { format, parseISO } from "date-fns";
 import { Plus, Settings2, Sparkles } from "lucide-react";
-import { useCallback, useMemo, useState } from "react";
+import { useCallback, useMemo, useRef, useState } from "react";
 import { PageHeader } from "@/components/page-header";
 import { AnchorsCard, TravelWindowsCard } from "@/components/plan/plan-sidebar";
 import { PlanMenu, PlanMenuItem } from "@/components/plan/plan-menu";
@@ -49,6 +49,16 @@ export default function PlanPage() {
   const [settingsOpen, setSettingsOpen] = useState(false);
   const [addOpen, setAddOpen] = useState(false);
   const [regenerating, setRegenerating] = useState(false);
+  const [focusPhase, setFocusPhase] = useState<PhaseKey | null>(null);
+  const listRef = useRef<HTMLDivElement>(null);
+
+  function selectPhase(phase: PhaseKey | null) {
+    setFocusPhase(phase);
+    // On a phone the timeline sits above the list: bring the list into view.
+    if (phase && listRef.current && listRef.current.getBoundingClientRect().top > window.innerHeight * 0.6) {
+      listRef.current.scrollIntoView({ behavior: "smooth", block: "start" });
+    }
+  }
 
   const windowLabels = useMemo(() => Object.fromEntries((settings?.planConfig.travelWindows ?? []).map((w) => [w.id, w.label])), [settings]);
   const tasksById = useMemo(() => new Map(tasks.map((t) => [t.id, t])), [tasks]);
@@ -154,8 +164,26 @@ export default function PlanPage() {
         </div>
       ) : (
         <div className="grid grid-cols-1 gap-10 lg:grid-cols-[1.4fr_1fr]">
-          <div className="order-2 flex flex-col lg:order-1">
-            {PHASE_ORDER.map((phase, phaseIndex) => {
+          <div ref={listRef} className="order-2 flex scroll-mt-24 flex-col lg:order-1">
+            {focusPhase && (
+              <div className="mb-6 flex flex-wrap items-center justify-between gap-2 rounded-lg border border-line bg-card px-4 py-2.5 text-sm">
+                <span className="text-ink-soft">
+                  Showing just <span className="font-medium text-foreground">{PHASE_LABELS[focusPhase]}</span>
+                </span>
+                <button type="button" onClick={() => setFocusPhase(null)} className="text-coral hover:underline">
+                  Show every phase
+                </button>
+              </div>
+            )}
+            {focusPhase && (byPhase.get(focusPhase) ?? []).length === 0 && (
+              <div className="postcard flex flex-col items-start gap-3 p-6">
+                <p className="text-[15px] text-ink-soft">Nothing in {PHASE_LABELS[focusPhase]} yet.</p>
+                <Button size="sm" onClick={() => setAddOpen(true)}>
+                  <Plus className="size-4" /> Add a task
+                </Button>
+              </div>
+            )}
+            {PHASE_ORDER.filter((phase) => !focusPhase || phase === focusPhase).map((phase, phaseIndex) => {
               const items = byPhase.get(phase) ?? [];
               if (items.length === 0) return null;
               const closed = items.filter((t) => t.status === "done" || t.status === "skipped").length;
@@ -190,7 +218,7 @@ export default function PlanPage() {
           </div>
 
           <div className="order-1 flex flex-col gap-6 lg:order-2">
-            <PlanPhaseTimeline byPhase={byPhase} />
+            <PlanPhaseTimeline byPhase={byPhase} selected={focusPhase} onSelect={selectPhase} />
             <PrioritiesCard
               title="Wedding must-haves"
               area="Overall"
@@ -227,7 +255,7 @@ export default function PlanPage() {
         }}
       />
 
-      <AddTaskDialog open={addOpen} onOpenChange={setAddOpen} onAdd={addTask} />
+      <AddTaskDialog key={focusPhase ?? "all"} defaultPhase={focusPhase ?? "details"} open={addOpen} onOpenChange={setAddOpen} onAdd={addTask} />
     </div>
   );
 }
@@ -254,16 +282,18 @@ function dateSpan(items: Task[]): string {
 }
 
 function AddTaskDialog({
+  defaultPhase,
   open,
   onOpenChange,
   onAdd,
 }: {
+  defaultPhase: PhaseKey;
   open: boolean;
   onOpenChange: (open: boolean) => void;
   onAdd: (title: string, phase: PhaseKey, dueDate: string) => void;
 }) {
   const [title, setTitle] = useState("");
-  const [phase, setPhase] = useState<PhaseKey>("details");
+  const [phase, setPhase] = useState<PhaseKey>(defaultPhase);
   const [dueDate, setDueDate] = useState("");
 
   return (

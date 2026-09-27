@@ -17,7 +17,7 @@ import { ScenarioEditorDialog } from "@/components/scenario-editor-dialog";
 import { Button } from "@/components/ui/button";
 import { VenueEditorDialog } from "@/components/venue-editor-dialog";
 import { restoreSeed } from "@/lib/bootstrap";
-import { isDomesticCountry } from "@/lib/country-code";
+import { isCaribbean, isDomesticCountry } from "@/lib/country-code";
 import { cn } from "@/lib/utils";
 import { LoadingState } from "@/components/loading-state";
 import { usePriorities } from "@/lib/use-priorities";
@@ -25,13 +25,20 @@ import { useRepoContext } from "@/lib/repo-context";
 import { useEntityList } from "@/lib/use-entity-list";
 
 type DestinationTab = "explore" | "favorites" | "caribbean" | "not-for-us";
-type RegionFilter = "all" | "domestic" | "international";
+type RegionFilter = "all" | "domestic" | "international" | "caribbean";
 
 const REGION_FILTERS: { key: RegionFilter; label: string }[] = [
   { key: "all", label: "All" },
   { key: "domestic", label: "Domestic" },
   { key: "international", label: "International" },
+  { key: "caribbean", label: "Caribbean" },
 ];
+
+function inRegion(destination: Destination, region: RegionFilter): boolean {
+  if (region === "all") return true;
+  if (region === "caribbean") return isCaribbean(destination.country);
+  return isDomesticCountry(destination.country) === (region === "domestic");
+}
 
 export default function DestinationsPage() {
   const { repo, wedding, touch } = useRepoContext();
@@ -87,24 +94,15 @@ export default function DestinationsPage() {
   const favoriteFrontRunnerId = favoriteDestinations[0]?.id;
   const favoriteDomesticCount = useMemo(() => favoriteDestinations.filter((d) => isDomesticCountry(d.country)).length, [favoriteDestinations]);
   const favoriteInternationalCount = favoriteDestinations.length - favoriteDomesticCount;
-  const visibleFavorites = useMemo(
-    () =>
-      region === "all"
-        ? favoriteDestinations
-        : favoriteDestinations.filter((d) => isDomesticCountry(d.country) === (region === "domestic")),
-    [favoriteDestinations, region],
-  );
+  const visibleFavorites = useMemo(() => favoriteDestinations.filter((d) => inRegion(d, region)), [favoriteDestinations, region]);
 
-  const caribbeanDestinations = useMemo(() => orderedDestinations.filter((d) => (d.originFlights ?? []).length > 0), [orderedDestinations]);
+  // Every Caribbean destination still in play — flight data shows where the research has it.
+  const caribbeanDestinations = useMemo(() => activeDestinations.filter((d) => isCaribbean(d.country)), [activeDestinations]);
 
   const explorePool = useMemo(() => [...activeDestinations].sort((a, b) => a.name.localeCompare(b.name)), [activeDestinations]);
   const exploreDomesticCount = useMemo(() => explorePool.filter((d) => isDomesticCountry(d.country)).length, [explorePool]);
   const exploreInternationalCount = explorePool.length - exploreDomesticCount;
-  const visibleExplore = useMemo(
-    () =>
-      region === "all" ? explorePool : explorePool.filter((d) => isDomesticCountry(d.country) === (region === "domestic")),
-    [explorePool, region],
-  );
+  const visibleExplore = useMemo(() => explorePool.filter((d) => inRegion(d, region)), [explorePool, region]);
 
   const detailDestination = detailId ? destinations.find((d) => d.id === detailId) : undefined;
 
@@ -276,7 +274,13 @@ export default function DestinationsPage() {
             {tab !== "caribbean" && tab !== "not-for-us" && (
             <div className="inline-flex w-fit rounded-full border border-line p-0.5 text-xs">
               {REGION_FILTERS.map((r) => {
-                const count = tab === "explore" ? (r.key === "domestic" ? exploreDomesticCount : r.key === "international" ? exploreInternationalCount : explorePool.length) : r.key === "domestic" ? favoriteDomesticCount : r.key === "international" ? favoriteInternationalCount : favoriteDestinations.length;
+                const pool = tab === "explore" ? explorePool : favoriteDestinations;
+                const count =
+                  r.key === "domestic"
+                    ? tab === "explore" ? exploreDomesticCount : favoriteDomesticCount
+                    : r.key === "international"
+                      ? tab === "explore" ? exploreInternationalCount : favoriteInternationalCount
+                      : pool.filter((d) => inRegion(d, r.key)).length;
                 return (
                   <button
                     key={r.key}

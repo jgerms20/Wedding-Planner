@@ -322,3 +322,65 @@ export function alreadyListed(row: Pick<ParsedGuest, "firstName" | "lastName" | 
   const name = coreName(row);
   return guests.find((g) => coreName(g) === name && (g.side === row.side || g.side === "both" || row.side === "both"));
 }
+
+/* ------------------------------------------------------------------ */
+/* Family-first order                                                  */
+/* ------------------------------------------------------------------ */
+
+/** Who comes first by default: closest family at the top, then out through friends. */
+const CLOSENESS: [RegExp, number][] = [
+  [/\b(step-?)?(mom|mother|dad|father|parents?|mama|papa)\b/, 0],
+  [/\b(sister|brother|sibling)\b/, 1],
+  [/\bgrand(mother|father|ma|pa|mommy|daddy|parents?|mom|dad)\b/, 2],
+  [/\bgod(mother|father|parents?)\b/, 3],
+  [/\bcousin/, 5],
+  [/\b(aunt|uncle)\b/, 4],
+  [/\b(niece|nephew|in-law|family)\b(?! friend)/, 6],
+  [/\b(family friend|play aunt|babysitter|mom's friend|dad's friend)\b/, 7],
+  [/\b(friend|roommate|coworker|colleague|classmate|teammate)\b/, 8],
+];
+const OTHER = 9;
+const PARTNER_OF = /^(?:possibly\s+)?(?:uncle\s+|aunt\s+|cousin\s+)?([\p{L}][\p{L}'.-]*)'s\s+(partner|husband|wife|boyfriend|girlfriend|fianc[ée]e?|spouse)\b/iu;
+
+function ownRank(guest: Pick<Guest, "firstName" | "relationship">): number {
+  const rel = norm(guest.relationship ?? "");
+  // "Uncle Marcus & Regina's child", "Cousin's family": the family branch, not the aunt/uncle.
+  if (/'s (child|kids?|son|daughter|family)\b/.test(rel)) return 5;
+  // "Mom's friend, a childhood play aunt": someone's friend, not the parent.
+  if (/'s (friend|coworker|colleague|neighbor)\b/.test(rel)) return 7;
+  for (const [pattern, rank] of CLOSENESS) if (pattern.test(rel)) return rank;
+  // "Mom" and "Dad" often arrive as the name itself, with no relationship.
+  for (const [pattern, rank] of CLOSENESS.slice(0, 3)) if (pattern.test(norm(guest.firstName))) return rank;
+  return OTHER;
+}
+
+/**
+ * Sort key for the family-first default: [rank, anchor name, 0 for the person / 1 for their
+ * partner]. A partner ("Reagan's partner") sits right under the person they came with.
+ */
+export function closenessKey(guest: Guest, everyone: Guest[]): [number, string, number] {
+  const partnerOf = PARTNER_OF.exec(guest.relationship ?? "");
+  if (partnerOf) {
+    const anchorName = norm(partnerOf[1]!);
+    const anchor = everyone.find((g) => g.id !== guest.id && g.side === guest.side && norm(g.firstName) === anchorName)
+      ?? everyone.find((g) => g.id !== guest.id && norm(g.firstName) === anchorName);
+    if (anchor) return [ownRank(anchor), coreName(anchor), 1];
+  }
+  return [ownRank(guest), coreName(guest), 0];
+}
+
+/**
+ * One tier's guests in display order: anyone the couple placed by hand (sortOrder) first, in
+ * their order; everyone else after, family first, then by name.
+ */
+export function orderGuests(tierGuests: Guest[], everyone: Guest[] = tierGuests): Guest[] {
+  const keys = new Map(tierGuests.map((g) => [g.id, closenessKey(g, everyone)]));
+  return [...tierGuests].sort((a, b) => {
+    const ao = a.sortOrder ?? Number.POSITIVE_INFINITY;
+    const bo = b.sortOrder ?? Number.POSITIVE_INFINITY;
+    if (ao !== bo) return ao - bo;
+    const [ar, an, ap] = keys.get(a.id)!;
+    const [br, bn, bp] = keys.get(b.id)!;
+    return ar - br || an.localeCompare(bn) || ap - bp || coreName(a).localeCompare(coreName(b)) || a.side.localeCompare(b.side);
+  });
+}

@@ -16,6 +16,8 @@ import {
   coreName,
   GUEST_CORRECTIONS,
   GUEST_LIST_ROUND_6,
+  type Destination,
+  type DestinationSeed,
   type Guest,
   type GuestListEntry,
   type Wedding,
@@ -129,6 +131,9 @@ export async function reconcileDestinations(repo: WeddingRepo, weddingId: string
     const key = destinationKey(seed.name);
     if (existingNames.has(norm(seed.name))) {
       ledger.add(key);
+      const existing = destinations.find((d) => norm(d.name) === norm(seed.name));
+      const filled = existing && backfillResearch(existing, seed);
+      if (filled) await repo.destinations.upsert({ ...filled, updatedAt: now });
       continue;
     }
     if (ledger.has(key)) continue; // added before, then removed on purpose
@@ -149,6 +154,22 @@ export async function reconcileDestinations(repo: WeddingRepo, weddingId: string
     for (const venue of seed.venues) ledger.add(venueKey(seed.name, venue.name));
   }
   await ledger.save();
+}
+
+/**
+ * Research fields added to the seed after a wedding was created (flight split, per-city flights,
+ * photos) never reached destinations that already existed. Fills only what's missing, so nothing
+ * the couple edited is overwritten. Returns the filled destination, or undefined if nothing changed.
+ */
+export function backfillResearch(destination: Destination, seed: DestinationSeed): Destination | undefined {
+  const patch: Partial<Destination> = {};
+  if (destination.flightCostEstimate === undefined && seed.flightCostEstimate !== undefined) patch.flightCostEstimate = seed.flightCostEstimate;
+  if (!destination.originFlights?.length && seed.originFlights?.length) patch.originFlights = seed.originFlights;
+  if (!destination.imageUrl && seed.imageUrl) {
+    patch.imageUrl = seed.imageUrl;
+    patch.imageCredit = seed.imageCredit;
+  }
+  return Object.keys(patch).length > 0 ? { ...destination, ...patch } : undefined;
 }
 
 /**

@@ -8,10 +8,9 @@ import { cn } from "@/lib/utils";
 const ORIGINS = ["Atlanta", "Charlotte", "Baltimore", "Los Angeles"];
 
 /**
- * A dedicated side-by-side of the island finalists — the couple's own comparison table groups by
- * destination, not by "which island is cheapest to actually fly to from where our people live."
- * Only destinations carrying real, cited `originFlights` data show up here; everything else in
- * the atlas is unaffected.
+ * A dedicated side-by-side of every Caribbean destination in the atlas: price, and "which island
+ * is cheapest to actually fly to from where our people live." Flight rows come from real, cited
+ * `originFlights` research; an island without it yet shows a dash, never a guess.
  */
 export function CaribbeanComparisonTable({
   destinations,
@@ -22,10 +21,14 @@ export function CaribbeanComparisonTable({
   scenarioByDestination: Map<string, Scenario>;
   onViewDetails: (destinationId: string) => void;
 }) {
-  const islands = destinations.filter((d) => (d.originFlights ?? []).length > 0);
+  const islands = destinations;
 
   if (islands.length === 0) {
-    return <p className="mt-6 text-sm text-ink-soft">No Caribbean-island flight data yet.</p>;
+    return (
+      <p className="mt-6 text-sm text-ink-soft">
+        No Caribbean destinations in play right now. Check &ldquo;Not for us&rdquo; if one was set aside, or add one from Explore.
+      </p>
+    );
   }
 
   return (
@@ -64,7 +67,7 @@ export function CaribbeanComparisonTable({
               }}
               emphasize
             />
-            <Row label="Flight, roughly" islands={islands} render={(d) => formatMoney(d.flightCostEstimate)} />
+            <Row label="Flight, roughly" islands={islands} render={(d) => (d.flightCostEstimate ? formatMoney(d.flightCostEstimate) : "—")} />
             {ORIGINS.map((origin) => (
               <Row
                 key={origin}
@@ -81,7 +84,7 @@ export function CaribbeanComparisonTable({
       </div>
       <p className="mt-2 text-xs text-ink-mute">
         Flight times and fares are real, cited averages per route (nonstop where it exists, a representative connecting
-        itinerary otherwise) — see each island's detail view for sources.
+        itinerary otherwise) — see each island&apos;s detail view for sources. A dash means that route hasn&apos;t been researched yet.
       </p>
     </div>
   );

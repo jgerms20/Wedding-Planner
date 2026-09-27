@@ -1,6 +1,13 @@
 "use client";
 
-import { parseSeasonStart, scenarioMath, type Decision, type Destination, type Scenario, type Task } from "@bower/shared";
+import {
+  parseSeasonStart,
+  scenarioMath,
+  type Decision,
+  type Destination,
+  type Scenario,
+  type Task,
+} from "@bower/shared";
 import { differenceInCalendarDays, format, parseISO } from "date-fns";
 import { ArrowRight, Check, Mic, RefreshCw } from "lucide-react";
 import Link from "next/link";
@@ -10,6 +17,7 @@ import { WEDDING_SLUG } from "@/lib/constants";
 import { countryCode } from "@/lib/country-code";
 import { daysUntil, formatMoney, seasonLabel } from "@/lib/format";
 import { LoadingState } from "@/components/loading-state";
+import { assetPath, COUPLE_PHOTO } from "@/lib/asset-path";
 import { useRepoContext } from "@/lib/repo-context";
 import { useEntityList } from "@/lib/use-entity-list";
 import { cn } from "@/lib/utils";
@@ -21,11 +29,26 @@ export default function HomePage() {
   const weddingId = wedding?.id;
   const [restoring, setRestoring] = useState(false);
 
-  const loadTasks = useCallback(async () => (repo && weddingId ? repo.tasks.list(weddingId) : undefined), [repo, weddingId]);
-  const loadScenarios = useCallback(async () => (repo && weddingId ? repo.scenarios.list(weddingId) : undefined), [repo, weddingId]);
-  const loadDestinations = useCallback(async () => (repo && weddingId ? repo.destinations.list(weddingId) : undefined), [repo, weddingId]);
-  const loadBudget = useCallback(async () => (repo && weddingId ? repo.budgetItems.list(weddingId) : undefined), [repo, weddingId]);
-  const loadDecisions = useCallback(async () => (repo && weddingId ? repo.decisions.list(weddingId) : undefined), [repo, weddingId]);
+  const loadTasks = useCallback(
+    async () => (repo && weddingId ? repo.tasks.list(weddingId) : undefined),
+    [repo, weddingId],
+  );
+  const loadScenarios = useCallback(
+    async () => (repo && weddingId ? repo.scenarios.list(weddingId) : undefined),
+    [repo, weddingId],
+  );
+  const loadDestinations = useCallback(
+    async () => (repo && weddingId ? repo.destinations.list(weddingId) : undefined),
+    [repo, weddingId],
+  );
+  const loadBudget = useCallback(
+    async () => (repo && weddingId ? repo.budgetItems.list(weddingId) : undefined),
+    [repo, weddingId],
+  );
+  const loadDecisions = useCallback(
+    async () => (repo && weddingId ? repo.decisions.list(weddingId) : undefined),
+    [repo, weddingId],
+  );
 
   const { items: tasks, reload: reloadTasks } = useEntityList(loadTasks);
   const { items: scenarios } = useEntityList(loadScenarios);
@@ -34,7 +57,8 @@ export default function HomePage() {
   const { items: decisions } = useEntityList(loadDecisions);
 
   const pinned = useMemo(
-    () => scenarios.find((s) => s.id === wedding?.activeScenarioId) ?? scenarios.find((s) => s.pinned),
+    () =>
+      scenarios.find((s) => s.id === wedding?.activeScenarioId) ?? scenarios.find((s) => s.pinned),
     [scenarios, wedding?.activeScenarioId],
   );
   const scenarioByDestination = useMemo(() => {
@@ -49,14 +73,20 @@ export default function HomePage() {
     () =>
       [...destinations]
         .filter((d) => (d.favoritedBy ?? []).length > 0)
-        .sort((a, b) => (a.sortOrder ?? Number.MAX_SAFE_INTEGER) - (b.sortOrder ?? Number.MAX_SAFE_INTEGER)),
+        .sort(
+          (a, b) =>
+            (a.sortOrder ?? Number.MAX_SAFE_INTEGER) - (b.sortOrder ?? Number.MAX_SAFE_INTEGER),
+        ),
     [destinations],
   );
   const frontRunnerId = orderedDestinations[0]?.id;
   const thisWeek = useMemo(() => weekTasks(tasks), [tasks]);
   const nextAnchor = useMemo(() => upcomingAnchor(settings?.planConfig.anchors ?? []), [settings]);
   const estimateTotal = budgetItems.reduce((sum, item) => sum + (item.estimate ?? 0), 0);
-  const committedTotal = budgetItems.reduce((sum, item) => sum + (item.contracted ?? item.quoted ?? 0), 0);
+  const committedTotal = budgetItems.reduce(
+    (sum, item) => sum + (item.contracted ?? item.quoted ?? 0),
+    0,
+  );
 
   if (!ready || !wedding) {
     return <LoadingState label="Opening your atlas…" />;
@@ -89,7 +119,10 @@ export default function HomePage() {
           <p className="eyebrow rise">
             {wedding.partnerA.name} &amp; {wedding.partnerB.name} · engaged in Brazil · Sept 2026
           </p>
-          <h1 className="settle mt-3 text-6xl leading-[0.95] text-balance sm:text-7xl lg:text-8xl" data-testid="home-headline">
+          <h1
+            className="settle mt-3 text-6xl leading-[0.95] text-balance sm:text-7xl lg:text-8xl"
+            data-testid="home-headline"
+          >
             {countdown.headline}
           </h1>
           <div className="rise rise-2 mt-6 flex flex-wrap items-baseline gap-x-4 gap-y-1">
@@ -100,27 +133,47 @@ export default function HomePage() {
           </div>
         </div>
 
-        <div className="rise rise-3 postcard p-5">
-          <p className="eyebrow">Next anchor</p>
-          {nextAnchor ? (
-            <>
-              <p className="mt-2 font-display text-2xl">{nextAnchor.title}</p>
-              <p className="mt-1 text-sm text-ink-soft">
-                {format(parseISO(nextAnchor.date), "EEEE, MMM d, yyyy")} ·{" "}
-                <span className="tabular font-medium text-foreground">{daysUntil(nextAnchor.date)} days</span>
-              </p>
-              {nextAnchor.reveals.length > 0 && (
-                <p className="mt-3 text-sm text-ink-soft">
-                  The reveal: {nextAnchor.reveals.map((r) => r.replace("_", " ")).join(", ")}. Save-the-dates go out right after.
+        <div className="flex flex-col gap-4">
+          <figure className="rise rise-2 postcard overflow-hidden p-2">
+            <img
+              src={assetPath(COUPLE_PHOTO.large)}
+              alt={COUPLE_PHOTO.alt}
+              width={1400}
+              height={1120}
+              className="aspect-[5/4] w-full rounded-[calc(var(--radius)-2px)] object-cover"
+              data-testid="couple-photo"
+            />
+          </figure>
+          <div className="rise rise-3 postcard p-5">
+            <p className="eyebrow">Next anchor</p>
+            {nextAnchor ? (
+              <>
+                <p className="mt-2 font-display text-2xl">{nextAnchor.title}</p>
+                <p className="mt-1 text-sm text-ink-soft">
+                  {format(parseISO(nextAnchor.date), "EEEE, MMM d, yyyy")} ·{" "}
+                  <span className="tabular font-medium text-foreground">
+                    {daysUntil(nextAnchor.date)} days
+                  </span>
                 </p>
-              )}
-              <Link href={`${base}/plan`} className="mt-4 inline-flex items-center gap-1 text-sm text-coral">
-                Everything before it <ArrowRight className="size-3.5" />
-              </Link>
-            </>
-          ) : (
-            <p className="mt-2 text-sm text-ink-soft">Add an anchor in Plan settings to organize around it.</p>
-          )}
+                {nextAnchor.reveals.length > 0 && (
+                  <p className="mt-3 text-sm text-ink-soft">
+                    The reveal: {nextAnchor.reveals.map((r) => r.replace("_", " ")).join(", ")}.
+                    Save-the-dates go out right after.
+                  </p>
+                )}
+                <Link
+                  href={`${base}/plan`}
+                  className="mt-4 inline-flex items-center gap-1 text-sm text-coral"
+                >
+                  Everything before it <ArrowRight className="size-3.5" />
+                </Link>
+              </>
+            ) : (
+              <p className="mt-2 text-sm text-ink-soft">
+                Add an anchor in Plan settings to organize around it.
+              </p>
+            )}
+          </div>
         </div>
       </section>
 
@@ -133,15 +186,18 @@ export default function HomePage() {
             <p className="eyebrow">The atlas</p>
             <h2 className="mt-1 text-3xl">Where it could be</h2>
           </div>
-          <Link href={`${base}/destinations`} className="inline-flex items-center gap-1 text-sm text-coral">
+          <Link
+            href={`${base}/destinations`}
+            className="inline-flex items-center gap-1 text-sm text-coral"
+          >
             Compare all <ArrowRight className="size-3.5" />
           </Link>
         </div>
         {destinations.length === 0 ? (
           <div className="mt-4 flex flex-wrap items-center gap-3 rounded-lg border border-dashed border-line-strong p-4 text-sm">
             <p className="flex-1 text-ink-soft">
-              This looks like it&apos;s from before we added the destination research. One click brings in Brazil, Jamaica, and the
-              rest with real costs and sources.
+              This looks like it&apos;s from before we added the destination research. One click
+              brings in Brazil, Jamaica, and the rest with real costs and sources.
             </p>
             <button
               type="button"
@@ -175,7 +231,11 @@ export default function HomePage() {
       <section className="grid gap-10 lg:grid-cols-[1.4fr_1fr]">
         <div className="rise">
           <p className="eyebrow">This week</p>
-          <h2 className="mt-1 text-3xl">{thisWeek.length === 0 ? "Nothing due. Enjoy it." : `${thisWeek.length} thing${thisWeek.length === 1 ? "" : "s"} to move`}</h2>
+          <h2 className="mt-1 text-3xl">
+            {thisWeek.length === 0
+              ? "Nothing due. Enjoy it."
+              : `${thisWeek.length} thing${thisWeek.length === 1 ? "" : "s"} to move`}
+          </h2>
           <ul className="mt-5 divide-y divide-line">
             {thisWeek.map((task) => {
               const days = daysUntil(task.dueDate);
@@ -192,27 +252,47 @@ export default function HomePage() {
                   </button>
                   <div className="min-w-0 flex-1">
                     <p className="text-[15px] leading-snug">{task.title}</p>
-                    {task.description && <p className="mt-0.5 line-clamp-1 text-sm text-ink-mute">{task.description}</p>}
+                    {task.description && (
+                      <p className="mt-0.5 line-clamp-1 text-sm text-ink-mute">
+                        {task.description}
+                      </p>
+                    )}
                   </div>
-                  <span className={cn("tabular shrink-0 text-sm", overdue ? "text-coral" : "text-ink-soft")}>
+                  <span
+                    className={cn(
+                      "tabular shrink-0 text-sm",
+                      overdue ? "text-coral" : "text-ink-soft",
+                    )}
+                  >
                     {task.dueDate ? format(parseISO(task.dueDate), "EEE, MMM d") : ""}
                   </span>
                 </li>
               );
             })}
           </ul>
-          <Link href={`${base}/plan`} className="mt-4 inline-flex items-center gap-1 text-sm text-coral">
+          <Link
+            href={`${base}/plan`}
+            className="mt-4 inline-flex items-center gap-1 text-sm text-coral"
+          >
             The whole plan <ArrowRight className="size-3.5" />
           </Link>
         </div>
 
         <div className="rise rise-2">
           <p className="eyebrow">Where the money goes</p>
-          <h2 className="mt-1 text-3xl">{pinned ? formatMoney(scenarioMath(pinned).totalCost) : formatMoney(estimateTotal)}</h2>
+          <h2 className="mt-1 text-3xl">
+            {pinned ? formatMoney(scenarioMath(pinned).totalCost) : formatMoney(estimateTotal)}
+          </h2>
           <p className="mt-1 text-sm text-ink-soft">
-            {pinned ? `Estimated total for ${pinned.name}, ${scenarioMath(pinned).expectedGuests} guests likely to come.` : "Estimated total so far."}
+            {pinned
+              ? `Estimated total for ${pinned.name}, ${scenarioMath(pinned).expectedGuests} guests likely to come.`
+              : "Estimated total so far."}
           </p>
-          <MoneyBar estimate={estimateTotal} committed={committedTotal} target={pinned ? scenarioMath(pinned).totalCost : estimateTotal} />
+          <MoneyBar
+            estimate={estimateTotal}
+            committed={committedTotal}
+            target={pinned ? scenarioMath(pinned).totalCost : estimateTotal}
+          />
           <div className="mt-3 flex flex-wrap gap-x-5 gap-y-1 text-sm">
             <span>
               <span className="inline-block size-2.5 rounded-full bg-ink align-middle" /> Committed{" "}
@@ -223,7 +303,10 @@ export default function HomePage() {
               <span className="tabular text-ink-soft">{formatMoney(estimateTotal)}</span>
             </span>
           </div>
-          <Link href={`${base}/budget`} className="mt-4 inline-flex items-center gap-1 text-sm text-coral">
+          <Link
+            href={`${base}/budget`}
+            className="mt-4 inline-flex items-center gap-1 text-sm text-coral"
+          >
             How we estimated this <ArrowRight className="size-3.5" />
           </Link>
 
@@ -253,8 +336,8 @@ export default function HomePage() {
           <Mic className="size-4" />
         </span>
         <p>
-          Talk to the bar below. “Add my aunt Denise and uncle Ray from Columbia, must-invite.” “Move the engagement party to May.” Atlas
-          proposes, you approve.
+          Talk to the bar below. “Add my aunt Denise and uncle Ray from Columbia, must-invite.”
+          “Move the engagement party to May.” Atlas proposes, you approve.
         </p>
       </section>
     </div>
@@ -275,18 +358,30 @@ function DestinationPostcard({
   className?: string;
 }) {
   const math = scenario ? scenarioMath(scenario) : undefined;
-  const likely = Math.round(guestTarget * (destination.attendanceRateEstimate ?? scenario?.attendanceRate ?? 0.8));
+  const likely = Math.round(
+    guestTarget * (destination.attendanceRateEstimate ?? scenario?.attendanceRate ?? 0.8),
+  );
   return (
     <Link
       href={`${base}/destinations`}
-      className={cn("postcard flex w-64 shrink-0 snap-start flex-col p-4", pinned && "ring-1 ring-coral", className)}
+      className={cn(
+        "postcard flex w-64 shrink-0 snap-start flex-col p-4",
+        pinned && "ring-1 ring-coral",
+        className,
+      )}
     >
       <div className="flex items-start justify-between">
         <span className="stamp stamp-sm">{countryCode(destination.country, destination.name)}</span>
-        {pinned && <span className="rounded-full bg-coral-soft px-2 py-0.5 text-[0.65rem] font-semibold tracking-wide text-coral uppercase">Front-runner</span>}
+        {pinned && (
+          <span className="rounded-full bg-coral-soft px-2 py-0.5 text-[0.65rem] font-semibold tracking-wide text-coral uppercase">
+            Front-runner
+          </span>
+        )}
       </div>
       <p className="mt-4 font-display text-2xl leading-tight">{destination.name}</p>
-      <p className="mt-0.5 line-clamp-1 text-xs text-ink-mute">{destination.region ?? destination.country}</p>
+      <p className="mt-0.5 line-clamp-1 text-xs text-ink-mute">
+        {destination.region ?? destination.country}
+      </p>
       <dl className="mt-4 space-y-1.5 text-sm">
         <div className="flex justify-between gap-2">
           <dt className="text-ink-soft">Total</dt>
@@ -294,7 +389,9 @@ function DestinationPostcard({
         </div>
         <div className="flex justify-between gap-2">
           <dt className="text-ink-soft">Per guest to get there</dt>
-          <dd className="tabular font-medium">{formatMoney(destination.travelCostPerGuestEstimate)}</dd>
+          <dd className="tabular font-medium">
+            {formatMoney(destination.travelCostPerGuestEstimate)}
+          </dd>
         </div>
         <div className="flex justify-between gap-2">
           <dt className="text-ink-soft">Likely to come</dt>
@@ -307,13 +404,27 @@ function DestinationPostcard({
   );
 }
 
-function MoneyBar({ estimate, committed, target }: { estimate: number; committed: number; target: number }) {
+function MoneyBar({
+  estimate,
+  committed,
+  target,
+}: {
+  estimate: number;
+  committed: number;
+  target: number;
+}) {
   const max = Math.max(estimate, committed, target, 1);
   return (
     <div className="mt-4 h-3 w-full overflow-hidden rounded-full bg-paper-deep">
       <div className="relative h-full">
-        <div className="absolute inset-y-0 left-0 rounded-full bg-gold/70" style={{ width: `${(estimate / max) * 100}%` }} />
-        <div className="absolute inset-y-0 left-0 rounded-full bg-ink" style={{ width: `${(committed / max) * 100}%` }} />
+        <div
+          className="absolute inset-y-0 left-0 rounded-full bg-gold/70"
+          style={{ width: `${(estimate / max) * 100}%` }}
+        />
+        <div
+          className="absolute inset-y-0 left-0 rounded-full bg-ink"
+          style={{ width: `${(committed / max) * 100}%` }}
+        />
       </div>
     </div>
   );
@@ -330,17 +441,26 @@ function weekTasks(tasks: Task[]): Task[] {
     .slice(0, 8);
 }
 
-function upcomingAnchor(anchors: { id: string; title: string; date?: string; reveals: string[] }[]) {
+function upcomingAnchor(
+  anchors: { id: string; title: string; date?: string; reveals: string[] }[],
+) {
   const today = new Date().toISOString().slice(0, 10);
   return anchors
     .filter((a): a is typeof a & { date: string } => Boolean(a.date) && a.date! >= today)
     .sort((a, b) => (a.date < b.date ? -1 : 1))[0];
 }
 
-function countdownFor(targetDate?: string, targetSeason?: string): { headline: string; days: string; caption: string } {
+function countdownFor(
+  targetDate?: string,
+  targetSeason?: string,
+): { headline: string; days: string; caption: string } {
   if (targetDate) {
     const days = daysUntil(targetDate) ?? 0;
-    return { headline: format(parseISO(targetDate), "MMMM d, yyyy"), days: String(days), caption: "days to go" };
+    return {
+      headline: format(parseISO(targetDate), "MMMM d, yyyy"),
+      days: String(days),
+      caption: "days to go",
+    };
   }
   if (targetSeason) {
     const start = parseSeasonStart(targetSeason);

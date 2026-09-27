@@ -1,6 +1,7 @@
 import { createLocalRepo, GUEST_LIST_ROUND_6, newId, nowIso, STARTER_GUEST_LIST, type Guest, type WeddingRepo } from "@bower/shared";
 import { describe, expect, it } from "vitest";
 import { ensureWedding, reconcileDestinations, reconcileGuests, reconcileVenues } from "@/lib/bootstrap";
+import { isCaribbean } from "@/lib/country-code";
 
 async function reconcileAll(repo: WeddingRepo, weddingId: string) {
   await reconcileDestinations(repo, weddingId);
@@ -110,5 +111,27 @@ describe("reconcile — destinations", () => {
     await reconcileAll(repo, wedding.id);
     const back = (await repo.destinations.list(wedding.id)).find((d) => d.name === "Maldives");
     expect(back?.excluded).toBe(true);
+  });
+});
+
+describe("reconcile — research added after a wedding was created", () => {
+  it("backfills flight data onto existing destinations without touching the couple's edits", async () => {
+    const repo = createLocalRepo(`reconcile-${newId()}`);
+    const wedding = await ensureWedding(repo);
+    const before = await repo.destinations.list(wedding.id);
+    const islands = before.filter((d) => isCaribbean(d.country));
+    expect(islands.length).toBeGreaterThanOrEqual(5);
+
+    // Strip the round-5 fields, as a wedding created before them had; and make one hand edit.
+    for (const d of before) {
+      await repo.destinations.upsert({ ...d, originFlights: undefined, flightCostEstimate: d.name === "Jamaica" ? 999 : undefined });
+    }
+    await reconcileDestinations(repo, wedding.id);
+    const after = await repo.destinations.list(wedding.id);
+
+    for (const island of after.filter((d) => isCaribbean(d.country))) {
+      expect(island.originFlights?.length ?? 0, island.name).toBeGreaterThan(0);
+    }
+    expect(after.find((d) => d.name === "Jamaica")!.flightCostEstimate).toBe(999);
   });
 });

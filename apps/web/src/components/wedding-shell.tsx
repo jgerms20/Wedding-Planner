@@ -26,6 +26,7 @@ import { TellBowerBar } from "@/components/tell-bower/tell-bower-bar";
 import { WEDDING_SLUG } from "@/lib/constants";
 import { seasonLabel } from "@/lib/format";
 import { MergeBanner } from "@/components/cloud/merge-banner";
+import { assetPath, COUPLE_PHOTO } from "@/lib/asset-path";
 import { RepoProvider, useRepoContext } from "@/lib/repo-context";
 import { cn } from "@/lib/utils";
 
@@ -72,7 +73,7 @@ function ShellChrome({ children }: { children: ReactNode }) {
   return (
     <div className="flex min-h-screen flex-col md:grid md:grid-cols-[var(--rail-w)_1fr]">
       {/* Desktop rail */}
-      <aside className="sticky top-0 hidden h-screen flex-col bg-rail text-rail-foreground md:flex">
+      <aside className="sticky top-0 hidden h-screen flex-col overflow-y-auto bg-rail text-rail-foreground md:flex">
         <div className="px-6 pt-7 pb-5">
           <Link href={base} className="font-display text-3xl italic tracking-tight">
             Atlas
@@ -81,6 +82,13 @@ function ShellChrome({ children }: { children: ReactNode }) {
         </div>
         <div className="mx-6 border-t border-rail-line" />
         <div className="px-6 py-5">
+          <img
+            src={assetPath(COUPLE_PHOTO.small)}
+            alt={COUPLE_PHOTO.alt}
+            width={480}
+            height={384}
+            className="mb-3 h-20 w-full rounded-md object-cover object-[center_18%] ring-1 ring-rail-line"
+          />
           <p className="font-display text-lg leading-tight">{wedding ? `${wedding.partnerA.name} & ${wedding.partnerB.name}` : " "}</p>
           <p className="mt-1 text-sm text-rail-muted">{ready ? dateLine : " "}</p>
         </div>

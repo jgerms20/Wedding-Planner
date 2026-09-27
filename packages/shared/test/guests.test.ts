@@ -1,6 +1,6 @@
 import { describe, expect, it } from "vitest";
 import type { Guest } from "../src/entities/index";
-import { findPossibleDuplicates, guestHeadcount, mergeGuests, parseGuestList } from "../src/guests/index";
+import { findPossibleDuplicates, guestHeadcount, mergeGuests, orderGuests, parseGuestList } from "../src/guests/index";
 import { stableId } from "../src/util";
 
 describe("parseGuestList — the shorthand from the couple's own pasted lists", () => {
@@ -143,5 +143,31 @@ describe("stableId", () => {
     expect(stableId("w", "guests", "reagan")).toBe(stableId("w", "guests", "reagan"));
     expect(stableId("w", "guests", "reagan")).not.toBe(stableId("w", "guests", "rj"));
     expect(stableId("a")).toMatch(/^[0-9a-f]{8}-[0-9a-f]{4}-[0-9a-f]{4}-[0-9a-f]{4}-[0-9a-f]{12}$/);
+  });
+});
+
+describe("orderGuests — family first, then the couple's own order", () => {
+  const list = [
+    guest({ firstName: "Alayna", relationship: "Cousin" }),
+    guest({ firstName: "Wanita", relationship: 'Mom\'s friend, a childhood "play aunt"' }),
+    guest({ firstName: "Eddie", relationship: "Reagan's partner" }),
+    guest({ firstName: "Renee", relationship: "Aunt" }),
+    guest({ firstName: "Mom", relationship: "Mother" }),
+    guest({ firstName: "Grandmommy", relationship: "Joshua's grandmother" }),
+    guest({ firstName: "Reagan", relationship: "Sister" }),
+    guest({ firstName: "Bobo", relationship: "Godfather" }),
+    guest({ firstName: "Dad" }),
+    guest({ firstName: "Kayleigh" }),
+  ];
+
+  it("puts parents, siblings (with partners right under them), grandparents, godparents, aunts, cousins, friends in that order", () => {
+    expect(orderGuests(list).map((g) => g.firstName)).toEqual([
+      "Dad", "Mom", "Reagan", "Eddie", "Grandmommy", "Bobo", "Renee", "Alayna", "Wanita", "Kayleigh",
+    ]);
+  });
+
+  it("lets a hand-placed order win, with anyone not yet placed after it", () => {
+    const placed = list.map((g) => (g.firstName === "Kayleigh" ? { ...g, sortOrder: 0 } : g.firstName === "Mom" ? { ...g, sortOrder: 1 } : g));
+    expect(orderGuests(placed).map((g) => g.firstName).slice(0, 3)).toEqual(["Kayleigh", "Mom", "Dad"]);
   });
 });
