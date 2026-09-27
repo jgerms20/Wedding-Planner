@@ -126,8 +126,8 @@ public URL and publishable key ever ship in the site.
 2. **Authentication → URL Configuration**: set the Site URL to the deployed site
    (e.g. `https://<user>.github.io/Wedding-Planner/`) and add it, with `/**`, to Redirect URLs, plus
    `http://localhost:3000/**` for local testing.
-3. In the GitHub repo, **Settings → Secrets and variables → Actions → Variables**, add
-   `SUPABASE_URL` (Project URL) and `SUPABASE_ANON_KEY` (publishable/anon key). The Pages workflow
-   builds in shared mode whenever both are set, and in local mode otherwise.
+3. Put the Project URL and publishable key in `.github/workflows/pages.yml` (the couple's project,
+   `mppdasompuzsbjtlcrco`, is already there), or override them with the repo's Actions variables
+   `SUPABASE_URL` and `SUPABASE_ANON_KEY`. The Pages site always builds in shared mode.
 
 Locally: `NEXT_PUBLIC_DATA_MODE=supabase NEXT_PUBLIC_SUPABASE_URL=… NEXT_PUBLIC_SUPABASE_ANON_KEY=… pnpm dev`.

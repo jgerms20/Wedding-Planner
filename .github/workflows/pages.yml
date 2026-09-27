@@ -56,17 +56,16 @@ jobs:
       - name: Install dependencies
         run: pnpm install --frozen-lockfile
 
-      # Shared mode (both partners, one wedding) turns on once the repo has the Supabase project's
-      # URL and publishable key as Actions *variables* (Settings -> Secrets and variables ->
-      # Actions -> Variables): SUPABASE_URL and SUPABASE_ANON_KEY. Both are public by design — they
-      # ship in the page bundle, and row-level security decides access. Without them the site
-      # builds in local (this-browser-only) mode, exactly as before.
+      # Shared mode: both partners sign in and see one wedding, stored in the couple's Supabase
+      # project (mppdasompuzsbjtlcrco). The URL and publishable key are public by design — they ship
+      # in the page bundle, and row-level security decides access. Actions variables SUPABASE_URL /
+      # SUPABASE_ANON_KEY override them (e.g. to point at another project).
       - name: Build static export
         run: pnpm --filter @bower/web build
         env:
-          NEXT_PUBLIC_DATA_MODE: ${{ vars.SUPABASE_URL != '' && vars.SUPABASE_ANON_KEY != '' && 'supabase' || 'local' }}
-          NEXT_PUBLIC_SUPABASE_URL: ${{ vars.SUPABASE_URL }}
-          NEXT_PUBLIC_SUPABASE_ANON_KEY: ${{ vars.SUPABASE_ANON_KEY }}
+          NEXT_PUBLIC_DATA_MODE: supabase
+          NEXT_PUBLIC_SUPABASE_URL: ${{ vars.SUPABASE_URL || 'https://mppdasompuzsbjtlcrco.supabase.co' }}
+          NEXT_PUBLIC_SUPABASE_ANON_KEY: ${{ vars.SUPABASE_ANON_KEY || 'sb_publishable_SC8QVhj0BpxLkPmTcHiuEA_TTQpw-VM' }}
           NEXT_PUBLIC_BASE_PATH: /Wedding-Planner
 
       # Without this, GitHub Pages' default Jekyll processing ignores any

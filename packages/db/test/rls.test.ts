@@ -201,6 +201,7 @@ beforeAll(async () => {
   `);
   await admin.query(`alter role ${TEST_LOGIN_ROLE} with password '${TEST_LOGIN_PASSWORD}'`);
   await admin.query(`grant authenticated to ${TEST_LOGIN_ROLE}`);
+  await admin.query(`grant anon to ${TEST_LOGIN_ROLE}`);
 
   wedding1 = await createWeddingFixture(`rls-test-${randomUUID()}`, "owner1@example.com");
   wedding2 = await createWeddingFixture(`rls-test-${randomUUID()}`, "owner2@example.com");
@@ -462,6 +463,16 @@ describe("joining a wedding", () => {
     expect(rows).toHaveLength(0);
     const docs = await client.query(`select 1 from public.wedding_docs`);
     expect(docs.rows).toHaveLength(0);
+  });
+
+  it("signed-out visitors can't create or join a wedding at all", async () => {
+    const client = new Client({ connectionString: testClientUrl.toString() });
+    await client.connect();
+    sessions.push(client);
+    await client.query("set role anon");
+    await expect(client.query(`select public.create_wedding($1, 'nope')`, [randomUUID()])).rejects.toThrow(/permission denied/);
+    await expect(client.query(`select * from public.claim_invites()`)).rejects.toThrow(/permission denied/);
+    await expect(client.query(`select public.handle_new_user()`)).rejects.toThrow(/permission denied/);
   });
 
   it("create_wedding makes the caller its only member, isolated from everyone else", async () => {
