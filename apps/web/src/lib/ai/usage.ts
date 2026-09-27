@@ -37,7 +37,7 @@ export function costCentsFor(model: string, usage: PortUsage): number {
 }
 
 /** Which part of the app spent the money. */
-export type UsageFeature = "tell_bower" | "concierge" | "research";
+export type UsageFeature = "tell_bower" | "concierge" | "research" | "guest_list";
 
 /** Writes one `aiUsage` row. Never throws: a logging failure must not lose a reply. */
 export async function logUsage(
@@ -138,4 +138,5 @@ export const USAGE_FEATURE_LABELS: Record<string, string> = {
   tell_bower: "Tell Atlas",
   concierge: "Concierge",
   research: "Venue research",
+  guest_list: "Guest list tidy-up",
 };

@@ -12,12 +12,15 @@ import {
   type Side,
   type Tier,
 } from "@bower/shared";
-import { FileUp } from "lucide-react";
+import { FileUp, Sparkles } from "lucide-react";
 import { useState } from "react";
 import { Button } from "@/components/ui/button";
 import { Dialog, DialogBody, DialogCloseButton, DialogFooter, DialogHeader, DialogTitle } from "@/components/ui/dialog";
 import { Select } from "@/components/ui/select";
 import { Textarea } from "@/components/ui/textarea";
+import { createBrowserPort, describeApiError, hasApiKey } from "@/lib/ai/client";
+import { tidyGuestList } from "@/lib/ai/tidy-guests";
+import { useRepoContext } from "@/lib/repo-context";
 import { sideLabel } from "@/lib/side-label";
 import { cn } from "@/lib/utils";
 
@@ -57,21 +60,43 @@ export function BulkAddDialog({
   const [rows, setRows] = useState<ReviewRow[] | null>(null);
   const [busy, setBusy] = useState(false);
   const [error, setError] = useState<string | null>(null);
+  const { repo } = useRepoContext();
+  const [tidying, setTidying] = useState(false);
+  const [tidied, setTidied] = useState(false);
 
   function reset() {
     setText("");
     setRows(null);
     setError(null);
+    setTidied(false);
+  }
+
+  function toReview(parsed: ParsedGuest[]): ReviewRow[] {
+    return parsed.map((row, i) => {
+      const match = alreadyListed(row, guests);
+      return { ...row, key: `${i}-${row.firstName}`, include: !match, existing: match ? [match.firstName, match.lastName].filter(Boolean).join(" ") : undefined };
+    });
   }
 
   function review() {
-    const parsed = parseGuestList(text, { side });
-    setRows(
-      parsed.map((row, i) => {
-        const match = alreadyListed(row, guests);
-        return { ...row, key: `${i}-${row.firstName}`, include: !match, existing: match ? [match.firstName, match.lastName].filter(Boolean).join(" ") : undefined };
-      }),
-    );
+    setTidied(false);
+    setError(null);
+    setRows(toReview(parseGuestList(text, { side })));
+  }
+
+  async function tidy() {
+    if (!repo) return;
+    setTidying(true);
+    setError(null);
+    try {
+      const result = await tidyGuestList({ text, side, partnerAName, partnerBName, port: createBrowserPort(), repo, weddingId });
+      setRows(toReview(result.rows));
+      setTidied(true);
+    } catch (err) {
+      setError(describeApiError(err));
+    } finally {
+      setTidying(false);
+    }
   }
 
   async function readFile(file: File) {
@@ -185,6 +210,11 @@ export function BulkAddDialog({
         </DialogBody>
       ) : (
         <DialogBody className="max-h-[65vh] overflow-auto p-0">
+          {(tidied || error) && (
+            <p className={cn("border-b border-line px-4 py-2 text-xs", error ? "text-destructive" : "text-ink-soft")}>
+              {error ?? "Claude reworked this list. Check anything flagged, and the line each row came from, before adding."}
+            </p>
+          )}
           <table className="w-full min-w-[720px] border-collapse text-sm">
             <thead className="sticky top-0 bg-card">
               <tr className="border-b border-line text-left text-[0.65rem] font-semibold tracking-[0.14em] text-ink-mute uppercase">
@@ -280,12 +310,19 @@ export function BulkAddDialog({
         </DialogBody>
       )}
 
-      <DialogFooter>
+      <DialogFooter className="flex-wrap">
         {rows ? (
           <>
             <Button variant="outline" onClick={() => setRows(null)}>
               Back to the list
             </Button>
+            {hasApiKey() ? (
+              <Button variant="outline" onClick={() => void tidy()} disabled={tidying || busy} className="sm:mr-auto">
+                <Sparkles className="size-4 stroke-[1.5]" /> {tidying ? "Claude is reading it…" : tidied ? "Tidy again" : "Tidy with Claude"}
+              </Button>
+            ) : (
+              <p className="self-center text-xs text-ink-mute sm:mr-auto">Messy list? Connect Claude in Settings and it can tidy this up.</p>
+            )}
             <Button onClick={() => void add()} disabled={busy || chosen.length === 0}>
               {busy ? "Adding…" : `Add ${chosen.length} ${chosen.length === 1 ? "guest" : "guests"}`}
             </Button>
