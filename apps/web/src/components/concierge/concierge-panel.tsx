@@ -112,7 +112,7 @@ export function ConciergePanel({ open, onOpenChange }: { open: boolean; onOpenCh
                   <div
                     className={cn(
                       "max-w-[85%] rounded-2xl px-4 py-2.5 text-[15px] leading-relaxed",
-                      m.role === "user" ? "bg-ink text-rail-foreground" : "bg-card border border-line",
+                      m.role === "user" ? "bg-ink text-rail-foreground dark:bg-gold dark:text-ink-900" : "bg-card border border-line",
                     )}
                   >
                     {m.content}

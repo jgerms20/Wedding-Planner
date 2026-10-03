@@ -135,7 +135,7 @@ export default function EventsPage() {
             onClick={() => setTab(t.key)}
             className={cn(
               "shrink-0 rounded-full px-4 py-1.5 whitespace-nowrap transition-colors",
-              tab === t.key ? "bg-ink text-rail-foreground" : "text-ink-soft hover:text-foreground",
+              tab === t.key ? "bg-ink text-rail-foreground dark:bg-gold dark:text-ink-900" : "text-ink-soft hover:text-foreground",
             )}
           >
             {t.label}

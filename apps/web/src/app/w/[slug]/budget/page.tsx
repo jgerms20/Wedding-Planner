@@ -257,7 +257,7 @@ export default function BudgetPage() {
               type="button"
               onClick={() => setTab(t.key)}
               aria-pressed={tab === t.key}
-              className={cn("rounded-full px-4 py-1.5 transition-colors", tab === t.key ? "bg-ink text-rail-foreground" : "text-ink-soft hover:text-foreground")}
+              className={cn("rounded-full px-4 py-1.5 transition-colors", tab === t.key ? "bg-ink text-rail-foreground dark:bg-gold dark:text-ink-900" : "text-ink-soft hover:text-foreground")}
             >
               {t.label}
             </button>
@@ -273,7 +273,7 @@ export default function BudgetPage() {
                 aria-pressed={mode === m}
                 className={cn(
                   "rounded-full px-3 py-1 capitalize transition-colors",
-                  mode === m ? "bg-ink text-rail-foreground" : "text-ink-soft hover:text-foreground",
+                  mode === m ? "bg-ink text-rail-foreground dark:bg-gold dark:text-ink-900" : "text-ink-soft hover:text-foreground",
                 )}
               >
                 {m}

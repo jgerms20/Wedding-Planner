@@ -1,53 +1,60 @@
 ---
 name: bower-design
-description: The Bower design system ("The Atlas"). Load before writing or changing any UI in apps/web so every screen shares one look: ink-green chrome, ivory pages, coral accent, gold hairlines, Fraunces + Instrument Sans, postcards and stamps, staggered reveals.
+description: The Atlas design system ("sun-washed tropical modern"). Load before writing or changing any UI in apps/web so every screen shares one look: sand pages lit by soft sun and lagoon washes, a floating palm-green rail, hibiscus coral accent, marigold highlights, Instrument Serif + Instrument Sans, pill buttons, rounded postcards, staggered reveals.
 ---
 
-# Bower design system: "The Atlas"
+# Atlas design system: "Sun-washed tropical modern"
 
-A destination-first wedding, typeset like a travel atlas crossed with a letterpress invitation suite. One idea, executed precisely. Warm, editorial, never "admin dashboard".
+A resort lookbook, not a dashboard. Warm sand pages with soft sun (top right) and lagoon (bottom left) light, a deep palm-green frame, one hibiscus accent and marigold for highlights. Fun and a little playful (a rotated sticker, an italic "&"), never goofy. Token names predate this palette: **ink = palm green, paper = sand, coral = hibiscus, gold = marigold**.
 
 ## Tokens (all in `apps/web/src/app/globals.css`, never inline hex)
 
 | Use | Class / token |
 |---|---|
-| Page background | `bg-background` (ivory paper; ink-green in dark mode) |
-| Cards | `.postcard` (lifted, gold hairline top, hover tilt) or `bg-card border-line rounded-lg` |
-| Chrome (rail, tab bar) | `bg-rail text-rail-foreground`, muted `text-rail-muted`, dividers `border-rail-line`, active `bg-rail-active` |
+| Page background | `bg-background` (sand; "night on the lagoon" in dark mode). Atmosphere washes and grain live on `body::before/::after`. |
+| House card | `.postcard`: rounded 1.25rem, soft shadow, lifts 3px on hover with a marigold-tinted border. Or the `Card` component. |
+| Callout panels | `.tint` (marigold), `.tint .tint-lagoon`, `.tint .tint-coral` |
+| Chrome (rail, mobile bars, hero bands) | `.rail-surface` (palm gradient with gold/lagoon light) + `text-rail-foreground`, muted `text-rail-muted`. Active nav: `bg-rail-foreground/12` pill, icon `text-gold`, gold dot. |
 | Text | `text-foreground`; secondary `text-ink-soft`; tertiary `text-ink-mute` |
-| Accent (one only) | `text-coral` / `bg-coral text-primary-foreground`; soft fills `bg-coral-soft` |
-| Gold | hairlines `.hairline`, `border-gold`, soft fills `bg-gold-soft`; never gold text on ivory |
+| Accent | `text-coral` / `bg-coral text-primary-foreground`; soft fills `bg-coral-soft` |
+| Marigold | `bg-gold text-ink-900` for the Concierge button and stickers; `bg-gold-soft` fills; `.hairline` (gold to coral rule). Never gold text on sand. |
+| Lagoon | `bg-lagoon-soft`, `text-lagoon` icons, the "per guest" panel |
 | Eyebrow labels | `.eyebrow` |
 | Money and countdown digits | `.tabular`; big display numbers `.numeral` |
-| Passport stamp | `.stamp` (`.stamp-sm`) with a 2-letter country code inside |
-| Reveal on load | `.rise` + `.rise-1` … `.rise-8` on siblings; `.settle` for hero numerals |
-| Mic listening | `.listening` |
+| Passport stamp | `.stamp` (`.stamp-sm`) with a 2-letter country code |
+| Reveal on load | `.rise` + `.rise-1` … `.rise-8`; `.settle` for hero numerals |
+| Shadows | `shadow-[var(--shadow-card)]`, `shadow-[var(--shadow-lift)]` |
 
 ## Type
 
-- Headlines: Fraunces (`font-display`, already applied to h1-h3). Sizes: page title `text-4xl sm:text-5xl`, hero `text-7xl sm:text-8xl`, card title `text-xl`.
+- Headlines: Instrument Serif (`font-display`, already on h1-h3; weight 400 only, never `font-semibold` on it). Italic for flourishes: `<span className="italic text-gold">&amp;</span>`. Page title `text-5xl sm:text-6xl` (PageHeader does this), hero `text-6xl sm:text-7xl lg:text-8xl`, section `text-4xl`, card title `text-xl`-`text-2xl`.
 - UI/body: Instrument Sans (default). Body `text-[15px] leading-relaxed`; small `text-sm`; labels `.eyebrow`.
-- Never Inter, Roboto, Arial, system-ui, Space Grotesk.
+- Never Inter, Roboto, Arial, system-ui, Space Grotesk, Fraunces (retired).
+
+## Components (`apps/web/src/components/ui/*`)
+
+- Button: `rounded-full` pills. `default` coral with a coral glow; `outline` sand glass with a marigold hover; `secondary` palm green; `ghost`.
+- Input/Select/Textarea: `rounded-xl`, `h-10`, `bg-card/80`.
+- Dialog: `rounded-[1.5rem]`, serif `text-2xl` title, footer on `bg-paper-deep/40`. Drawer floats with rounded corners on desktop.
+- Segmented controls: `rounded-full border border-line p-0.5` with the active pill `bg-ink text-rail-foreground`.
+- Filter chips: `rounded-full border` pills; active `border-ink bg-ink text-rail-foreground`.
+- Icons: lucide-react, `size-4`, `stroke-[1.5]`-`stroke-[1.6]`.
 
 ## Layout
 
-- Desktop: left rail `var(--rail-w)` wide, content `max-w-6xl px-6 py-10`. Mobile: top bar + bottom tab bar; content `px-4 py-6 pb-32` (clears the Tell Bower bar and tabs).
-- Rhythm: sections separated by `.hairline` with `my-10`; asymmetric two-column `lg:grid-cols-[1.4fr_1fr]` for editorial pages.
-- Every list is a real list, not a table of inputs. Inline edit on click/tap, not permanent input boxes.
-- Empty states say what Bower will do or what to tell it, in one sentence, with one action.
-
-## Components (`apps/web/src/components/ui/*`, hand-written shadcn style)
-
-button, card, badge, input, textarea, label, select, checkbox, slider, dialog, drawer, separator. Add new ones in the same style; no external UI kits. Icons: lucide-react, `size-4`, `stroke-[1.5]`.
+- Desktop: a floating rail (`m-3 rounded-[1.75rem]`, column width `calc(var(--rail-w)+0.75rem)`), content `max-w-6xl`. Mobile: a rounded top bar plus a floating pill dock at the bottom; content `pb-28` clears it and the Tell Atlas button.
+- Rhythm: sections separated by `.hairline` with `my-10`; asymmetric `lg:grid-cols-[1.4fr_1fr]` for editorial pages.
+- Feature bands (e.g. Home's Jamaica link, the Jamaica hero) use `.rail-surface rounded-[1.5rem]-[2rem]` with blurred gold/lagoon glows.
+- Every list is a real list. Inline edit on click. Empty states say what to do in one sentence, in a `.tint` panel.
 
 ## Voice and copy
 
-- Address the couple as "you two" or by name. Bower speaks in first person, briefly, warmly, no exclamation marks.
-- Every estimate shows where it came from: a "Sources" row with the URLs, or "estimate" in a badge.
-- Dates read as "Sat, Apr 17" (date-fns `EEE, MMM d`) and add the year only when it is not the current year.
+- Address the couple as "you two" or by name. Warm, brief, no exclamation marks.
+- Every estimate shows where it came from: a source link, or "estimate" in a badge with the derivation.
+- Dates read as "Sat, Apr 17" (date-fns `EEE, MMM d`), with the year only when it isn't this year.
 
 ## Checks before you finish
 
 1. `pnpm --filter @bower/web typecheck && pnpm --filter @bower/web lint`.
 2. Static export: `NEXT_PUBLIC_DATA_MODE=local NEXT_PUBLIC_BASE_PATH=/Wedding-Planner pnpm --filter @bower/web build`.
-3. Screenshot at 1280×900 and 375×812 with Playwright (Chromium at `/opt/pw-browsers/chromium`, never `playwright install`) and look at them. No horizontal scroll, nothing hidden under the bottom bars, dark mode readable.
+3. Screenshot at 1280×900 and 375×812, light and dark, with Playwright (Chromium at `/opt/pw-browsers/chromium`, never `playwright install`). No horizontal scroll, nothing hidden under the dock, dark mode readable.

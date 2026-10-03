@@ -182,6 +182,24 @@ export default function HomePage() {
         </div>
       </section>
 
+      <Link
+        href={`${base}/jamaica`}
+        className="rise rise-4 rail-surface group relative mt-10 flex flex-wrap items-center justify-between gap-4 overflow-hidden rounded-[1.5rem] px-6 py-5 text-rail-foreground"
+        data-testid="home-jamaica"
+      >
+        <span aria-hidden className="pointer-events-none absolute -top-16 right-10 size-48 rounded-full bg-gold/30 blur-3xl" />
+        <span className="relative">
+          <span className="block text-[0.65rem] font-semibold tracking-[0.2em] text-gold uppercase">The deep dive</span>
+          <span className="mt-1 block font-display text-3xl text-white">
+            Jamaica, <span className="italic text-gold">costed out</span>
+          </span>
+          <span className="mt-1 block text-sm text-rail-muted">Nine venues, every line item, and a weekend of things to do.</span>
+        </span>
+        <span className="relative inline-flex items-center gap-1.5 rounded-full bg-gold px-4 py-2 text-sm font-medium text-ink-900 transition-transform group-hover:translate-x-0.5">
+          Open it <ArrowRight className="size-4" />
+        </span>
+      </Link>
+
       <div className="hairline my-10" />
 
       {/* Atlas strip */}

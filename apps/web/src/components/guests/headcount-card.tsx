@@ -63,7 +63,7 @@ export function HeadcountCard({
                 title={TIER_LABELS[t]}
                 className={cn(
                   "tabular size-8 rounded-full text-sm transition-colors",
-                  throughTier === t ? "bg-ink text-rail-foreground" : "text-ink-soft hover:text-foreground",
+                  throughTier === t ? "bg-ink text-rail-foreground dark:bg-gold dark:text-ink-900" : "text-ink-soft hover:text-foreground",
                 )}
               >
                 {t}

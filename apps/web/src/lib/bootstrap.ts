@@ -32,8 +32,9 @@ import {
  * "Race & Religious" markets a preserved "slave quarter" building as part of the venue. This is a
  * narrow, one-time correction (remove these exact names if found), not a general "delete venues
  * no longer in the seed" mechanism — that would risk resurrecting or deleting venues the couple
- * has since edited by hand for unrelated reasons. */
-const RETRACTED_VENUE_NAMES = new Set(["Southern Oaks", "Race & Religious"]);
+ * has since edited by hand for unrelated reasons. Jamaica's "Hyatt Ziva Rose Hall" sits on the old Rose
+ * Hall sugar estate and "Round Hill Hotel & Villas" on Lord Monson's Round Hill Estate. */
+const RETRACTED_VENUE_NAMES = new Set(["Southern Oaks", "Race & Religious", "Hyatt Ziva Rose Hall", "Round Hill Hotel & Villas"]);
 import { WEDDING_SLUG } from "./constants";
 
 /** True when the researched seed modules are registered and a full bundle can be built. */

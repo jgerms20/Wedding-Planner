@@ -54,6 +54,16 @@ test("first load lands on the pre-seeded Home, and the redesigned pages hold up"
   await expect(page.getByRole("button", { name: "Grandmommy", exact: true })).toBeVisible();
   await expect(page.getByRole("button", { name: "Mom", exact: true })).toHaveCount(2);
 
+  // Jamaica: the cost-out reacts to picking a venue, and the estate venues stay cut.
+  await page.getByRole("link", { name: "Jamaica", exact: true }).click();
+  await page.waitForURL(/\/w\/our-wedding\/jamaica\/?$/);
+  const coupleTotal = page.getByTestId("jamaica-couple-total");
+  await expect(coupleTotal).toBeVisible();
+  const before = await coupleTotal.textContent();
+  await page.getByRole("button", { name: /^Jakes/ }).click();
+  await expect(coupleTotal).not.toHaveText(before ?? "");
+  await expect(page.getByTestId("jamaica-excluded")).toContainText("Hyatt Ziva Rose Hall");
+
   // Settings: the seed-restore action is there, ready if the couple wants to start over.
   await page.getByRole("link", { name: "Settings", exact: true }).click();
   await page.waitForURL(/\/w\/our-wedding\/settings\/?$/);

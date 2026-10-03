@@ -35,7 +35,7 @@ export function PartyIdeas({ kind, onKindChange }: { kind: PartyKind; onKindChan
               type="button"
               onClick={() => onKindChange(k.key)}
               aria-pressed={kind === k.key}
-              className={cn("rounded-full px-3.5 py-1.5 transition-colors", kind === k.key ? "bg-ink text-rail-foreground" : "text-ink-soft hover:text-foreground")}
+              className={cn("rounded-full px-3.5 py-1.5 transition-colors", kind === k.key ? "bg-ink text-rail-foreground dark:bg-gold dark:text-ink-900" : "text-ink-soft hover:text-foreground")}
             >
               {k.label}
             </button>

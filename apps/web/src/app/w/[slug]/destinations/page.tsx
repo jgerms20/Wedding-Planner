@@ -265,7 +265,7 @@ export default function DestinationsPage() {
                   type="button"
                   onClick={() => setTab(t.key)}
                   aria-pressed={tab === t.key}
-                  className={cn("shrink-0 rounded-full px-4 py-1.5 whitespace-nowrap transition-colors", tab === t.key ? "bg-ink text-rail-foreground" : "text-ink-soft hover:text-foreground")}
+                  className={cn("shrink-0 rounded-full px-4 py-1.5 whitespace-nowrap transition-colors", tab === t.key ? "bg-ink text-rail-foreground dark:bg-gold dark:text-ink-900" : "text-ink-soft hover:text-foreground")}
                 >
                   {t.label}
                 </button>
@@ -289,7 +289,7 @@ export default function DestinationsPage() {
                     aria-pressed={region === r.key}
                     className={cn(
                       "rounded-full px-3 py-1 transition-colors",
-                      region === r.key ? "bg-ink text-rail-foreground" : "text-ink-soft hover:text-foreground",
+                      region === r.key ? "bg-ink text-rail-foreground dark:bg-gold dark:text-ink-900" : "text-ink-soft hover:text-foreground",
                     )}
                   >
                     {r.label} {count > 0 && `(${count})`}
