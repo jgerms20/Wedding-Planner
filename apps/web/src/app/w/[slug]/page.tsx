@@ -114,7 +114,7 @@ export default function HomePage() {
   return (
     <div className="flex flex-col">
       {/* Hero */}
-      <section className="grid gap-8 lg:grid-cols-[1.5fr_1fr] lg:items-end">
+      <section className="grid gap-8 lg:grid-cols-[1.5fr_1fr] lg:items-center">
         <div>
           <p className="eyebrow rise">
             {wedding.partnerA.name} &amp; {wedding.partnerB.name} · engaged in Brazil · Sept 2026
@@ -134,15 +134,20 @@ export default function HomePage() {
         </div>
 
         <div className="flex flex-col gap-4">
-          <figure className="rise rise-2 postcard overflow-hidden p-2">
-            <img
-              src={assetPath(COUPLE_PHOTO.large)}
-              alt={COUPLE_PHOTO.alt}
-              width={1400}
-              height={1120}
-              className="aspect-[5/4] w-full rounded-[calc(var(--radius)-2px)] object-cover"
-              data-testid="couple-photo"
-            />
+          <figure className="rise rise-2 relative">
+            <div className="postcard -rotate-[1.25deg] overflow-hidden p-2 hover:rotate-0">
+              <img
+                src={assetPath(COUPLE_PHOTO.large)}
+                alt={COUPLE_PHOTO.alt}
+                width={1400}
+                height={1120}
+                className="aspect-[5/4] w-full rounded-[1rem] object-cover"
+                data-testid="couple-photo"
+              />
+            </div>
+            <span className="absolute -top-3 -right-2 rotate-6 rounded-full bg-gold px-3 py-1 text-[0.7rem] font-semibold tracking-[0.14em] text-ink-900 uppercase shadow-[0_8px_18px_-8px_var(--gold)]">
+              Spring 2028
+            </span>
           </figure>
           <div className="rise rise-3 postcard p-5">
             <p className="eyebrow">Next anchor</p>
@@ -184,7 +189,7 @@ export default function HomePage() {
         <div className="rise flex items-end justify-between gap-4">
           <div>
             <p className="eyebrow">The atlas</p>
-            <h2 className="mt-1 text-3xl">Where it could be</h2>
+            <h2 className="mt-1 text-4xl">Where it could be</h2>
           </div>
           <Link
             href={`${base}/destinations`}
@@ -209,6 +214,10 @@ export default function HomePage() {
               {restoring ? "Bringing it in…" : "Bring in the atlas"}
             </button>
           </div>
+        ) : orderedDestinations.length === 0 ? (
+          <p className="tint tint-lagoon mt-5 p-5 text-[15px] text-ink-soft">
+            Heart a place on the Destinations page and it lands here, ranked the way you two rank it.
+          </p>
         ) : (
           <div className="-mx-4 mt-5 flex snap-x gap-4 overflow-x-auto px-4 pb-3 sm:-mx-8 sm:px-8">
             {orderedDestinations.map((d, i) => (
@@ -231,7 +240,7 @@ export default function HomePage() {
       <section className="grid gap-10 lg:grid-cols-[1.4fr_1fr]">
         <div className="rise">
           <p className="eyebrow">This week</p>
-          <h2 className="mt-1 text-3xl">
+          <h2 className="mt-1 text-4xl">
             {thisWeek.length === 0
               ? "Nothing due. Enjoy it."
               : `${thisWeek.length} thing${thisWeek.length === 1 ? "" : "s"} to move`}
@@ -280,7 +289,7 @@ export default function HomePage() {
 
         <div className="rise rise-2">
           <p className="eyebrow">Where the money goes</p>
-          <h2 className="mt-1 text-3xl">
+          <h2 className="mt-1 text-4xl">
             {pinned ? formatMoney(scenarioMath(pinned).totalCost) : formatMoney(estimateTotal)}
           </h2>
           <p className="mt-1 text-sm text-ink-soft">

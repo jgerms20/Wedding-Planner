@@ -36,21 +36,21 @@ function Drawer({ open, onOpenChange, title, children }: DrawerProps) {
       )}
       aria-hidden={!open}
     >
-      <div className="absolute inset-0 bg-ink/40 backdrop-blur-[2px]" onClick={() => onOpenChange(false)} />
+      <div className="absolute inset-0 bg-ink-900/45 backdrop-blur-sm" onClick={() => onOpenChange(false)} />
       <div
         className={cn(
-          "absolute top-0 right-0 flex h-full w-full max-w-sm flex-col border-l border-border bg-card text-card-foreground shadow-2xl transition-transform duration-300 ease-out",
-          open ? "translate-x-0" : "translate-x-full",
+          "absolute top-0 right-0 flex h-full w-full max-w-sm flex-col border-l border-line/80 bg-card sm:top-3 sm:right-3 sm:h-[calc(100%-1.5rem)] sm:rounded-[1.5rem] sm:border text-card-foreground shadow-2xl transition-transform duration-300 ease-out",
+          open ? "translate-x-0" : "translate-x-[105%]",
         )}
         role="dialog"
         aria-modal="true"
       >
         <div className="flex items-center justify-between border-b border-border px-5 py-4">
-          <h2 className="font-display text-lg font-semibold">{title}</h2>
+          <h2 className="font-display text-2xl leading-tight">{title}</h2>
           <button
             type="button"
             onClick={() => onOpenChange(false)}
-            className="rounded-md p-1 text-muted-foreground transition-colors hover:bg-muted hover:text-foreground"
+            className="rounded-full p-1.5 text-muted-foreground transition-colors hover:bg-muted hover:text-foreground"
             aria-label="Close"
           >
             <X className="size-4" />

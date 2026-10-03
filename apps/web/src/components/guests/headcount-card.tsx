@@ -83,8 +83,8 @@ export function HeadcountCard({
               type="button"
               onClick={() => onThroughTierChange(t)}
               className={cn(
-                "rounded-md border px-1 py-2 transition-colors",
-                t <= throughTier ? "border-coral/40 bg-coral-soft/60" : "border-line opacity-60 hover:opacity-100",
+                "rounded-xl border px-1 py-2 transition-colors",
+                t <= throughTier ? "border-gold/50 bg-gold-soft/70" : "border-line opacity-60 hover:opacity-100",
               )}
             >
               <p className="text-[0.65rem] font-semibold tracking-wide text-ink-mute uppercase">Tier {t}</p>

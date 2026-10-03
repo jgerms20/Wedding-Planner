@@ -101,7 +101,7 @@ export function TellBowerBar() {
         onClick={() => setOpen(true)}
         aria-label="Tell Atlas something"
         title="Tell Atlas something"
-        className="fixed right-4 bottom-[4.75rem] z-40 flex size-14 items-center justify-center rounded-full bg-coral text-primary-foreground shadow-[0_14px_32px_-10px_rgba(20,40,32,0.5)] transition-transform hover:scale-105 md:right-6 md:bottom-6"
+        className="fixed right-4 bottom-[5.5rem] z-40 flex size-14 items-center justify-center rounded-full bg-coral text-primary-foreground shadow-[0_14px_32px_-10px_rgba(20,40,32,0.5)] transition-transform hover:scale-105 md:right-6 md:bottom-6"
       >
         <Sparkles className="size-5" />
       </button>
@@ -109,7 +109,7 @@ export function TellBowerBar() {
   }
 
   return (
-    <div className="pointer-events-none fixed inset-x-0 bottom-[4.25rem] z-40 flex justify-center px-3 md:bottom-6 md:left-[var(--rail-w)]">
+    <div className="pointer-events-none fixed inset-x-0 bottom-[5rem] z-40 flex justify-center px-3 md:bottom-6 md:left-[calc(var(--rail-w)+0.75rem)]">
       <div className="pointer-events-auto w-full max-w-2xl">
         {proposal && (
           <div className="rise mb-2 max-h-[45vh] overflow-y-auto rounded-lg border border-line bg-card/95 p-3 shadow-[0_20px_50px_-20px_rgba(20,40,32,0.5)] backdrop-blur">

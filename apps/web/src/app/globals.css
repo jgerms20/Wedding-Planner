@@ -3,36 +3,39 @@
 @custom-variant dark (&:where(.dark, .dark *));
 
 /*
- * Atlas design system: "The Atlas".
- * A destination-first wedding typeset like a travel atlas crossed with a
- * letterpress invitation suite. Ink-green chrome, ivory pages, one coral
- * accent, antique-gold hairlines. Tokens only live here.
+ * Atlas design system: "Sun-washed tropical modern".
+ * A resort lookbook rather than a dashboard: warm sand pages lit by soft sun
+ * and lagoon washes, a deep palm-green frame, one hibiscus accent, marigold
+ * for highlights. Tokens only live here; the names predate this palette
+ * (ink = palm green, paper = sand, coral = hibiscus, gold = marigold).
  */
 :root {
-  --radius: 0.5rem;
-  --rail-w: 15rem;
+  --radius: 0.75rem;
+  --rail-w: 16.5rem;
 
-  /* Ink (green) scale */
-  --ink-900: oklch(0.2 0.035 160);
-  --ink: oklch(0.28 0.05 160);
-  --ink-700: oklch(0.36 0.05 160);
-  --ink-soft: oklch(0.46 0.04 160);
-  --ink-mute: oklch(0.58 0.03 160);
+  /* Palm (green) scale */
+  --ink-900: oklch(0.22 0.05 168);
+  --ink: oklch(0.3 0.065 168);
+  --ink-700: oklch(0.38 0.06 168);
+  --ink-soft: oklch(0.46 0.035 165);
+  --ink-mute: oklch(0.6 0.025 160);
 
-  /* Paper (ivory) scale */
-  --paper: oklch(0.97 0.012 80);
-  --paper-raised: oklch(0.985 0.01 80);
-  --paper-deep: oklch(0.94 0.016 80);
-  --paper-ink: oklch(0.24 0.04 160);
+  /* Sand scale */
+  --paper: oklch(0.975 0.014 85);
+  --paper-raised: oklch(0.995 0.005 85);
+  --paper-deep: oklch(0.948 0.02 80);
+  --paper-ink: oklch(0.24 0.035 170);
 
   /* Accents */
-  --coral: oklch(0.66 0.16 40);
-  --coral-deep: oklch(0.58 0.16 38);
-  --coral-soft: oklch(0.93 0.05 40);
-  --gold: oklch(0.75 0.09 85);
-  --gold-soft: oklch(0.95 0.04 85);
-  --line: oklch(0.88 0.02 80);
-  --line-strong: oklch(0.8 0.03 80);
+  --coral: oklch(0.64 0.19 22);
+  --coral-deep: oklch(0.55 0.19 22);
+  --coral-soft: oklch(0.945 0.04 22);
+  --gold: oklch(0.8 0.15 75);
+  --gold-soft: oklch(0.962 0.05 88);
+  --lagoon: oklch(0.7 0.1 195);
+  --lagoon-soft: oklch(0.95 0.03 195);
+  --line: oklch(0.905 0.014 80);
+  --line-strong: oklch(0.84 0.022 80);
 
   --background: var(--paper);
   --foreground: var(--paper-ink);
@@ -41,41 +44,48 @@
   --popover: var(--paper-raised);
   --popover-foreground: var(--paper-ink);
   --primary: var(--coral);
-  --primary-foreground: oklch(0.99 0.01 80);
+  --primary-foreground: oklch(0.99 0.008 80);
   --secondary: var(--paper-deep);
   --secondary-foreground: var(--paper-ink);
   --muted: var(--paper-deep);
   --muted-foreground: var(--ink-soft);
   --accent: var(--gold-soft);
   --accent-foreground: var(--paper-ink);
-  --destructive: oklch(0.55 0.19 25);
+  --destructive: oklch(0.55 0.2 25);
   --border: var(--line);
   --input: var(--line-strong);
   --ring: var(--coral);
 
-  /* Chrome (the rail) is always ink, in both themes. */
+  /* The frame (rail, tab bar) is palm green in both themes. */
   --rail: var(--ink);
-  --rail-foreground: oklch(0.95 0.012 80);
-  --rail-muted: oklch(0.78 0.03 140);
-  --rail-line: oklch(0.36 0.04 160);
-  --rail-active: oklch(0.34 0.05 160);
+  --rail-2: oklch(0.25 0.06 175);
+  --rail-foreground: oklch(0.97 0.012 85);
+  --rail-muted: oklch(0.83 0.04 150);
+  --rail-line: oklch(0.4 0.05 168);
+  --rail-active: oklch(0.38 0.06 168);
+
+  --shadow-card: 0 1px 2px color-mix(in oklch, var(--ink) 8%, transparent), 0 18px 40px -26px color-mix(in oklch, var(--ink) 45%, transparent);
+  --shadow-lift: 0 2px 4px color-mix(in oklch, var(--ink) 8%, transparent), 0 28px 50px -24px color-mix(in oklch, var(--ink) 50%, transparent);
 }
 
 .dark {
-  --paper: var(--ink-900);
-  --paper-raised: oklch(0.25 0.04 160);
-  --paper-deep: oklch(0.23 0.035 160);
-  --paper-ink: oklch(0.95 0.012 80);
+  /* Night on the lagoon. */
+  --paper: oklch(0.19 0.025 190);
+  --paper-raised: oklch(0.235 0.03 188);
+  --paper-deep: oklch(0.215 0.028 190);
+  --paper-ink: oklch(0.96 0.012 85);
 
-  --coral: oklch(0.74 0.15 42);
-  --coral-deep: oklch(0.68 0.16 40);
-  --coral-soft: oklch(0.34 0.07 40);
-  --gold: oklch(0.8 0.1 85);
-  --gold-soft: oklch(0.32 0.05 85);
-  --line: oklch(0.34 0.03 160);
-  --line-strong: oklch(0.42 0.03 160);
-  --ink-soft: oklch(0.78 0.03 140);
-  --ink-mute: oklch(0.66 0.03 150);
+  --coral: oklch(0.74 0.16 25);
+  --coral-deep: oklch(0.68 0.17 24);
+  --coral-soft: oklch(0.32 0.07 24);
+  --gold: oklch(0.83 0.14 78);
+  --gold-soft: oklch(0.31 0.05 80);
+  --lagoon: oklch(0.76 0.1 195);
+  --lagoon-soft: oklch(0.3 0.04 195);
+  --line: oklch(0.32 0.03 188);
+  --line-strong: oklch(0.4 0.03 188);
+  --ink-soft: oklch(0.8 0.03 160);
+  --ink-mute: oklch(0.67 0.03 170);
 
   --background: var(--paper);
   --foreground: var(--paper-ink);
@@ -84,21 +94,25 @@
   --popover: var(--paper-raised);
   --popover-foreground: var(--paper-ink);
   --primary: var(--coral);
-  --primary-foreground: oklch(0.16 0.03 40);
+  --primary-foreground: oklch(0.16 0.03 25);
   --secondary: var(--paper-deep);
   --secondary-foreground: var(--paper-ink);
   --muted: var(--paper-deep);
   --muted-foreground: var(--ink-soft);
   --accent: var(--gold-soft);
   --accent-foreground: var(--paper-ink);
-  --destructive: oklch(0.62 0.18 25);
+  --destructive: oklch(0.64 0.19 25);
   --border: var(--line);
   --input: var(--line-strong);
   --ring: var(--coral);
 
-  --rail: oklch(0.17 0.03 160);
-  --rail-line: oklch(0.28 0.035 160);
-  --rail-active: oklch(0.26 0.04 160);
+  --rail: oklch(0.24 0.045 172);
+  --rail-2: oklch(0.17 0.035 185);
+  --rail-line: oklch(0.32 0.04 172);
+  --rail-active: oklch(0.31 0.05 172);
+
+  --shadow-card: 0 1px 2px oklch(0 0 0 / 0.3), 0 18px 40px -26px oklch(0 0 0 / 0.7);
+  --shadow-lift: 0 2px 4px oklch(0 0 0 / 0.3), 0 28px 50px -24px oklch(0 0 0 / 0.75);
 }
 
 @theme inline {
@@ -134,6 +148,9 @@
   --color-coral-soft: var(--coral-soft);
   --color-gold: var(--gold);
   --color-gold-soft: var(--gold-soft);
+  --color-lagoon: var(--lagoon);
+  --color-lagoon-soft: var(--lagoon-soft);
+  --color-rail-2: var(--rail-2);
   --color-line: var(--line);
   --color-line-strong: var(--line-strong);
   --color-rail: var(--rail);
@@ -151,9 +168,10 @@
   --radius-sm: calc(var(--radius) - 2px);
   --radius-md: var(--radius);
   --radius-lg: calc(var(--radius) + 6px);
-  --radius-xl: calc(var(--radius) + 14px);
+  --radius-xl: calc(var(--radius) + 12px);
+  --radius-2xl: calc(var(--radius) + 18px);
 
-  --font-display: "Fraunces Variable", "Iowan Old Style", "Palatino Linotype", Georgia, serif;
+  --font-display: "Instrument Serif", "Iowan Old Style", "Palatino Linotype", Georgia, serif;
   --font-sans: "Instrument Sans Variable", "Instrument Sans", "Helvetica Neue", Arial, sans-serif;
   --font-mono: ui-monospace, "SF Mono", Menlo, Consolas, monospace;
 
@@ -210,53 +228,44 @@
     font-feature-settings: "ss01", "cv01";
     position: relative;
   }
-  /* Topographic contour lines on the paper, faint. */
+  /* Atmosphere: soft sun (top right) and lagoon (bottom left) light on the sand. */
   body::before {
     content: "";
     position: fixed;
     inset: 0;
     z-index: 0;
     pointer-events: none;
-    opacity: 0.35;
-    background-image: url("data:image/svg+xml;utf8,%3Csvg xmlns='http://www.w3.org/2000/svg' width='520' height='520' viewBox='0 0 520 520'%3E%3Cg fill='none' stroke='%23264d3f' stroke-opacity='0.11' stroke-width='1'%3E%3Cpath d='M20 260c40-90 120-120 210-110s150 70 200 40 70-90 80-140'/%3E%3Cpath d='M0 300c60-80 140-100 230-90s150 60 210 30 60-80 80-130'/%3E%3Cpath d='M-10 340c70-70 160-80 250-70s140 50 200 20 60-70 90-120'/%3E%3Cpath d='M0 380c80-60 170-60 260-50s130 40 190 10 60-60 80-110'/%3E%3Cpath d='M10 420c90-50 180-40 270-30s120 30 180 0 60-50 70-100'/%3E%3Cpath d='M30 460c100-40 190-20 280-10s110 20 170-10 50-40 60-90'/%3E%3Cpath d='M60 500c110-30 200-10 290 0s100 10 150-20'/%3E%3Cpath d='M40 220c30-100 110-150 200-140s160 80 220 50 60-100 60-130'/%3E%3Cpath d='M70 180c20-100 100-170 190-160s170 90 230 60 50-80 40-80'/%3E%3C/g%3E%3C/svg%3E");
-    background-size: 520px 520px;
+    background:
+      radial-gradient(60rem 40rem at 105% -10%, color-mix(in oklch, var(--gold) 26%, transparent), transparent 60%),
+      radial-gradient(45rem 35rem at 85% 8%, color-mix(in oklch, var(--coral) 10%, transparent), transparent 60%),
+      radial-gradient(55rem 45rem at -10% 110%, color-mix(in oklch, var(--lagoon) 20%, transparent), transparent 60%);
   }
   .dark body::before {
-    opacity: 0.22;
-    filter: invert(1);
+    opacity: 0.55;
   }
-  /* Fine paper grain. */
+  /* Fine grain so the sand doesn't read as flat digital beige. */
   body::after {
     content: "";
     position: fixed;
     inset: 0;
     z-index: 0;
     pointer-events: none;
-    opacity: 0.045;
+    opacity: 0.05;
     mix-blend-mode: multiply;
     background-image: url("data:image/svg+xml;utf8,%3Csvg xmlns='http://www.w3.org/2000/svg' width='200' height='200'%3E%3Cfilter id='n'%3E%3CfeTurbulence type='fractalNoise' baseFrequency='0.9' numOctaves='2' stitchTiles='stitch'/%3E%3C/filter%3E%3Crect width='200' height='200' filter='url(%23n)'/%3E%3C/svg%3E");
   }
   .dark body::after {
     mix-blend-mode: screen;
-    opacity: 0.06;
+    opacity: 0.05;
   }
   h1,
   h2,
   h3,
   .font-display {
     font-family: var(--font-display);
-    font-variation-settings:
-      "SOFT" 60,
-      "WONK" 1,
-      "opsz" 72;
-    letter-spacing: -0.015em;
-  }
-  h1 {
-    font-weight: 500;
-  }
-  h2,
-  h3 {
-    font-weight: 500;
+    font-weight: 400;
+    letter-spacing: -0.012em;
+    line-height: 1.02;
   }
   ::selection {
     background: color-mix(in oklch, var(--coral) 30%, transparent);
@@ -269,9 +278,9 @@
     position: relative;
     z-index: 1;
   }
-  /* Editorial small caps label. */
+  /* Small label above a heading. */
   .eyebrow {
-    @apply text-[0.68rem] font-semibold tracking-[0.18em] uppercase text-ink-soft;
+    @apply text-[0.7rem] font-semibold tracking-[0.16em] uppercase text-ink-soft;
   }
   /* Tabular figures for money and countdowns. */
   .tabular {
@@ -280,36 +289,44 @@
   /* Big display numerals. */
   .numeral {
     font-family: var(--font-display);
-    font-variation-settings:
-      "SOFT" 100,
-      "WONK" 0,
-      "opsz" 144;
-    font-variant-numeric: tabular-nums lining-nums;
-    letter-spacing: -0.03em;
-    line-height: 0.9;
+    font-variant-numeric: lining-nums;
+    letter-spacing: -0.02em;
+    line-height: 0.88;
   }
-  /* Antique gold hairline. */
+  /* A soft marigold-to-hibiscus rule between sections. */
   .hairline {
     height: 1px;
-    background: linear-gradient(90deg, transparent, var(--gold) 20%, var(--gold) 80%, transparent);
+    background: linear-gradient(90deg, transparent, color-mix(in oklch, var(--gold) 80%, transparent) 20%, color-mix(in oklch, var(--coral) 45%, transparent) 80%, transparent);
   }
-  /* Postcard: a card with a deckled, slightly warmer surface and a lift on hover. */
+  /* Postcard: the house card. Soft, rounded, and it lifts when you reach for it. */
   .postcard {
-    @apply relative rounded-lg border border-line bg-card;
-    box-shadow:
-      0 1px 0 color-mix(in oklch, var(--gold) 45%, transparent),
-      0 10px 30px -18px color-mix(in oklch, var(--ink) 55%, transparent);
+    @apply relative rounded-[1.25rem] border border-line/80 bg-card;
+    box-shadow: var(--shadow-card);
     transition:
       transform 0.35s cubic-bezier(0.2, 0.7, 0.2, 1),
-      box-shadow 0.35s;
+      box-shadow 0.35s,
+      border-color 0.35s;
   }
   .postcard:hover {
-    transform: translateY(-3px) rotate(-0.4deg);
-    box-shadow:
-      0 1px 0 color-mix(in oklch, var(--gold) 60%, transparent),
-      0 22px 44px -20px color-mix(in oklch, var(--ink) 65%, transparent);
+    transform: translateY(-3px);
+    box-shadow: var(--shadow-lift);
+    border-color: color-mix(in oklch, var(--gold) 55%, var(--line));
   }
-  /* Passport stamp ring: a double coral ring with mono lettering. */
+  /* A tinted panel for callouts: marigold by default, .tint-lagoon / .tint-coral variants. */
+  .tint {
+    @apply rounded-[1.25rem] border;
+    background: color-mix(in oklch, var(--gold-soft) 85%, transparent);
+    border-color: color-mix(in oklch, var(--gold) 35%, transparent);
+  }
+  .tint-lagoon {
+    background: color-mix(in oklch, var(--lagoon-soft) 85%, transparent);
+    border-color: color-mix(in oklch, var(--lagoon) 35%, transparent);
+  }
+  .tint-coral {
+    background: color-mix(in oklch, var(--coral-soft) 85%, transparent);
+    border-color: color-mix(in oklch, var(--coral) 30%, transparent);
+  }
+  /* Passport stamp ring: a double hibiscus ring with mono lettering. */
   .stamp {
     @apply inline-flex items-center justify-center rounded-full font-mono text-[0.62rem] font-semibold tracking-[0.2em] uppercase text-coral;
     width: 3rem;
@@ -324,6 +341,13 @@
     height: 2.25rem;
     font-size: 0.55rem;
     box-shadow: inset 0 0 0 2px var(--card), inset 0 0 0 3px var(--coral);
+  }
+  /* The palm-green frame: a deep gradient with faint frond light. */
+  .rail-surface {
+    background:
+      radial-gradient(22rem 16rem at 110% -5%, color-mix(in oklch, var(--gold) 22%, transparent), transparent 70%),
+      radial-gradient(18rem 18rem at -20% 105%, color-mix(in oklch, var(--lagoon) 22%, transparent), transparent 70%),
+      linear-gradient(180deg, var(--rail), var(--rail-2));
   }
   /* Staggered reveal. Add .rise to children and .rise-1..8 for delay. */
   .rise {
